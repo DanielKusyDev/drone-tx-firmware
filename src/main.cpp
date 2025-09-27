@@ -42,14 +42,14 @@ void updateOledNormalView(const ControlInputs& inputs, const TelemetryPacket& te
     // Line 2: Roll and Pitch angles
     display.setCursor(0, 10);
     display.print("R: ");
-    display.print(telem.angR_x10 / 10.0f, 1);
+    display.print(telem.roll_deg_x10 / 10.0f, 1);
     display.print(" P: ");
-    display.print(telem.angP_x10 / 10.0f, 1);
+    display.print(telem.pitch_deg_x10 / 10.0f, 1);
     
     // Line 3: Yaw rate and telemetry frequency
     display.setCursor(0, 20);
     display.print("YR: ");
-    display.print((int)(telem.rateY_x10 / 10.0f));
+    display.print((int)telem.yawRate_dps);
     display.print(" FPS: ");
     display.print((int)g_telemFrequency);
     
@@ -69,25 +69,25 @@ void updateOledDebugView(const ControlInputs& inputs, const TelemetryPacket& tel
     // Line 1: Setpoints
     display.setCursor(0, 0);
     display.print("setR: ");
-    display.print(telem.setR_x10 / 10.0f, 1);
+    display.print(telem.setAngleRoll_x10 / 10.0f, 1);
     display.print(" setP: ");
-    display.print(telem.setP_x10 / 10.0f, 1);
+    display.print(telem.setAnglePitch_x10 / 10.0f, 1);
     
     // Line 2: Rate values
     display.setCursor(0, 10);
     display.print("rateR:");
-    display.print((int)(telem.rateR_x10 / 10.0f));
+    display.print((int)telem.rollRate_dps);
     display.print(" rateP:");
-    display.print((int)(telem.rateP_x10 / 10.0f));
+    display.print((int)telem.pitchRate_dps);
     
     // Line 3: Outputs
     display.setCursor(0, 20);
     display.print("outR:");
-    display.print(telem.outR);
+    display.print(telem.outRoll);
     display.print(" outP:");
-    display.print(telem.outP);
+    display.print(telem.outPitch);
     display.print(" Y:");
-    display.print(telem.outY);
+    display.print(telem.outYaw);
     
     // Drop indicator (small dot every 5 drops)
     if (dropCount >= DROP_INDICATOR_COUNT) {
@@ -98,23 +98,33 @@ void updateOledDebugView(const ControlInputs& inputs, const TelemetryPacket& tel
 }
 
 void printCsvLine(unsigned long ms, const ControlInputs& inputs, const TelemetryPacket& telem) {
+    // Format readable: TX[time,armed,throttle] | DRONE[time,armed,throttle] | ATTITUDE[roll,pitch,yaw_rate] | MOTORS[m1,m2,m3,m4]
+    Serial.print("TX[");
     Serial.print(ms); Serial.print(",");
     Serial.print(inputs.armed ? 1 : 0); Serial.print(",");
-    Serial.print(inputs.throttle); Serial.print(",");
-    Serial.print(telem.setR_x10 / 10.0f, 1); Serial.print(",");
-    Serial.print(telem.setP_x10 / 10.0f, 1); Serial.print(",");
-    Serial.print(telem.angR_x10 / 10.0f, 1); Serial.print(",");
-    Serial.print(telem.angP_x10 / 10.0f, 1); Serial.print(",");
-    Serial.print(telem.rateR_x10 / 10.0f, 1); Serial.print(",");
-    Serial.print(telem.rateP_x10 / 10.0f, 1); Serial.print(",");
-    Serial.print(telem.rateY_x10 / 10.0f, 1); Serial.print(",");
-    Serial.print(telem.outR); Serial.print(",");
-    Serial.print(telem.outP); Serial.print(",");
-    Serial.print(telem.outY); Serial.print(",");
+    Serial.print(inputs.throttle); Serial.print("] | ");
+    
+    Serial.print("DRONE[");
+    Serial.print(telem.ms); Serial.print(",");
+    Serial.print(telem.armed); Serial.print(",");
+    Serial.print(telem.thr); Serial.print("] | ");
+    
+    Serial.print("ATT[R:");
+    Serial.print(telem.roll_deg_x10 / 10.0f, 1); Serial.print(",P:");
+    Serial.print(telem.pitch_deg_x10 / 10.0f, 1); Serial.print(",YR:");
+    Serial.print(telem.yawRate_dps); Serial.print("] | ");
+    
+    Serial.print("MOTORS[");
     Serial.print(telem.m1); Serial.print(",");
     Serial.print(telem.m2); Serial.print(",");
     Serial.print(telem.m3); Serial.print(",");
-    Serial.print(telem.m4);
+    Serial.print(telem.m4); Serial.print("] | ");
+    
+    Serial.print("PID[R:");
+    Serial.print(telem.outRoll); Serial.print(",P:");
+    Serial.print(telem.outPitch); Serial.print(",Y:");
+    Serial.print(telem.outYaw); Serial.print("]");
+    
     Serial.println();
 }
 
@@ -189,7 +199,7 @@ void setup() {
     Serial.println();
     
     // TELEM: Print CSV header
-    Serial.println("ms,armed,thr,setR,setP,angR,angP,rateR,rateP,rateY,outR,outP,outY,m1,m2,m3,m4");
+    Serial.println("ms,tx_armed,tx_thr,drone_ms,setRoll,setPitch,setYawRate,roll,pitch,rollRate,pitchRate,yawRate,outRoll,outPitch,outYaw,m1,m2,m3,m4,drone_thr,drone_armed,linkAlive");
     g_csvHeaderPrinted = true;
 }
 
@@ -275,9 +285,11 @@ void loop() {
         }
         g_lastTelemUpdateMs = telemUpdateMs;
         
-        // Print CSV header if needed
+        // Print telemetry header if needed
         if (!g_csvHeaderPrinted) {
-            Serial.println("ms,armed,throttle,setR,setP,angR,angP,rateR,rateP,rateY,outR,outP,outY,m1,m2,m3,m4");
+            Serial.println("=== TELEMETRY FORMAT ===");
+            Serial.println("TX[ms,armed,thr] | DRONE[ms,armed,thr] | ATT[R:roll,P:pitch,YR:yaw_rate] | MOTORS[m1,m2,m3,m4] | PID[R:roll_out,P:pitch_out,Y:yaw_out]");
+            Serial.println("========================");
             g_csvHeaderPrinted = true;
         }
         

@@ -22,29 +22,23 @@ void RadioManager::onSendCallback(const uint8_t *mac_addr, esp_now_send_status_t
 void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *data, int len) {
     (void)mac_addr; // Unused
     
-    // DEBUG: Print received packet info
-    Serial.print("[RECV] Len: ");
-    Serial.print(len);
-    Serial.print(" Expected: ");
-    Serial.println(sizeof(TelemetryPacket));
-    
     // Quick validation
     if (len != sizeof(TelemetryPacket)) {
-        Serial.println("[RECV] Wrong packet size!");
+        Serial.print("[RECV] Wrong packet size! Len: ");
+        Serial.print(len);
+        Serial.print(" Expected: ");
+        Serial.println(sizeof(TelemetryPacket));
         return;
     }
     
     const TelemetryPacket* packet = reinterpret_cast<const TelemetryPacket*>(data);
     
-    // DEBUG: Print magic and version
-    Serial.print("[RECV] Magic: 0x");
-    Serial.print(packet->magic, HEX);
-    Serial.print(" Ver: ");
-    Serial.println(packet->version);
-    
     // Check magic and version
     if (packet->magic != TELEM_PACKET_MAGIC || packet->version != TELEM_PACKET_VERSION) {
-        Serial.println("[RECV] Wrong magic/version!");
+        Serial.print("[RECV] Wrong magic/version! Magic: 0x");
+        Serial.print(packet->magic, HEX);
+        Serial.print(" Ver: ");
+        Serial.println(packet->version);
         return;
     }
     
@@ -57,9 +51,6 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
         Serial.println(packet->crc, HEX);
         return;
     }
-    
-    Serial.print("[RECV] Good packet! Seq: ");
-    Serial.println(packet->seq);
     
     // Check for dropped packets
     uint32_t currentSeq = packet->seq;

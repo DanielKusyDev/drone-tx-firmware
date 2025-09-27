@@ -1,0 +1,70 @@
+#include <Arduino.h>
+#include "protocol.h"
+
+void setup() {
+    Serial.begin(115200);
+    delay(2000);
+    
+    Serial.println("=== PACKET SIZE DEBUG ===");
+    Serial.print("RcPacket size: ");
+    Serial.println(sizeof(RcPacket));
+    Serial.print("TelemetryPacket size: ");
+    Serial.println(sizeof(TelemetryPacket));
+    
+    Serial.println("\n=== TelemetryPacket field sizes ===");
+    Serial.print("magic: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->magic));
+    Serial.print("version: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->version));
+    Serial.print("seq: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->seq));
+    Serial.print("ms: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->ms));
+    Serial.print("setAngleRoll_x10: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->setAngleRoll_x10));
+    Serial.print("setAnglePitch_x10: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->setAnglePitch_x10));
+    Serial.print("setYawRate_dps: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->setYawRate_dps));
+    Serial.print("roll_deg_x10: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->roll_deg_x10));
+    Serial.print("pitch_deg_x10: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->pitch_deg_x10));
+    Serial.print("rollRate_dps: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->rollRate_dps));
+    Serial.print("pitchRate_dps: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->pitchRate_dps));
+    Serial.print("yawRate_dps: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->yawRate_dps));
+    Serial.print("outRoll: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->outRoll));
+    Serial.print("outPitch: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->outPitch));
+    Serial.print("outYaw: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->outYaw));
+    Serial.print("m1: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->m1));
+    Serial.print("m2: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->m2));
+    Serial.print("m3: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->m3));
+    Serial.print("m4: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->m4));
+    Serial.print("thr: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->thr));
+    Serial.print("armed: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->armed));
+    Serial.print("linkAlive: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->linkAlive));
+    Serial.print("crc: ");
+    Serial.println(sizeof(((TelemetryPacket*)0)->crc));
+    
+    Serial.println("\n=== Expected total: 44 bytes ===");
+    Serial.println("Actual calculation:");
+    Serial.print("1+1+2+4+2+2+2+2+2+2+2+2+2+2+2+2+2+2+2+2+1+1+2 = ");
+    Serial.println(1+1+2+4+2+2+2+2+2+2+2+2+2+2+2+2+2+2+2+2+1+1+2);
+}
+
+void loop() {
+    delay(1000);
+}
