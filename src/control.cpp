@@ -42,6 +42,7 @@ ControlInputs ControlManager::readInputs() {
     inputs.pitch = readAxisCentered(PIN_PITCH, m_filterPitch, m_centerPitch, true); // Inverted
     inputs.roll = readAxisCentered(PIN_ROLL, m_filterRoll, m_centerRoll);
     inputs.armed = m_armed;
+    inputs.debugView = m_debugView;  // TELEM: Add debug view state
     
     return inputs;
 }
@@ -114,13 +115,40 @@ float ControlManager::smoothFilter(float current, float input) const {
 
 void ControlManager::updateArmState() {
     bool buttonPressed = isArmButtonPressed();
+    unsigned long currentTime = millis();
     
-    // Detect rising edge (button press)
+    // TELEM: Enhanced button handling for short/long press
     if (!m_prevButton && buttonPressed) {
-        if (millis() - m_lastToggleMs > ARM_DEBOUNCE_MS) {
-            m_armed = !m_armed;
-            m_lastToggleMs = millis();
+        // Button just pressed - start timing
+        m_buttonPressed = true;
+        m_buttonPressStart = currentTime;
+    }
+    else if (m_prevButton && !buttonPressed && m_buttonPressed) {
+        // Button just released - check press duration
+        unsigned long pressDuration = currentTime - m_buttonPressStart;
+        
+        // DEBUG: Print press duration
+        Serial.print("[BTN] Press duration: ");
+        Serial.print(pressDuration);
+        Serial.println("ms");
+        
+        if (currentTime - m_lastToggleMs > ARM_DEBOUNCE_MS) {
+            if (pressDuration < SHORT_PRESS_MS) {
+                // Short press: toggle armed state (as before)
+                m_armed = !m_armed;
+                m_lastToggleMs = currentTime;
+                Serial.println("[BTN] Short press - ARM toggle");
+            }
+            else if (pressDuration >= LONG_PRESS_MS) {
+                // Long press: toggle debug view without changing armed
+                m_debugView = !m_debugView;
+                m_lastToggleMs = currentTime;
+                Serial.print("[BTN] Long press - Debug view: ");
+                Serial.println(m_debugView ? "ON" : "OFF");
+            }
+            // Medium press (500ms-1500ms): do nothing
         }
+        m_buttonPressed = false;
     }
     
     m_prevButton = buttonPressed;

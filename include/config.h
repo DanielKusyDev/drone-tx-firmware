@@ -42,6 +42,14 @@
 #define THR_DEADZONE       50
 #define THR_RATE_SCALE     1.2f
 
+// TELEM: Button press timing
+#define SHORT_PRESS_MS     500
+#define LONG_PRESS_MS      1500
+
+// TELEM: Telemetry parameters
+#define TELEM_TIMEOUT_MS   1000
+#define DROP_INDICATOR_COUNT 5
+
 // ADC averaging
 #define ADC_SAMPLES_DEFAULT 16
 #define ADC_SAMPLES_AXIS    4

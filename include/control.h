@@ -8,6 +8,7 @@ struct ControlInputs {
     int16_t pitch;      // -1000..1000
     int16_t roll;       // -1000..1000
     bool armed;
+    bool debugView;     // TELEM: Debug view state
 };
 
 class ControlManager {
@@ -38,6 +39,11 @@ private:
     bool m_armed = false;
     bool m_prevButton = true;
     unsigned long m_lastToggleMs = 0;
+    
+    // TELEM: Debug view and button timing
+    bool m_debugView = false;
+    unsigned long m_buttonPressStart = 0;
+    bool m_buttonPressed = false;
     
     uint16_t readAdcAvg(int pin, int samples = ADC_SAMPLES_DEFAULT) const;
     int16_t readAxisCentered(int pin, float& filter, uint16_t center, bool invert = false);
