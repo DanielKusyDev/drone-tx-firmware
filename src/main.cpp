@@ -7,6 +7,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <WiFi.h>
+#include <cstdarg>  // For va_list in logging functions
 
 // Global instances
 RadioManager radio;
@@ -22,22 +23,275 @@ volatile uint16_t g_sequenceNumber = 0;
 uint8_t g_droneMac[6] = DEFAULT_DRONE_MAC;
 
 // TELEM: Telemetry state
-bool g_csvHeaderPrinted = false;
 unsigned long g_lastTelemUpdateMs = 0;
+unsigned long g_lastOledUpdateMs = 0;
 float g_telemFrequency = 0.0f;
 
-// TELEM: Helper functions
+// HORIZ: Horizon safety globals
+bool g_telemArmed = false;
+bool g_horizonOK = false;
+unsigned long g_horizFlashStartMs = 0;
+bool g_showHorizFlash = false;
+
+// ARM: Arm pulse countdown (avoid multiple arm toggles)
+#define ARM_PULSE_PACKETS 3  // Send ARM flag for this many packets (~60ms at 50Hz)
+uint8_t g_armPulseCountdown = 0;
+bool g_lastInputsArmed = false;
+
+// LOG: Logging system configuration
+struct LogConfig {
+    bool enableSetup = true;           // Setup and initialization messages
+    bool enableTelemetry = true;       // Telemetry data output 
+    bool enableMacAddress = true;      // MAC address commands ('M')
+    bool enableErrors = true;          // Error and warning messages
+    bool enableDebug = false;          // Debug/diagnostic messages
+};
+
+LogConfig g_logConfig;
+
+// LOG: Modular logging functions with category-based filtering
+namespace Logger {
+    /**
+     * @brief Log setup and initialization messages
+     * @param message Message to log (supports multiple parameters like Serial.print)
+     */
+    void setup(const char* message) {
+        if (g_logConfig.enableSetup) {
+            Serial.print("[SETUP] ");
+            Serial.println(message);
+        }
+    }
+    
+    /**
+     * @brief Log telemetry data in structured format
+     * @param ms Timestamp
+     * @param inputs Control inputs from transmitter
+     * @param telem Telemetry packet from drone
+     */
+    void telemetry(unsigned long ms, const ControlInputs& inputs, const TelemetryPacket& telem) {
+        if (!g_logConfig.enableTelemetry) return;
+        
+        // Structured telemetry format: TX[time,armed,throttle] | DRONE[...] | ATT[...] | MOTORS[...] | PID[...] | STATUS[...]
+        Serial.print("TX[");
+        Serial.print(ms); Serial.print(",");
+        Serial.print(inputs.armed ? 1 : 0); Serial.print(",");
+        Serial.print(inputs.throttle); Serial.print("] | ");
+        
+        Serial.print("DRONE[");
+        Serial.print(telem.ms); Serial.print(",");
+        Serial.print(telem.armed); Serial.print(",");
+        Serial.print(telem.thr); Serial.print("] | ");
+        
+        Serial.print("ATT[R:");
+        Serial.print(telem.roll_deg_x10 / 10.0f, 1); Serial.print(",P:");
+        Serial.print(telem.pitch_deg_x10 / 10.0f, 1); Serial.print(",YR:");
+        Serial.print(telem.yawRate_dps); Serial.print("] | ");
+        
+        Serial.print("MOTORS[");
+        Serial.print(telem.m1); Serial.print(",");
+        Serial.print(telem.m2); Serial.print(",");
+        Serial.print(telem.m3); Serial.print(",");
+        Serial.print(telem.m4); Serial.print("] | ");
+        
+        Serial.print("PID[R:");
+        Serial.print(telem.outRoll); Serial.print(",P:");
+        Serial.print(telem.outPitch); Serial.print(",Y:");
+        Serial.print(telem.outYaw); Serial.print("] | ");
+        
+        // HORIZ: Add derived status columns
+        Serial.print("STATUS[horizOK:");
+        Serial.print(g_horizonOK ? 1 : 0); Serial.print(",armedDRN:");
+        Serial.print(g_telemArmed ? 1 : 0); Serial.print("]");
+        
+        Serial.println();
+    }
+    
+    /**
+     * @brief Log MAC address information
+     * @param label Descriptive label (e.g., "Our MAC", "Drone MAC")
+     * @param mac 6-byte MAC address array
+     */
+    void macAddress(const char* label, const uint8_t* mac) {
+        if (!g_logConfig.enableMacAddress) return;
+        
+        Serial.print("[MAC] ");
+        Serial.print(label);
+        Serial.print(": ");
+        for (int i = 0; i < 6; i++) {
+            Serial.printf("%02X", mac[i]);
+            if (i < 5) Serial.print(":");
+        }
+        Serial.println();
+    }
+    
+    /**
+     * @brief Log error and warning messages
+     * @param category Error category (e.g., "INIT", "RADIO", "CONTROL")
+     * @param message Error description
+     */
+    void error(const char* category, const char* message) {
+        if (!g_logConfig.enableErrors) return;
+        
+        Serial.print("[ERROR:");
+        Serial.print(category);
+        Serial.print("] ");
+        Serial.println(message);
+    }
+    
+    /**
+     * @brief Log debug and diagnostic information
+     * @param category Debug category
+     * @param message Debug message
+     */
+    void debug(const char* category, const char* message) {
+        if (!g_logConfig.enableDebug) return;
+        
+        Serial.print("[DEBUG:");
+        Serial.print(category);
+        Serial.print("] ");
+        Serial.println(message);
+    }
+    
+    /**
+     * @brief Log debug information with formatted values
+     * @param category Debug category
+     * @param format printf-style format string
+     * @param ... Variable arguments for formatting
+     */
+    void debugf(const char* category, const char* format, ...) {
+        if (!g_logConfig.enableDebug) return;
+        
+        Serial.print("[DEBUG:");
+        Serial.print(category);
+        Serial.print("] ");
+        
+        va_list args;
+        va_start(args, format);
+        char buffer[128];
+        vsnprintf(buffer, sizeof(buffer), format, args);
+        va_end(args);
+        
+        Serial.println(buffer);
+    }
+}
+
+// TELEM: Helper functions for OLED display
+void updateOledNoTelemNormalView(const ControlInputs& inputs) {
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    
+    display.setCursor(0, 0);
+    if (g_showHorizFlash) {
+        // Show more informative warning based on what's preventing arming
+        unsigned long telemAge = millis() - g_lastTelemUpdateMs;
+        if (telemAge > TELEM_TIMEOUT_MS) {
+            display.print("LINK LOST!  THR:");
+        } else {
+            display.print("LEVEL!      THR:");
+        }
+        display.print(inputs.throttle);
+    } else {
+        display.print("TX: ");
+        display.print(inputs.armed ? "ARM" : "---");
+        display.print(" CH:");
+        display.print(ESPNOW_CHANNEL);
+        
+        // HORIZ: Show LINK? only when telemetry is truly stale
+        unsigned long telemAge = millis() - g_lastTelemUpdateMs;
+        if (telemAge > TELEM_TIMEOUT_MS) {
+            display.setCursor(90, 0);
+            display.print("LINK?");
+        }
+        
+        display.setCursor(0, 10);
+        display.print("THR: ");
+        display.print(inputs.throttle);
+    }
+    
+    // Show second and third line only when not flashing
+    if (!g_showHorizFlash) {
+        display.setCursor(0, 20);
+        display.print("Y:");
+        display.print((int)inputs.yaw);
+        display.print(" P:");
+        display.print((int)inputs.pitch);
+        display.print(" R:");
+        display.print((int)inputs.roll);
+    }
+}
+
+void updateOledNoTelemDebugView(const ControlInputs& inputs) {
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    
+    // Debug view without telemetry - show more technical info
+    display.setCursor(0, 0);
+    if (g_showHorizFlash) {
+        // Show more informative warning in debug view too
+        unsigned long telemAge = millis() - g_lastTelemUpdateMs;
+        if (telemAge > TELEM_TIMEOUT_MS) {
+            display.print("LINK LOST!");
+        } else {
+            display.print("HORIZON UNSAFE!");
+        }
+    } else {
+        display.print("DEBUG (no telem)");
+    }
+    display.setCursor(0, 10);
+    display.print("ARM:");
+    display.print(inputs.armed ? "ON" : "OFF");
+    display.print(" T:");
+    display.print(inputs.throttle);
+    display.setCursor(0, 20);
+    display.print("Y:");
+    display.print((int)inputs.yaw);
+    display.print(" P:");
+    display.print((int)inputs.pitch);
+    display.print(" R:");
+    display.print((int)inputs.roll);
+}
+
 void updateOledNormalView(const ControlInputs& inputs, const TelemetryPacket& telem, uint32_t dropCount) {
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
     
-    // Line 1: ARM and THR
+    // Line 1: ARM and THR with flash override
     display.setCursor(0, 0);
-    display.print("ARM: ");
-    display.print(inputs.armed ? "ON" : "OFF");
-    display.print(" THR:");
+    if (g_showHorizFlash) {
+        // Show more informative warning based on what's preventing arming
+        unsigned long telemAge = millis() - g_lastTelemUpdateMs;
+        if (telemAge > TELEM_TIMEOUT_MS) {
+            display.print("LINK LOST!  THR:");
+        } else if (!g_horizonOK) {
+            display.print("LEVEL!      THR:");
+        } else if (inputs.throttle > 0) {
+            display.print("THR=0 TO ARM THR:");
+        } else {
+            display.print("WAIT...     THR:");
+        }
+    } else {
+        display.print("ARM: ");
+        display.print(inputs.armed ? "ON" : "OFF");
+        display.print(" THR:");
+    }
     display.print(inputs.throttle);
+    
+    // HORIZ: Top-right status indicators (only when not flashing)
+    if (!g_showHorizFlash) {
+        unsigned long telemAge = millis() - g_lastTelemUpdateMs;
+        if (telemAge > TELEM_TIMEOUT_MS) {
+            // Stale telemetry
+            display.setCursor(90, 0);
+            display.print("LINK?");
+        } else if (!g_horizonOK && !g_telemArmed) {
+            // Horizon not OK
+            display.setCursor(84, 0);
+            display.print("HORIZ?");
+        }
+    }
     
     // Line 2: Roll and Pitch angles
     display.setCursor(0, 10);
@@ -52,6 +306,11 @@ void updateOledNormalView(const ControlInputs& inputs, const TelemetryPacket& te
     display.print((int)telem.yawRate_dps);
     display.print(" FPS: ");
     display.print((int)g_telemFrequency);
+    
+    // Show expected telemetry rate (small)
+    display.setCursor(105, 20);
+    display.print("/");
+    display.print(TELEMETRY_RATE_HZ);
     
     // Drop indicator (small dot every 5 drops)
     if (dropCount >= DROP_INDICATOR_COUNT) {
@@ -97,115 +356,83 @@ void updateOledDebugView(const ControlInputs& inputs, const TelemetryPacket& tel
     display.display();
 }
 
+// DEPRECATED: Old CSV logging function - replaced by Logger::telemetry()
+// Kept for compatibility during transition
 void printCsvLine(unsigned long ms, const ControlInputs& inputs, const TelemetryPacket& telem) {
-    // Format readable: TX[time,armed,throttle] | DRONE[time,armed,throttle] | ATTITUDE[roll,pitch,yaw_rate] | MOTORS[m1,m2,m3,m4]
-    Serial.print("TX[");
-    Serial.print(ms); Serial.print(",");
-    Serial.print(inputs.armed ? 1 : 0); Serial.print(",");
-    Serial.print(inputs.throttle); Serial.print("] | ");
-    
-    Serial.print("DRONE[");
-    Serial.print(telem.ms); Serial.print(",");
-    Serial.print(telem.armed); Serial.print(",");
-    Serial.print(telem.thr); Serial.print("] | ");
-    
-    Serial.print("ATT[R:");
-    Serial.print(telem.roll_deg_x10 / 10.0f, 1); Serial.print(",P:");
-    Serial.print(telem.pitch_deg_x10 / 10.0f, 1); Serial.print(",YR:");
-    Serial.print(telem.yawRate_dps); Serial.print("] | ");
-    
-    Serial.print("MOTORS[");
-    Serial.print(telem.m1); Serial.print(",");
-    Serial.print(telem.m2); Serial.print(",");
-    Serial.print(telem.m3); Serial.print(",");
-    Serial.print(telem.m4); Serial.print("] | ");
-    
-    Serial.print("PID[R:");
-    Serial.print(telem.outRoll); Serial.print(",P:");
-    Serial.print(telem.outPitch); Serial.print(",Y:");
-    Serial.print(telem.outYaw); Serial.print("]");
-    
-    Serial.println();
+    Logger::telemetry(ms, inputs, telem);
 }
 
 void setup() {
     Serial.begin(115200);
-    delay(1000);  // Dodaj opóźnienie na stabilizację
+    delay(1000);  // Stabilization delay
     
-    Serial.println();
-    Serial.println("=== RC Transmitter Starting ===");
-    Serial.println("Serial init OK");
+    Logger::setup("=== RC Transmitter Starting ===");
+    Logger::setup("Serial init OK");
     
     // Initialize I2C for OLED
     Wire.begin(OLED_SDA, OLED_SCL);
-    Serial.println("I2C init OK");
+    Logger::setup("I2C init OK");
     
     // Initialize OLED display
     if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR)) {
-        Serial.println("OLED init failed!");
+        Logger::error("INIT", "OLED init failed!");
         while (1) delay(1000);
     }
-    Serial.println("OLED init OK");
+    Logger::setup("OLED init OK");
     display.clearDisplay();
     display.display();
     
     // Initialize control system
     if (!control.init()) {
-        Serial.println("Control init failed!");
+        Logger::error("INIT", "Control init failed!");
         while (1) delay(1000);
     }
-    Serial.println("Control init OK");
+    Logger::setup("Control init OK");
     
     // Initialize radio
     if (!radio.init(ESPNOW_CHANNEL)) {
-        Serial.println("ESP-NOW init failed");
+        Logger::error("RADIO", "ESP-NOW init failed");
     } else {
-        Serial.println("ESP-NOW init OK");
+        Logger::setup("ESP-NOW init OK");
     }
     
     // Set peer MAC address
     if (!radio.setPeerMac(g_droneMac)) {
-        Serial.println("Peer setup failed!");
+        Logger::error("RADIO", "Peer setup failed!");
     } else {
-        Serial.println("Peer MAC set OK");
+        Logger::setup("Peer MAC set OK");
     }
     
     delay(500);
     
     // Perform calibration
-    Serial.println("Starting calibration...");
+    Logger::setup("Starting calibration...");
     control.calibrate();
-    Serial.println("Calibration complete");
+    Logger::setup("Calibration complete");
     
-    Serial.println("RC Transmitter Ready!");
-    Serial.println("Waiting for telemetry from drone...");
+    Logger::setup("RC Transmitter Ready!");
+    Logger::setup("Waiting for telemetry from drone...");
     
-    // DEBUG: Print our MAC address
+    // Print MAC addresses for debugging
     uint8_t mac[6];
     WiFi.macAddress(mac);
-    Serial.print("Our MAC: ");
-    for (int i = 0; i < 6; i++) {
-        Serial.printf("%02X", mac[i]);
-        if (i < 5) Serial.print(":");
-    }
-    Serial.println();
+    Logger::macAddress("Our MAC", mac);
+    Logger::macAddress("Drone MAC", g_droneMac);
     
-    // DEBUG: Print drone MAC we expect
-    Serial.print("Drone MAC: ");
-    for (int i = 0; i < 6; i++) {
-        Serial.printf("%02X", g_droneMac[i]);
-        if (i < 5) Serial.print(":");
-    }
-    Serial.println();
+    Logger::setup("Transmitter ready!");
     
-    // TELEM: Print CSV header
-    Serial.println("ms,tx_armed,tx_thr,drone_ms,setRoll,setPitch,setYawRate,roll,pitch,rollRate,pitchRate,yawRate,outRoll,outPitch,outYaw,m1,m2,m3,m4,drone_thr,drone_armed,linkAlive");
-    g_csvHeaderPrinted = true;
+    // Log telemetry configuration
+    Serial.print("[CONFIG] Packet rate: ");
+    Serial.print(PACKET_RATE_HZ);
+    Serial.print(" Hz, Telemetry rate: ");
+    Serial.print(TELEMETRY_RATE_HZ);
+    Serial.print(" Hz, Timeout: ");
+    Serial.print(TELEM_TIMEOUT_MS);
+    Serial.println(" ms");
 }
 
 void loop() {
     unsigned long currentTime = millis();
-    static unsigned long lastDebugMs = 0;
     
     // Check for serial commands
     if (Serial.available()) {
@@ -214,12 +441,8 @@ void loop() {
             // Print MAC address
             uint8_t mac[6];
             WiFi.macAddress(mac);
-            Serial.print("Transmitter MAC: ");
-            for (int i = 0; i < 6; i++) {
-                Serial.printf("%02X", mac[i]);
-                if (i < 5) Serial.print(":");
-            }
-            Serial.println();
+            Logger::debugf("MAC", "Transmitter MAC: %02X:%02X:%02X:%02X:%02X:%02X", 
+                          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
         }
         // Clear remaining characters
         while (Serial.available()) {
@@ -230,17 +453,76 @@ void loop() {
     // Read control inputs with button handling
     ControlInputs inputs = control.readInputs();
     
-    // Debug info co 5 sekund
-    if (currentTime - lastDebugMs >= 5000) {
-        Serial.print("[DEBUG] Time: ");
-        Serial.print(currentTime);
-        Serial.print(" ARM: ");
-        Serial.print(inputs.armed ? "ON" : "OFF");
-        Serial.print(" THR: ");
+    // Debug: Track ARM state changes
+    static bool prevArmedState = false;
+    if (inputs.armed != prevArmedState) {
+        Serial.print("[ARM_STATE] Changed to: ");
+        Serial.println(inputs.armed ? "ARMED" : "DISARMED");
+        prevArmedState = inputs.armed;
+    }
+    
+    // HORIZ: Apply horizon safety - prevent arming if horizon not OK or telemetry stale
+    bool effectiveArmed = inputs.armed;
+    unsigned long telemAge = currentTime - g_lastTelemUpdateMs;
+    bool horizonSafe = g_horizonOK && (telemAge <= TELEM_TIMEOUT_MS);
+    
+    // HORIZ: If user tried to arm but horizon not safe, show appropriate flash message
+    if (inputs.armed && !g_showHorizFlash) {
+        if (!horizonSafe) {
+            g_showHorizFlash = true;
+            g_horizFlashStartMs = currentTime;
+            effectiveArmed = false; // Don't actually arm
+            
+            // Add more detailed logging about WHY arming was prevented
+            if (!g_horizonOK) {
+                Serial.println("[SAFETY] Arming prevented: horizon not level");
+            } else if (telemAge > TELEM_TIMEOUT_MS) {
+                Serial.println("[SAFETY] Arming prevented: telemetry stale");
+            }
+        }
+    }
+    
+    // Keep disarmed if horizon not safe
+    if (!horizonSafe) {
+        effectiveArmed = false;
+    }
+    
+    // HORIZ: Safety check - never arm with throttle > 0
+    if (inputs.throttle > 0) {
+        effectiveArmed = false;
+    }
+    
+    // Debug: Track effective ARM state changes
+    static bool prevEffectiveArmed = false;
+    if (effectiveArmed != prevEffectiveArmed) {
+        Serial.print("[EFFECTIVE_ARM] Changed to: ");
+        Serial.print(effectiveArmed ? "ARMED" : "DISARMED");
+        Serial.print(" (inputs.armed=");
+        Serial.print(inputs.armed ? "true" : "false");
+        Serial.print(", horizonSafe=");
+        Serial.print(horizonSafe ? "true" : "false");
+        Serial.print(", throttle=");
         Serial.print(inputs.throttle);
-        Serial.print(" Seq: ");
-        Serial.println(g_sequenceNumber);
-        lastDebugMs = currentTime;
+        Serial.println(")");
+        prevEffectiveArmed = effectiveArmed;
+    }
+    
+    // ARM PULSE: Check for rising edge of inputs.armed (user pressed ARM button)
+    if (inputs.armed && !g_lastInputsArmed) {
+        g_armPulseCountdown = ARM_PULSE_PACKETS; // Start ARM pulse
+        Serial.println("[ARM_PULSE] Starting ARM pulse");
+    }
+    g_lastInputsArmed = inputs.armed;
+    
+    // ARM PULSE: Manage countdown
+    bool sendArmFlag = false;
+    if (g_armPulseCountdown > 0) {
+        g_armPulseCountdown--;
+        sendArmFlag = effectiveArmed; // Only send if also effectively armed
+        
+        if (g_armPulseCountdown == 0) {
+            Serial.println("[ARM_PULSE] ARM pulse complete");
+        }
     }
     
     // Build and send packet (maintain 50Hz)
@@ -252,7 +534,13 @@ void loop() {
     packet.yaw = inputs.yaw;
     packet.pitch = inputs.pitch;
     packet.roll = inputs.roll;
-    packet.flags = inputs.armed ? RC_FLAG_ARMED : 0;
+    
+    // ARM PULSE: Set ARM flag only during pulse or first packet when arming
+    packet.flags = 0;
+    if (sendArmFlag) {
+        packet.flags |= RC_FLAG_ARMED;  // Set ARM flag only during pulse
+    }
+    
     if (inputs.debugView) packet.flags |= RC_FLAG_DEBUG;
     packet.rssi_hint = 0;
     
@@ -274,6 +562,10 @@ void loop() {
         radio.clearNewTelemetryFlag();
         hasFreshTelemetry = true;
         
+        // HORIZ: Parse armed bitfield from telemetry
+        g_telemArmed = (telemetry.armed & 0x01) != 0;
+        g_horizonOK = (telemetry.armed & 0x02) != 0;
+        
         unsigned long telemUpdateMs = millis();
         
         // Calculate telemetry frequency
@@ -285,67 +577,35 @@ void loop() {
         }
         g_lastTelemUpdateMs = telemUpdateMs;
         
-        // Print telemetry header if needed
-        if (!g_csvHeaderPrinted) {
-            Serial.println("=== TELEMETRY FORMAT ===");
-            Serial.println("TX[ms,armed,thr] | DRONE[ms,armed,thr] | ATT[R:roll,P:pitch,YR:yaw_rate] | MOTORS[m1,m2,m3,m4] | PID[R:roll_out,P:pitch_out,Y:yaw_out]");
-            Serial.println("========================");
-            g_csvHeaderPrinted = true;
-        }
-        
-        // Print CSV line with fresh telemetry
+        // Print formatted telemetry line
         printCsvLine(currentTime, inputs, telemetry);
     }
     
-    // OLED display - choose view based on debug flag
-    if (hasFreshTelemetry) {
-        if (inputs.debugView) {
-            updateOledDebugView(inputs, telemetry, dropCount);
-        } else {
-            updateOledNormalView(inputs, telemetry, dropCount);
+    // OLED display update - limit to ~20Hz to prevent flickering
+    if (currentTime - g_lastOledUpdateMs >= 50) {
+        // HORIZ: Check for flash message timeout ONCE per OLED update cycle
+        if (g_showHorizFlash && (currentTime - g_horizFlashStartMs) > 700) {
+            g_showHorizFlash = false;
         }
-    } else {
-        // No telemetry - show basic TX status but respect debugView
-        display.clearDisplay();
-        display.setTextSize(1);
-        display.setTextColor(SSD1306_WHITE);
         
-        if (inputs.debugView) {
-            // Debug view without telemetry - show more technical info
-            display.setCursor(0, 0);
-            display.print("DEBUG MODE (no telem)");
-            display.setCursor(0, 10);
-            display.print("ARM:");
-            display.print(inputs.armed ? "ON" : "OFF");
-            display.print(" T:");
-            display.print(inputs.throttle);
-            display.setCursor(0, 20);
-            display.print("Y:");
-            display.print((int)inputs.yaw);
-            display.print(" P:");
-            display.print((int)inputs.pitch);
-            display.print(" R:");
-            display.print((int)inputs.roll);
+        // Choose view based on debug flag
+        if (hasFreshTelemetry) {
+            if (inputs.debugView) {
+                updateOledDebugView(inputs, telemetry, dropCount);
+            } else {
+                updateOledNormalView(inputs, telemetry, dropCount);
+            }
         } else {
-            // Normal view without telemetry - clean display
-            display.setCursor(0, 0);
-            display.print("TX: ");
-            display.print(inputs.armed ? "ARM" : "---");
-            display.print(" CH:");
-            display.print(ESPNOW_CHANNEL);
-            display.setCursor(0, 10);
-            display.print("THR: ");
-            display.print(inputs.throttle);
-            display.setCursor(0, 20);
-            display.print("Y:");
-            display.print((int)inputs.yaw);
-            display.print(" P:");
-            display.print((int)inputs.pitch);
-            display.print(" R:");
-            display.print((int)inputs.roll);
+            // No telemetry - show basic TX status but respect debugView
+            if (inputs.debugView) {
+                updateOledNoTelemDebugView(inputs);
+            } else {
+                updateOledNoTelemNormalView(inputs);
+            }
         }
         
         display.display();
+        g_lastOledUpdateMs = currentTime;
     }
     
     delay(DISPLAY_UPDATE_MS); // ~50 Hz

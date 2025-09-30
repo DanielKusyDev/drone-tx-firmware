@@ -21,8 +21,12 @@
 #define DEFAULT_DRONE_MAC {0xD8, 0x3B, 0xDA, 0x74, 0x83, 0x68}
 
 // Control Configuration
-#define PACKET_RATE_HZ    50
+#define PACKET_RATE_HZ    50  // RC control packets (TX -> RX)
 #define PACKET_INTERVAL_MS (1000 / PACKET_RATE_HZ)
+
+// Telemetry Configuration
+#define TELEMETRY_RATE_HZ 10  // Telemetry packets (RX -> TX)
+#define TELEMETRY_INTERVAL_MS (1000 / TELEMETRY_RATE_HZ)
 
 // ADC Configuration
 #define ADC_RESOLUTION    12
@@ -47,7 +51,7 @@
 #define LONG_PRESS_MS      1500
 
 // TELEM: Telemetry parameters
-#define TELEM_TIMEOUT_MS   1000
+#define TELEM_TIMEOUT_MS   (TELEMETRY_INTERVAL_MS * 3)  // Consider telemetry stale after 3 missed packets
 #define DROP_INDICATOR_COUNT 5
 
 // ADC averaging
