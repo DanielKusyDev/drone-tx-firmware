@@ -551,23 +551,25 @@ void loop() {
     // Send packet
     radio.sendPacket(&packet, sizeof(packet));
     
-    // Check if we have fresh telemetry data
-    TelemetryPacket telemetry;
-    bool hasFreshTelemetry = false;
-    uint32_t dropCount = 0;
-    
+    // --- OLED Flicker Fix: Buffer last telemetry and only show 'no telemetry' after timeout ---
+    static TelemetryPacket lastTelemetry = {};
+    static uint32_t lastDropCount = 0;
+    static bool lastTelemetryValid = false;
+    static unsigned long lastTelemetryMs = 0;
+
     if (radio.hasNewTelemetry()) {
-        telemetry = radio.getLastTelemetry();
-        dropCount = radio.getDropCount();
+        lastTelemetry = radio.getLastTelemetry();
+        lastDropCount = radio.getDropCount();
         radio.clearNewTelemetryFlag();
-        hasFreshTelemetry = true;
-        
+        lastTelemetryValid = true;
+        lastTelemetryMs = millis();
+
         // HORIZ: Parse armed bitfield from telemetry
-        g_telemArmed = (telemetry.armed & 0x01) != 0;
-        g_horizonOK = (telemetry.armed & 0x02) != 0;
-        
-        unsigned long telemUpdateMs = millis();
-        
+        g_telemArmed = (lastTelemetry.armed & 0x01) != 0;
+        g_horizonOK = (lastTelemetry.armed & 0x02) != 0;
+
+        unsigned long telemUpdateMs = lastTelemetryMs;
+
         // Calculate telemetry frequency
         if (g_lastTelemUpdateMs != 0) {
             float deltaS = (telemUpdateMs - g_lastTelemUpdateMs) / 1000.0f;
@@ -576,24 +578,25 @@ void loop() {
             }
         }
         g_lastTelemUpdateMs = telemUpdateMs;
-        
+
         // Print formatted telemetry line
-        printCsvLine(currentTime, inputs, telemetry);
+        printCsvLine(currentTime, inputs, lastTelemetry);
     }
-    
+
     // OLED display update - limit to ~20Hz to prevent flickering
     if (currentTime - g_lastOledUpdateMs >= 50) {
         // HORIZ: Check for flash message timeout ONCE per OLED update cycle
         if (g_showHorizFlash && (currentTime - g_horizFlashStartMs) > 700) {
             g_showHorizFlash = false;
         }
-        
-        // Choose view based on debug flag
-        if (hasFreshTelemetry) {
+
+        // Show telemetry view as long as last telemetry is not stale
+        bool telemetryFresh = lastTelemetryValid && (currentTime - lastTelemetryMs <= TELEM_TIMEOUT_MS);
+        if (telemetryFresh) {
             if (inputs.debugView) {
-                updateOledDebugView(inputs, telemetry, dropCount);
+                updateOledDebugView(inputs, lastTelemetry, lastDropCount);
             } else {
-                updateOledNormalView(inputs, telemetry, dropCount);
+                updateOledNormalView(inputs, lastTelemetry, lastDropCount);
             }
         } else {
             // No telemetry - show basic TX status but respect debugView
@@ -603,7 +606,7 @@ void loop() {
                 updateOledNoTelemNormalView(inputs);
             }
         }
-        
+
         display.display();
         g_lastOledUpdateMs = currentTime;
     }
