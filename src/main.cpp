@@ -566,9 +566,9 @@ void loop() {
         lastTelemetryValid = true;
         lastTelemetryMs = millis();
 
-        // HORIZ: Parse armed bitfield from telemetry
-        g_telemArmed = (lastTelemetry.armed & 0x01) != 0;
-        g_horizonOK = (lastTelemetry.armed & 0x02) != 0;
+        // HORIZ: Parse armed bitfield from telemetry using protocol helpers
+        g_telemArmed = isTelemArmed(lastTelemetry);
+        g_horizonOK = isTelemHorizonOK(lastTelemetry);
 
         unsigned long telemUpdateMs = lastTelemetryMs;
 

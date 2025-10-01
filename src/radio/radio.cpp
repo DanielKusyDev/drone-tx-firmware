@@ -33,8 +33,8 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
     
     const TelemetryPacket* packet = reinterpret_cast<const TelemetryPacket*>(data);
     
-    // Check magic and version
-    if (packet->magic != TELEM_PACKET_MAGIC || packet->version != TELEM_PACKET_VERSION) {
+    // Check magic and version using protocol helper
+    if (!isValidTelemPacket(*packet)) {
         Serial.print("[RECV] Wrong magic/version! Magic: 0x");
         Serial.print(packet->magic, HEX);
         Serial.print(" Ver: ");
