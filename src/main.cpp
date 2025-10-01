@@ -4,6 +4,7 @@
 #include "radio.h"
 #include "control.h"
 #include "app/App.h"
+#include "utils/Timing.h"
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -185,7 +186,7 @@ void updateOledNoTelemNormalView(const ControlInputs& inputs) {
     display.setCursor(0, 0);
     if (g_showHorizFlash) {
         // Show more informative warning based on what's preventing arming
-        unsigned long telemAge = millis() - g_lastTelemUpdateMs;
+        unsigned long telemAge = Age::since(g_lastTelemUpdateMs);
         if (telemAge > TELEM_TIMEOUT_MS) {
             display.print("LINK LOST!  THR:");
         } else {
@@ -199,7 +200,7 @@ void updateOledNoTelemNormalView(const ControlInputs& inputs) {
         display.print(ESPNOW_CHANNEL);
         
         // HORIZ: Show LINK? only when telemetry is truly stale
-        unsigned long telemAge = millis() - g_lastTelemUpdateMs;
+        unsigned long telemAge = Age::since(g_lastTelemUpdateMs);
         if (telemAge > TELEM_TIMEOUT_MS) {
             display.setCursor(90, 0);
             display.print("LINK?");
@@ -231,7 +232,7 @@ void updateOledNoTelemDebugView(const ControlInputs& inputs) {
     display.setCursor(0, 0);
     if (g_showHorizFlash) {
         // Show more informative warning in debug view too
-        unsigned long telemAge = millis() - g_lastTelemUpdateMs;
+        unsigned long telemAge = Age::since(g_lastTelemUpdateMs);
         if (telemAge > TELEM_TIMEOUT_MS) {
             display.print("LINK LOST!");
         } else {
@@ -263,7 +264,7 @@ void updateOledNormalView(const ControlInputs& inputs, const TelemetryPacket& te
     display.setCursor(0, 0);
     if (g_showHorizFlash) {
         // Show more informative warning based on what's preventing arming
-        unsigned long telemAge = millis() - g_lastTelemUpdateMs;
+        unsigned long telemAge = Age::since(g_lastTelemUpdateMs);
         if (telemAge > TELEM_TIMEOUT_MS) {
             display.print("LINK LOST!  THR:");
         } else if (!g_horizonOK) {
@@ -282,7 +283,7 @@ void updateOledNormalView(const ControlInputs& inputs, const TelemetryPacket& te
     
     // HORIZ: Top-right status indicators (only when not flashing)
     if (!g_showHorizFlash) {
-        unsigned long telemAge = millis() - g_lastTelemUpdateMs;
+        unsigned long telemAge = Age::since(g_lastTelemUpdateMs);
         if (telemAge > TELEM_TIMEOUT_MS) {
             // Stale telemetry
             display.setCursor(90, 0);
@@ -464,7 +465,7 @@ void loop() {
     
     // HORIZ: Apply horizon safety - prevent arming if horizon not OK or telemetry stale
     bool effectiveArmed = inputs.armed;
-    unsigned long telemAge = currentTime - g_lastTelemUpdateMs;
+    unsigned long telemAge = Age::since(g_lastTelemUpdateMs);
     bool horizonSafe = g_horizonOK && (telemAge <= TELEM_TIMEOUT_MS);
     
     // HORIZ: If user tried to arm but horizon not safe, show appropriate flash message
@@ -585,14 +586,18 @@ void loop() {
     }
 
     // OLED display update - limit to ~20Hz to prevent flickering
-    if (currentTime - g_lastOledUpdateMs >= 50) {
+    static Every oledUpdate(50); // 20Hz update rate
+    if (oledUpdate.check()) {
         // HORIZ: Check for flash message timeout ONCE per OLED update cycle
-        if (g_showHorizFlash && (currentTime - g_horizFlashStartMs) > 700) {
-            g_showHorizFlash = false;
+        static FlashTimer horizFlash(700); // 700ms flash duration
+        if (g_showHorizFlash) {
+            horizFlash.start();
+            g_showHorizFlash = false; // Consume the trigger
         }
+        // FlashTimer automatically manages the flash state
 
         // Show telemetry view as long as last telemetry is not stale
-        bool telemetryFresh = lastTelemetryValid && (currentTime - lastTelemetryMs <= TELEM_TIMEOUT_MS);
+        bool telemetryFresh = lastTelemetryValid && (Age::since(lastTelemetryMs) <= TELEM_TIMEOUT_MS);
         if (telemetryFresh) {
             if (inputs.debugView) {
                 updateOledDebugView(inputs, lastTelemetry, lastDropCount);
