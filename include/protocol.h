@@ -64,5 +64,23 @@ struct TelemetryPacket {
 #define TELEM_PACKET_MAGIC   0x5A
 #define TELEM_PACKET_VERSION 1
 
+// Telemetry armed status bitfield constants
+#define TELEM_ARMED_BIT     0x01  // bit 0: drone armed state
+#define TELEM_HORIZON_BIT   0x02  // bit 1: horizon/level OK state
+
 // CRC-16/X.25 calculation
 uint16_t crc16_x25(const uint8_t* data, size_t len);
+
+// Telemetry status helpers
+inline bool isTelemArmed(const TelemetryPacket& packet) {
+    return (packet.armed & TELEM_ARMED_BIT) != 0;
+}
+
+inline bool isTelemHorizonOK(const TelemetryPacket& packet) {
+    return (packet.armed & TELEM_HORIZON_BIT) != 0;
+}
+
+// Packet validation helpers
+inline bool isValidTelemPacket(const TelemetryPacket& packet) {
+    return packet.magic == TELEM_PACKET_MAGIC && packet.version == TELEM_PACKET_VERSION;
+}
