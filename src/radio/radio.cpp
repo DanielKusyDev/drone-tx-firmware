@@ -18,11 +18,19 @@ volatile bool RadioManager::s_newTelemetryAvailable = false;
 volatile uint32_t RadioManager::s_lastTelemSeq = 0;
 volatile uint32_t RadioManager::s_dropCount = 0;
 
+// Send status tracking
+volatile uint32_t RadioManager::s_sendSuccessCount = 0;
+volatile uint32_t RadioManager::s_sendFailCount = 0;
+
 // Static callback function
 void RadioManager::onSendCallback(const uint8_t *mac_addr, esp_now_send_status_t status) {
-    // Callback for send status - could be used for link quality indication
-    (void)mac_addr;
-    (void)status;
+    (void)mac_addr; // Unused
+    
+    if (status == ESP_NOW_SEND_SUCCESS) {
+        s_sendSuccessCount++;
+    } else {
+        s_sendFailCount++;
+    }
 }
 
 // TELEM: Receive callback for telemetry
@@ -148,4 +156,12 @@ void RadioManager::clearNewTelemetryFlag() {
 
 uint32_t RadioManager::getDropCount() const {
     return s_dropCount;
+}
+
+uint32_t RadioManager::getSendSuccessCount() const {
+    return s_sendSuccessCount;
+}
+
+uint32_t RadioManager::getSendFailCount() const {
+    return s_sendFailCount;
 }

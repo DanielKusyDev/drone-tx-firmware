@@ -22,6 +22,13 @@ A simplified PlatformIO project for ESP32-C3 based RC controller transmitter tha
 - **Connection quality monitoring** with drop count tracking
 - **CRC validation** for telemetry packet integrity
 
+### Development & Testing
+- **OLED Display Demo Mode** - Serial command `O` to cycle through all UI states
+  - **8 display modes** showcasing every possible screen state
+  - **Realistic mock data** for comprehensive UI testing
+  - **Safety-protected** - auto-stops on any arming attempt
+  - **Perfect for development** - test all UI scenarios without flying
+
 ## Hardware Requirements
 
 ### MCU
@@ -162,6 +169,20 @@ While connected to USB Serial (115200 baud), you can use the following commands:
 - **`M`** or **`m`**: Display transmitter MAC address
   - Example output: `Transmitter MAC: E4:B3:23:C5:F4:6C`
   - Use this MAC address in drone firmware configuration
+  
+- **`O`** or **`o`**: Toggle OLED display demo mode
+  - **Demo cycle**: 8 views × 2 seconds each = 16 second total cycle
+  - **View sequence**:
+    1. No Telemetry Normal View - Basic TX status
+    2. No Telemetry Flash Warning - "LINK LOST!" alert
+    3. No Telemetry Debug View - Technical format
+    4. Normal View with Telemetry - Flight display
+    5. Normal Flash Warning - "LEVEL!" horizon alert  
+    6. Normal Status Indicator - "HORIZ?" warning
+    7. Debug View - PID tuning display
+    8. Debug View with Drops - Packet loss indicator
+  - **Safety**: Auto-stops if arming attempted, throttle moved, or drone reports armed
+  - **Usage**: Perfect for testing all UI states without flying
 
 ## Protocol Specification
 
@@ -226,6 +247,7 @@ struct TelemetryPacket {
 
 ### Runtime Issues
 - **Display not working**: Check I²C wiring (SDA/SCL pins)
+  - **Test with OLED demo**: Send `O` command to cycle through all display states
 - **No radio transmission**: Verify ESP-NOW initialization in serial monitor
 - **Erratic control**: Check joystick wiring and power supply stability
 - **ARM button not working**: Verify button wiring and GPIO 7 connection

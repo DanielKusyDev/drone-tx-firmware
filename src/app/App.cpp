@@ -193,15 +193,35 @@ void App::loop() {
         }
         bool sent = m_radio->sendPacket(&packet, sizeof(packet));
         
-        // Debug: Log occasional packet sends (every 50 packets = 1 second)
+        // Debug: Log occasional packet status (every 50 packets = 1 second)
         static uint8_t debugCounter = 0;
+        static uint32_t lastSuccessCount = 0;
+        static uint32_t lastFailCount = 0;
+        
         if (++debugCounter >= 50) {
             debugCounter = 0;
+            
+            uint32_t currentSuccess = m_radio->getSendSuccessCount();
+            uint32_t currentFail = m_radio->getSendFailCount();
+            uint32_t newSuccess = currentSuccess - lastSuccessCount;
+            uint32_t newFails = currentFail - lastFailCount;
+            
             if (sent) {
-                Logger::debugf("RADIO", "RC packet sent OK, seq=%d", packet.seq);
+                if (newFails > 0) {
+                    Logger::debugf("RADIO", "RC: queued seq=%d, %lu ACK, %lu FAIL (last 1s)", 
+                                 packet.seq, newSuccess, newFails);
+                } else if (newSuccess > 0) {
+                    Logger::debugf("RADIO", "RC: queued seq=%d, %lu ACK (last 1s)", 
+                                 packet.seq, newSuccess);
+                } else {
+                    Logger::debugf("RADIO", "RC: queued seq=%d, no callbacks yet", packet.seq);
+                }
             } else {
-                Logger::error("RADIO", "Failed to send RC packet");
+                Logger::error("RADIO", "Failed to queue RC packet");
             }
+            
+            lastSuccessCount = currentSuccess;
+            lastFailCount = currentFail;
         }
     }
 
@@ -221,10 +241,24 @@ void App::loop() {
 
     // 6. Update OLED display (20Hz)
     if (oledEvery.check()) {
-        if (Age::since(g_lastTelemUpdateMs) > TELEM_TIMEOUT_MS) {
-            updateOledNoTelemNormalView(inputs);
+        // OLED_DEMO: Override normal display when demo active
+        if (m_oledDemo.isActive()) {
+            m_oledDemo.update(inputs, lastTelem, dropCount);
         } else {
-            updateOledNormalView(inputs, lastTelem, dropCount);
+            // Normal display logic with debug view support
+            if (Age::since(g_lastTelemUpdateMs) > TELEM_TIMEOUT_MS) {
+                if (inputs.debugView) {
+                    updateOledNoTelemDebugView(inputs);
+                } else {
+                    updateOledNoTelemNormalView(inputs);
+                }
+            } else {
+                if (inputs.debugView) {
+                    updateOledDebugView(inputs, lastTelem, dropCount);
+                } else {
+                    updateOledNormalView(inputs, lastTelem, dropCount);
+                }
+            }
         }
         display.display(); // Ensure display is updated
         g_lastOledUpdateMs = millis();
@@ -232,7 +266,7 @@ void App::loop() {
 }
 
 void App::handleSerialCommands() {
-    // Handle serial commands (e.g., 'M' for MAC address)
+    // Handle serial commands (e.g., 'M' for MAC address, 'O' for OLED demo, 'D' for diagnostics)
     while (Serial.available()) {
         char c = Serial.read();
         if (c == 'M' || c == 'm') {
@@ -242,6 +276,240 @@ void App::handleSerialCommands() {
             Logger::macAddress("Our MAC", ourMac);
             Logger::macAddress("Drone MAC", g_droneMac);
         }
+        // OLED_DEMO: Toggle demo mode
+        else if (c == 'O' || c == 'o') {
+            m_oledDemo.toggle();
+        }
+        // Radio diagnostics
+        else if (c == 'D' || c == 'd') {
+            uint32_t successCount = m_radio->getSendSuccessCount();
+            uint32_t failCount = m_radio->getSendFailCount();
+            uint32_t dropCount = m_radio->getDropCount();
+            
+            Serial.println("[RADIO_STATS]");
+            Serial.printf("Send Success: %lu\n", successCount);
+            Serial.printf("Send Fail: %lu\n", failCount);
+            Serial.printf("Telemetry Drops: %lu\n", dropCount);
+            
+            if (successCount + failCount > 0) {
+                float successRate = (float)successCount / (successCount + failCount) * 100.0f;
+                Serial.printf("Success Rate: %.1f%%\n", successRate);
+            }
+            
+            unsigned long telemAge = Age::since(g_lastTelemUpdateMs);
+            Serial.printf("Last Telemetry: %lu ms ago\n", telemAge);
+        }
     }
 }
 
+// OLED_DEMO: Implementation of demo state machine
+void OledDemo::toggle() {
+    if (m_state == OledDemoState::OFF) {
+        m_state = OledDemoState::NO_TELEM_NORMAL;
+        m_stateStartMs = millis();
+        Serial.println("[OLED_DEMO] Started - cycling through 8 views (2s each)");
+    } else {
+        m_state = OledDemoState::OFF;
+        Serial.println("[OLED_DEMO] Stopped");
+    }
+}
+
+void OledDemo::update(const ControlInputs& inputs, const TelemetryPacket& lastTelem, uint32_t dropCount) {
+    // Safety check - stop demo if unsafe conditions
+    if (shouldStop(inputs, lastTelem)) {
+        m_state = OledDemoState::OFF;
+        Serial.println("[OLED_DEMO] Auto-stopped for safety");
+        return;
+    }
+    
+    // Check if it's time to advance to next state
+    if (millis() - m_stateStartMs >= STATE_DURATION_MS) {
+        advance();
+    }
+    
+    // Render current state
+    renderCurrentState(inputs, lastTelem, dropCount);
+}
+
+void OledDemo::advance() {
+    switch (m_state) {
+        case OledDemoState::NO_TELEM_NORMAL:
+            m_state = OledDemoState::NO_TELEM_FLASH;
+            Serial.println("[OLED_DEMO] -> No Telem Flash Warning");
+            break;
+        case OledDemoState::NO_TELEM_FLASH:
+            m_state = OledDemoState::NO_TELEM_DEBUG;
+            Serial.println("[OLED_DEMO] -> No Telem Debug View");
+            break;
+        case OledDemoState::NO_TELEM_DEBUG:
+            m_state = OledDemoState::NORMAL_VIEW;
+            Serial.println("[OLED_DEMO] -> Normal View (with telem)");
+            break;
+        case OledDemoState::NORMAL_VIEW:
+            m_state = OledDemoState::NORMAL_FLASH;
+            Serial.println("[OLED_DEMO] -> Normal Flash Warning");
+            break;
+        case OledDemoState::NORMAL_FLASH:
+            m_state = OledDemoState::NORMAL_STATUS;
+            Serial.println("[OLED_DEMO] -> Normal Status Indicator");
+            break;
+        case OledDemoState::NORMAL_STATUS:
+            m_state = OledDemoState::DEBUG_VIEW;
+            Serial.println("[OLED_DEMO] -> Debug View (PID tuning)");
+            break;
+        case OledDemoState::DEBUG_VIEW:
+            m_state = OledDemoState::DEBUG_DROPS;
+            Serial.println("[OLED_DEMO] -> Debug View with Drops");
+            break;
+        case OledDemoState::DEBUG_DROPS:
+            m_state = OledDemoState::NO_TELEM_NORMAL;
+            Serial.println("[OLED_DEMO] -> Cycle restart: No Telem Normal");
+            break;
+        default:
+            m_state = OledDemoState::OFF;
+            break;
+    }
+    m_stateStartMs = millis();
+}
+
+void OledDemo::renderCurrentState(const ControlInputs& inputs, const TelemetryPacket& lastTelem, uint32_t dropCount) {
+    ControlInputs mockInputs;
+    TelemetryPacket mockTelem;
+    uint32_t mockDropCount = 0;
+    
+    // Set global state variables to simulate different conditions
+    extern bool g_showHorizFlash;
+    extern bool g_horizonOK;
+    extern bool g_telemArmed;
+    extern unsigned long g_lastTelemUpdateMs;
+    extern float g_telemFrequency;
+    
+    // Save original states
+    bool origHorizFlash = g_showHorizFlash;
+    bool origHorizonOK = g_horizonOK;
+    bool origTelemArmed = g_telemArmed;
+    unsigned long origLastTelem = g_lastTelemUpdateMs;
+    float origTelemFreq = g_telemFrequency;
+    
+    switch (m_state) {
+        case OledDemoState::NO_TELEM_NORMAL:
+            Serial.println("[OLED_DEMO] Showing: No Telem Normal View");
+            createMockInputs(mockInputs, false);
+            g_showHorizFlash = false;
+            g_lastTelemUpdateMs = millis() - (TELEM_TIMEOUT_MS + 1000); // Force stale
+            updateOledNoTelemNormalView(mockInputs);
+            break;
+            
+        case OledDemoState::NO_TELEM_FLASH:
+            Serial.println("[OLED_DEMO] Showing: No Telem Flash Warning");
+            createMockInputs(mockInputs, false);
+            g_showHorizFlash = true;
+            g_horizonOK = false;
+            g_lastTelemUpdateMs = millis() - (TELEM_TIMEOUT_MS + 1000); // Force stale
+            updateOledNoTelemNormalView(mockInputs);
+            break;
+            
+        case OledDemoState::NO_TELEM_DEBUG:
+            Serial.println("[OLED_DEMO] Showing: No Telem Debug View");
+            createMockInputs(mockInputs, true);
+            g_showHorizFlash = false;
+            g_lastTelemUpdateMs = millis() - (TELEM_TIMEOUT_MS + 1000); // Force stale
+            updateOledNoTelemDebugView(mockInputs);
+            break;
+            
+        case OledDemoState::NORMAL_VIEW:
+            Serial.println("[OLED_DEMO] Showing: Normal View with Telemetry");
+            createMockInputs(mockInputs, false);
+            createMockTelemetry(mockTelem);
+            g_showHorizFlash = false;
+            g_horizonOK = true;
+            g_telemArmed = false;
+            g_lastTelemUpdateMs = millis(); // Fresh telemetry
+            g_telemFrequency = 9.8f;
+            updateOledNormalView(mockInputs, mockTelem, mockDropCount);
+            break;
+            
+        case OledDemoState::NORMAL_FLASH:
+            Serial.println("[OLED_DEMO] Showing: Normal Flash Warning (LEVEL!)");
+            createMockInputs(mockInputs, false);
+            createMockTelemetry(mockTelem);
+            g_showHorizFlash = true;
+            g_horizonOK = false;
+            g_lastTelemUpdateMs = millis(); // Fresh telemetry
+            updateOledNormalView(mockInputs, mockTelem, mockDropCount);
+            break;
+            
+        case OledDemoState::NORMAL_STATUS:
+            Serial.println("[OLED_DEMO] Showing: Normal Status Indicator (HORIZ?)");
+            createMockInputs(mockInputs, false);
+            createMockTelemetry(mockTelem);
+            g_showHorizFlash = false;
+            g_horizonOK = false;
+            g_telemArmed = false;
+            g_lastTelemUpdateMs = millis(); // Fresh telemetry
+            g_telemFrequency = 10.1f;
+            updateOledNormalView(mockInputs, mockTelem, mockDropCount);
+            break;
+            
+        case OledDemoState::DEBUG_VIEW:
+            Serial.println("[OLED_DEMO] Showing: Debug View (PID tuning)");
+            createMockInputs(mockInputs, true);
+            createMockTelemetry(mockTelem);
+            g_showHorizFlash = false;
+            g_lastTelemUpdateMs = millis(); // Fresh telemetry
+            updateOledDebugView(mockInputs, mockTelem, mockDropCount);
+            break;
+            
+        case OledDemoState::DEBUG_DROPS:
+            Serial.println("[OLED_DEMO] Showing: Debug View with Packet Drops");
+            createMockInputs(mockInputs, true);
+            createMockTelemetry(mockTelem);
+            g_showHorizFlash = false;
+            g_lastTelemUpdateMs = millis(); // Fresh telemetry
+            mockDropCount = DROP_INDICATOR_COUNT; // Force drop indicator
+            updateOledDebugView(mockInputs, mockTelem, mockDropCount);
+            break;
+            
+        default:
+            break;
+    }
+    
+    // Restore original states
+    g_showHorizFlash = origHorizFlash;
+    g_horizonOK = origHorizonOK;
+    g_telemArmed = origTelemArmed;
+    g_lastTelemUpdateMs = origLastTelem;
+    g_telemFrequency = origTelemFreq;
+}
+
+bool OledDemo::shouldStop(const ControlInputs& inputs, const TelemetryPacket& lastTelem) {
+    // Stop demo if unsafe conditions detected
+    return inputs.armed ||                    // User trying to arm
+           inputs.throttle > 50 ||           // Throttle not at zero
+           (lastTelem.armed & 0x01);         // Drone reports armed
+}
+
+void OledDemo::createMockInputs(ControlInputs& mockInputs, bool debugView) {
+    // OLED_DEMO: Safe, representative mock control inputs
+    mockInputs.throttle = 0;           // Always safe for demo
+    mockInputs.yaw = -150;            // Realistic stick input
+    mockInputs.pitch = 200;           // Realistic stick input
+    mockInputs.roll = -75;            // Realistic stick input
+    mockInputs.armed = false;         // Always false for safety
+    mockInputs.debugView = debugView; // Controlled by demo state
+}
+
+void OledDemo::createMockTelemetry(TelemetryPacket& mockTelem) {
+    // OLED_DEMO: Realistic telemetry data for demo
+    mockTelem.roll_deg_x10 = -52;     // -5.2 degrees (slight tilt)
+    mockTelem.pitch_deg_x10 = 31;     // 3.1 degrees
+    mockTelem.yawRate_dps = -45;      // Turning left
+    mockTelem.setAngleRoll_x10 = -50; // Close to actual angle
+    mockTelem.setAnglePitch_x10 = 30;
+    mockTelem.rollRate_dps = -48;     // Rate values
+    mockTelem.pitchRate_dps = 35;
+    mockTelem.outRoll = 1850;         // PID outputs (realistic range)
+    mockTelem.outPitch = 1920;
+    mockTelem.outYaw = 1480;
+    mockTelem.armed = 0x00;           // Not armed (bit 0 = armedDRN, bit 1 = horizonOK)
+}

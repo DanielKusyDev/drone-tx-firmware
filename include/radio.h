@@ -17,6 +17,10 @@ public:
     void clearNewTelemetryFlag();
     uint32_t getDropCount() const;
     
+    // Send status tracking
+    uint32_t getSendSuccessCount() const;
+    uint32_t getSendFailCount() const;
+    
 private:
     uint8_t m_peerMac[6] = {0};
     uint8_t m_channel = 1;
@@ -27,6 +31,10 @@ private:
     static volatile bool s_newTelemetryAvailable;
     static volatile uint32_t s_lastTelemSeq;
     static volatile uint32_t s_dropCount;
+    
+    // Send status tracking
+    static volatile uint32_t s_sendSuccessCount;
+    static volatile uint32_t s_sendFailCount;
     
     static void onSendCallback(const uint8_t *mac_addr, esp_now_send_status_t status);
     static void onReceiveCallback(const uint8_t *mac_addr, const uint8_t *data, int len);

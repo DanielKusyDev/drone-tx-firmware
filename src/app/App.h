@@ -14,6 +14,37 @@
 #include "radio.h"
 #include "protocol.h"
 
+// OLED_DEMO: Demo state machine for cycling through all UI views
+enum class OledDemoState {
+    OFF,
+    NO_TELEM_NORMAL,
+    NO_TELEM_FLASH,
+    NO_TELEM_DEBUG,
+    NORMAL_VIEW,
+    NORMAL_FLASH,
+    NORMAL_STATUS,
+    DEBUG_VIEW,
+    DEBUG_DROPS
+};
+
+class OledDemo {
+public:
+    void toggle();
+    void update(const ControlInputs& inputs, const TelemetryPacket& lastTelem, uint32_t dropCount);
+    bool isActive() const { return m_state != OledDemoState::OFF; }
+    
+private:
+    OledDemoState m_state = OledDemoState::OFF;
+    unsigned long m_stateStartMs = 0;
+    static const unsigned long STATE_DURATION_MS = 2000;
+    
+    void advance();
+    void renderCurrentState(const ControlInputs& inputs, const TelemetryPacket& lastTelem, uint32_t dropCount);
+    bool shouldStop(const ControlInputs& inputs, const TelemetryPacket& lastTelem);
+    void createMockInputs(ControlInputs& mockInputs, bool debugView);
+    void createMockTelemetry(TelemetryPacket& mockTelem);
+};
+
 class App {
 public:
     /**
@@ -37,6 +68,9 @@ private:
     // Subsystem instances (maintain global access pattern for now)
     ControlManager* m_control;
     RadioManager* m_radio;
+    
+    // OLED_DEMO: Demo state machine instance
+    OledDemo m_oledDemo;
     
     // Timing state (preserve existing timing behavior)
     unsigned long m_lastOledUpdateMs;
