@@ -1,18 +1,7 @@
 #pragma once
 
-// Hardware Configuration
-#define PIN_THR   0
-#define PIN_YAW   1
-#define PIN_PITCH 4
-#define PIN_ROLL  2
-#define PIN_ARM   7
-
-// OLED Configuration
-#define OLED_WIDTH  128
-#define OLED_HEIGHT 32
-#define OLED_SDA    8
-#define OLED_SCL    9
-#define OLED_ADDR   0x3C
+// Include hardware pin definitions
+#include "pins.h"
 
 // ESP-NOW Configuration
 #define ESPNOW_CHANNEL 1

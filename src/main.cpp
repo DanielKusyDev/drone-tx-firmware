@@ -3,6 +3,7 @@
 #include "protocol.h"
 #include "radio.h"
 #include "control.h"
+#include "app/App.h"
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
