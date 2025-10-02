@@ -40,13 +40,6 @@ private:
     
     // Timing state (preserve existing timing behavior)
     unsigned long m_lastOledUpdateMs;
-    
-    // Methods that mirror existing main.cpp structure
-    void processControlInputs();
-    void applySafetyLogic();
-    void buildAndSendRcPacket();
-    void processTelemetry();
-    void updateDisplay();
 };
 
 // Global app instance (maintains Arduino-style global access)
