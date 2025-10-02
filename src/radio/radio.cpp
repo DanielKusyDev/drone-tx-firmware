@@ -5,6 +5,13 @@
 #include <esp_wifi.h>
 #include <cstring>
 
+// Forward declarations for Logger functions (defined in main.cpp)
+namespace Logger {
+    void radioWrongPacketSize(int actualLen, int expectedLen);
+    void radioWrongMagicVersion(uint8_t magic, uint8_t version);
+    void radioCrcError(uint16_t calculated, uint16_t received);
+}
+
 // TELEM: Static telemetry variables
 TelemetryPacket RadioManager::s_lastTelemetry = {};
 volatile bool RadioManager::s_newTelemetryAvailable = false;
@@ -24,10 +31,7 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
     
     // Quick validation
     if (len != sizeof(TelemetryPacket)) {
-        Serial.print("[RECV] Wrong packet size! Len: ");
-        Serial.print(len);
-        Serial.print(" Expected: ");
-        Serial.println(sizeof(TelemetryPacket));
+        Logger::radioWrongPacketSize(len, sizeof(TelemetryPacket));
         return;
     }
     
@@ -35,20 +39,14 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
     
     // Check magic and version using protocol helper
     if (!isValidTelemPacket(*packet)) {
-        Serial.print("[RECV] Wrong magic/version! Magic: 0x");
-        Serial.print(packet->magic, HEX);
-        Serial.print(" Ver: ");
-        Serial.println(packet->version);
+        Logger::radioWrongMagicVersion(packet->magic, packet->version);
         return;
     }
     
     // Verify CRC
     uint16_t calculatedCrc = crc16_x25(data, len - sizeof(packet->crc));
     if (calculatedCrc != packet->crc) {
-        Serial.print("[RECV] CRC Error! Calc: 0x");
-        Serial.print(calculatedCrc, HEX);
-        Serial.print(" Got: 0x");
-        Serial.println(packet->crc, HEX);
+        Logger::radioCrcError(calculatedCrc, packet->crc);
         return;
     }
     

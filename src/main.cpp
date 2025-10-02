@@ -175,6 +175,45 @@ namespace Logger {
         
         Serial.println(buffer);
     }
+    
+    /**
+     * @brief Log radio-specific error messages with structured format
+     */
+    void radioError(const char* operation, const char* details) {
+        if (!g_logConfig.enableErrors) return;
+        
+        Serial.print("[ERROR:RADIO:");
+        Serial.print(operation);
+        Serial.print("] ");
+        Serial.println(details);
+    }
+    
+    void radioWrongPacketSize(int actualLen, int expectedLen) {
+        if (!g_logConfig.enableErrors) return;
+        
+        Serial.print("[ERROR:RADIO:SIZE] Len: ");
+        Serial.print(actualLen);
+        Serial.print(" Expected: ");
+        Serial.println(expectedLen);
+    }
+    
+    void radioWrongMagicVersion(uint8_t magic, uint8_t version) {
+        if (!g_logConfig.enableErrors) return;
+        
+        Serial.print("[ERROR:RADIO:PROTOCOL] Magic: 0x");
+        Serial.print(magic, HEX);
+        Serial.print(" Ver: ");
+        Serial.println(version);
+    }
+    
+    void radioCrcError(uint16_t calculated, uint16_t received) {
+        if (!g_logConfig.enableErrors) return;
+        
+        Serial.print("[ERROR:RADIO:CRC] Calc: 0x");
+        Serial.print(calculated, HEX);
+        Serial.print(" Got: 0x");
+        Serial.println(received, HEX);
+    }
 }
 
 // TELEM: Helper functions for OLED display
