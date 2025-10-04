@@ -12,7 +12,5 @@ uint16_t crc16_x25(const uint8_t* data, size_t len) {
             }
         }
     }
-    crc = ~crc;
-    // Byte swap for X.25 standard
-    return (crc << 8) | (crc >> 8);
+    return ~crc;
 }

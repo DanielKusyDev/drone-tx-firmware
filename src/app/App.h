@@ -60,7 +60,14 @@ public:
     void loop();
 
     /**
-     * @brief Process serial commands (e.g., 'M' for MAC address)
+     * @brief Process serial commands
+     *
+     * Available commands:
+     * - 'M': Display MAC addresses (transmitter and drone)
+     * - 'O': Toggle OLED demo mode (cycles through all UI views)
+     * - 'D': Display radio diagnostics (legacy telemetry)
+     * - 'E': Display enhanced telemetry statistics and per-packet details
+     * - 'T': Toggle enhanced telemetry mode on/off
      */
     void handleSerialCommands();
 

@@ -285,19 +285,75 @@ void App::handleSerialCommands() {
             uint32_t successCount = m_radio->getSendSuccessCount();
             uint32_t failCount = m_radio->getSendFailCount();
             uint32_t dropCount = m_radio->getDropCount();
-            
+
             Serial.println("[RADIO_STATS]");
             Serial.printf("Send Success: %lu\n", successCount);
             Serial.printf("Send Fail: %lu\n", failCount);
             Serial.printf("Telemetry Drops: %lu\n", dropCount);
-            
+
             if (successCount + failCount > 0) {
                 float successRate = (float)successCount / (successCount + failCount) * 100.0f;
                 Serial.printf("Success Rate: %.1f%%\n", successRate);
             }
-            
+
             unsigned long telemAge = Age::since(g_lastTelemUpdateMs);
             Serial.printf("Last Telemetry: %lu ms ago\n", telemAge);
+        }
+        // Enhanced telemetry diagnostics
+        else if (c == 'E' || c == 'e') {
+            const TelemReceiverConfig& config = m_radio->getReceiverConfig();
+
+            Serial.println("[ENHANCED_TELEMETRY_STATS]");
+            Serial.printf("Enhanced Mode: %s\n", config.enable_enhanced ? "ON" : "OFF");
+            Serial.printf("Legacy Mode: %s\n", config.enable_legacy ? "ON" : "OFF");
+            Serial.printf("Packet Type Mask: 0x%02X\n", config.packet_type_mask);
+            Serial.printf("Timeout: %u ms\n", config.packet_timeout_ms);
+            Serial.println();
+
+            uint32_t totalPkts = m_radio->getTotalEnhancedPackets();
+            uint32_t totalDrops = m_radio->getTotalEnhancedDrops();
+            Serial.printf("Total Enhanced Packets: %lu\n", totalPkts);
+            Serial.printf("Total Enhanced Drops: %lu\n", totalDrops);
+            if (totalPkts > 0) {
+                float lossRate = (float)totalDrops / (totalPkts + totalDrops) * 100.0f;
+                Serial.printf("Loss Rate: %.2f%%\n", lossRate);
+            }
+            Serial.println();
+
+            // Per-packet-type statistics
+            const char* typeNames[] = {"ATTITUDE", "CONTROL", "MOTORS", "STATUS", "SENSORS", "SAFETY", "PERFORMANCE"};
+            Serial.println("Per-Packet Statistics:");
+            for (uint8_t i = 1; i <= 7; i++) {
+                TelemetryPacketType type = static_cast<TelemetryPacketType>(i);
+                const EnhancedTelemStats& stats = m_radio->getEnhancedStats(type);
+
+                if (stats.packets_received > 0) {
+                    Serial.printf("  %s: RX=%lu, DROP=%lu, CRC_ERR=%lu, SEQ=%u\n",
+                                typeNames[i-1],
+                                stats.packets_received,
+                                stats.packets_dropped,
+                                stats.crc_errors,
+                                stats.last_seq);
+                }
+            }
+            Serial.println();
+
+            // Data freshness
+            Serial.println("Data Freshness:");
+            Serial.printf("  ATTITUDE: %s\n", m_radio->hasAttitude() ? "Fresh" : "Stale");
+            Serial.printf("  CONTROL: %s\n", m_radio->hasControl() ? "Fresh" : "Stale");
+            Serial.printf("  MOTORS: %s\n", m_radio->hasMotors() ? "Fresh" : "Stale");
+            Serial.printf("  STATUS: %s\n", m_radio->hasStatus() ? "Fresh" : "Stale");
+            Serial.printf("  SENSORS: %s\n", m_radio->hasSensors() ? "Fresh" : "Stale");
+            Serial.printf("  SAFETY: %s\n", m_radio->hasSafety() ? "Fresh" : "Stale");
+            Serial.printf("  PERFORMANCE: %s\n", m_radio->hasPerformance() ? "Fresh" : "Stale");
+        }
+        // Toggle enhanced telemetry mode
+        else if (c == 'T' || c == 't') {
+            TelemReceiverConfig config = m_radio->getReceiverConfig();
+            config.enable_enhanced = !config.enable_enhanced;
+            m_radio->setReceiverConfig(config);
+            Serial.printf("[CONFIG] Enhanced telemetry: %s\n", config.enable_enhanced ? "ENABLED" : "DISABLED");
         }
     }
 }
