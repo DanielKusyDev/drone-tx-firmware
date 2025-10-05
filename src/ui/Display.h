@@ -2,6 +2,7 @@
 
 #include "protocol.h"
 #include "control.h"
+#include "radio.h"
 
 /**
  * @file Display.h
@@ -25,15 +26,15 @@ void updateOledNoTelemDebugView(const ControlInputs& inputs);
 /**
  * @brief Update OLED with telemetry data (normal view)
  * @param inputs Current control inputs
- * @param telem Telemetry packet from drone
+ * @param telem Enhanced telemetry data from drone
  * @param dropCount Number of dropped packets
  */
-void updateOledNormalView(const ControlInputs& inputs, const TelemetryPacket& telem, uint32_t dropCount);
+void updateOledNormalView(const ControlInputs& inputs, const EnhancedTelemData& telem, uint32_t dropCount);
 
 /**
  * @brief Update OLED with telemetry data (debug view)
  * @param inputs Current control inputs
- * @param telem Telemetry packet from drone
+ * @param telem Enhanced telemetry data from drone
  * @param dropCount Number of dropped packets
  */
-void updateOledDebugView(const ControlInputs& inputs, const TelemetryPacket& telem, uint32_t dropCount);
+void updateOledDebugView(const ControlInputs& inputs, const EnhancedTelemData& telem, uint32_t dropCount);

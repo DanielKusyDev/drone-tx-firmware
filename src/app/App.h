@@ -30,19 +30,19 @@ enum class OledDemoState {
 class OledDemo {
 public:
     void toggle();
-    void update(const ControlInputs& inputs, const TelemetryPacket& lastTelem, uint32_t dropCount);
+    void update(const ControlInputs& inputs, const EnhancedTelemData& telem, uint32_t dropCount);
     bool isActive() const { return m_state != OledDemoState::OFF; }
-    
+
 private:
     OledDemoState m_state = OledDemoState::OFF;
     unsigned long m_stateStartMs = 0;
     static const unsigned long STATE_DURATION_MS = 2000;
-    
+
     void advance();
-    void renderCurrentState(const ControlInputs& inputs, const TelemetryPacket& lastTelem, uint32_t dropCount);
-    bool shouldStop(const ControlInputs& inputs, const TelemetryPacket& lastTelem);
+    void renderCurrentState(const ControlInputs& inputs, const EnhancedTelemData& telem, uint32_t dropCount);
+    bool shouldStop(const ControlInputs& inputs, const EnhancedTelemData& telem);
     void createMockInputs(ControlInputs& mockInputs, bool debugView);
-    void createMockTelemetry(TelemetryPacket& mockTelem);
+    void createMockTelemetry(EnhancedTelemData& mockTelem);
 };
 
 class App {

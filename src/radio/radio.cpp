@@ -5,12 +5,10 @@
 #include <esp_wifi.h>
 #include <cstring>
 
-// Forward declarations for Logger functions (defined in main.cpp)
-namespace Logger {
-    void radioWrongPacketSize(int actualLen, int expectedLen);
-    void radioWrongMagicVersion(uint8_t magic, uint8_t version);
-    void radioCrcError(uint16_t calculated, uint16_t received);
-}
+// Forward declarations for compatibility logging functions (defined in main.cpp)
+void radioWrongPacketSize(int actualLen, int expectedLen);
+void radioWrongMagicVersion(uint8_t magic, uint8_t version);
+void radioCrcError(uint16_t calculated, uint16_t received);
 
 
 // TELEM: Static telemetry variables (legacy)
@@ -24,12 +22,13 @@ EnhancedTelemData RadioManager::s_enhancedTelem = {};
 volatile bool RadioManager::s_newEnhancedAvailable = false;
 volatile uint8_t RadioManager::s_newPacketTypeFlags = 0;
 
-// Configuration with defaults
+// Telemetry receiver configuration
+// Enhanced telemetry only - legacy (0x5A) packets are ignored
 TelemReceiverConfig RadioManager::s_config = {
-    .enable_enhanced = true,     // Enable enhanced telemetry by default
-    .enable_legacy = true,       // Also support legacy for backward compatibility
-    .packet_type_mask = 0x7F,    // Enable all packet types (bits 0-6)
-    .packet_timeout_ms = 300     // 300ms timeout
+    .enable_enhanced = true,     // Enhanced telemetry (magic 0x5B, version 2)
+    .enable_legacy = false,      // Legacy telemetry disabled (magic 0x5A, version 1)
+    .packet_type_mask = 0x7F,    // All 7 packet types enabled (ATTITUDE..PERFORMANCE)
+    .packet_timeout_ms = 300     // Packet freshness timeout
 };
 
 // Send status tracking
@@ -63,7 +62,7 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
         if (!s_config.enable_enhanced) return;
 
         if (len < sizeof(TelemetryHeader)) {
-            Logger::radioWrongPacketSize(len, sizeof(TelemetryHeader));
+            radioWrongPacketSize(len, sizeof(TelemetryHeader));
             return;
         }
 
@@ -109,7 +108,7 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
         if (!s_config.enable_legacy) return;
 
         if (len != sizeof(TelemetryPacket)) {
-            Logger::radioWrongPacketSize(len, sizeof(TelemetryPacket));
+            radioWrongPacketSize(len, sizeof(TelemetryPacket));
             return;
         }
 
@@ -118,7 +117,7 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
         // Verify CRC (both sides use same CRC calc, no swap needed)
         uint16_t calculatedCrc = crc16_x25(data, len - sizeof(packet->crc));
         if (calculatedCrc != packet->crc) {
-            Logger::radioCrcError(calculatedCrc, packet->crc);
+            radioCrcError(calculatedCrc, packet->crc);
             return;
         }
 
@@ -143,7 +142,7 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
 
     } else {
         // Unknown packet format
-        Logger::radioWrongMagicVersion(magic, version);
+        radioWrongMagicVersion(magic, version);
     }
 }
 
@@ -271,7 +270,7 @@ void RadioManager::updatePacketStats(TelemetryPacketType type, uint16_t seq, boo
 
 void RadioManager::handleEnhancedAttitude(const uint8_t* data, int len) {
     if (len != sizeof(TelemetryAttitude)) {
-        Logger::radioWrongPacketSize(len, sizeof(TelemetryAttitude));
+        radioWrongPacketSize(len, sizeof(TelemetryAttitude));
         return;
     }
 
@@ -282,7 +281,7 @@ void RadioManager::handleEnhancedAttitude(const uint8_t* data, int len) {
     bool crcValid = (calculatedCrc == packet->crc);
 
     if (!crcValid) {
-        Logger::radioCrcError(calculatedCrc, packet->crc);
+        radioCrcError(calculatedCrc, packet->crc);
         updatePacketStats(TELEM_TYPE_ATTITUDE, packet->header.seq, false);
         return;
     }
@@ -302,7 +301,7 @@ void RadioManager::handleEnhancedAttitude(const uint8_t* data, int len) {
 
 void RadioManager::handleEnhancedControl(const uint8_t* data, int len) {
     if (len != sizeof(TelemetryControl)) {
-        Logger::radioWrongPacketSize(len, sizeof(TelemetryControl));
+        radioWrongPacketSize(len, sizeof(TelemetryControl));
         return;
     }
 
@@ -313,7 +312,7 @@ void RadioManager::handleEnhancedControl(const uint8_t* data, int len) {
     bool crcValid = (calculatedCrc == packet->crc);
 
     if (!crcValid) {
-        Logger::radioCrcError(calculatedCrc, packet->crc);
+        radioCrcError(calculatedCrc, packet->crc);
         updatePacketStats(TELEM_TYPE_CONTROL, packet->header.seq, false);
         return;
     }
@@ -330,7 +329,7 @@ void RadioManager::handleEnhancedControl(const uint8_t* data, int len) {
 
 void RadioManager::handleEnhancedMotors(const uint8_t* data, int len) {
     if (len != sizeof(TelemetryMotors)) {
-        Logger::radioWrongPacketSize(len, sizeof(TelemetryMotors));
+        radioWrongPacketSize(len, sizeof(TelemetryMotors));
         return;
     }
 
@@ -340,7 +339,7 @@ void RadioManager::handleEnhancedMotors(const uint8_t* data, int len) {
     bool crcValid = (calculatedCrc == packet->crc);
 
     if (!crcValid) {
-        Logger::radioCrcError(calculatedCrc, packet->crc);
+        radioCrcError(calculatedCrc, packet->crc);
         updatePacketStats(TELEM_TYPE_MOTORS, packet->header.seq, false);
         return;
     }
@@ -357,7 +356,7 @@ void RadioManager::handleEnhancedMotors(const uint8_t* data, int len) {
 
 void RadioManager::handleEnhancedStatus(const uint8_t* data, int len) {
     if (len != sizeof(TelemetryStatus)) {
-        Logger::radioWrongPacketSize(len, sizeof(TelemetryStatus));
+        radioWrongPacketSize(len, sizeof(TelemetryStatus));
         return;
     }
 
@@ -367,7 +366,7 @@ void RadioManager::handleEnhancedStatus(const uint8_t* data, int len) {
     bool crcValid = (calculatedCrc == packet->crc);
 
     if (!crcValid) {
-        Logger::radioCrcError(calculatedCrc, packet->crc);
+        radioCrcError(calculatedCrc, packet->crc);
         updatePacketStats(TELEM_TYPE_STATUS, packet->header.seq, false);
         return;
     }
@@ -384,7 +383,7 @@ void RadioManager::handleEnhancedStatus(const uint8_t* data, int len) {
 
 void RadioManager::handleEnhancedSensors(const uint8_t* data, int len) {
     if (len != sizeof(TelemetrySensors)) {
-        Logger::radioWrongPacketSize(len, sizeof(TelemetrySensors));
+        radioWrongPacketSize(len, sizeof(TelemetrySensors));
         return;
     }
 
@@ -394,7 +393,7 @@ void RadioManager::handleEnhancedSensors(const uint8_t* data, int len) {
     bool crcValid = (calculatedCrc == packet->crc);
 
     if (!crcValid) {
-        Logger::radioCrcError(calculatedCrc, packet->crc);
+        radioCrcError(calculatedCrc, packet->crc);
         updatePacketStats(TELEM_TYPE_SENSORS, packet->header.seq, false);
         return;
     }
@@ -411,7 +410,7 @@ void RadioManager::handleEnhancedSensors(const uint8_t* data, int len) {
 
 void RadioManager::handleEnhancedSafety(const uint8_t* data, int len) {
     if (len != sizeof(TelemetrySafety)) {
-        Logger::radioWrongPacketSize(len, sizeof(TelemetrySafety));
+        radioWrongPacketSize(len, sizeof(TelemetrySafety));
         return;
     }
 
@@ -421,7 +420,7 @@ void RadioManager::handleEnhancedSafety(const uint8_t* data, int len) {
     bool crcValid = (calculatedCrc == packet->crc);
 
     if (!crcValid) {
-        Logger::radioCrcError(calculatedCrc, packet->crc);
+        radioCrcError(calculatedCrc, packet->crc);
         updatePacketStats(TELEM_TYPE_SAFETY, packet->header.seq, false);
         return;
     }
@@ -438,7 +437,7 @@ void RadioManager::handleEnhancedSafety(const uint8_t* data, int len) {
 
 void RadioManager::handleEnhancedPerformance(const uint8_t* data, int len) {
     if (len != sizeof(TelemetryPerformance)) {
-        Logger::radioWrongPacketSize(len, sizeof(TelemetryPerformance));
+        radioWrongPacketSize(len, sizeof(TelemetryPerformance));
         return;
     }
 
@@ -448,7 +447,7 @@ void RadioManager::handleEnhancedPerformance(const uint8_t* data, int len) {
     bool crcValid = (calculatedCrc == packet->crc);
 
     if (!crcValid) {
-        Logger::radioCrcError(calculatedCrc, packet->crc);
+        radioCrcError(calculatedCrc, packet->crc);
         updatePacketStats(TELEM_TYPE_PERFORMANCE, packet->header.seq, false);
         return;
     }
