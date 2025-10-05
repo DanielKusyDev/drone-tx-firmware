@@ -227,6 +227,7 @@ void App::loop() {
 
     // 5. Process telemetry (10Hz)
     if (telemEvery.check()) {
+        // Check for legacy telemetry
         if (m_radio->hasNewTelemetry()) {
             lastTelem = m_radio->getLastTelemetry();
             m_radio->clearNewTelemetryFlag();
@@ -234,7 +235,15 @@ void App::loop() {
             g_telemFrequency = 10.0f; // Calculated elsewhere or fixed rate
             dropCount = 0;
             Logger::telemetry(millis(), inputs, lastTelem);
-        } else {
+        }
+        // Also check for enhanced telemetry (updates link status)
+        else if (m_radio->hasNewEnhancedTelemetry()) {
+            m_radio->clearNewEnhancedFlag();
+            g_lastTelemUpdateMs = millis();
+            // Enhanced telemetry received - link is alive
+            dropCount = 0;
+        }
+        else {
             dropCount++;
         }
     }
