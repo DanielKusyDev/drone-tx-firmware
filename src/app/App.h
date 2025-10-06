@@ -23,6 +23,8 @@ enum class OledDemoState {
     NORMAL_VIEW,
     NORMAL_FLASH,
     NORMAL_STATUS,
+    CALIBRATING,
+    CAL_FAILED,
     DEBUG_VIEW,
     DEBUG_DROPS
 };

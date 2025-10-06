@@ -34,6 +34,8 @@ float g_telemFrequency = 0.0f;
 bool g_telemArmed = false;
 bool g_horizonOK = false;
 bool g_calOK = false;
+bool g_calibrating = false;
+bool g_calFailed = false;
 unsigned long g_horizFlashStartMs = 0;
 bool g_showHorizFlash = false;
 

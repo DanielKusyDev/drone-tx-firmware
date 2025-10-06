@@ -10,6 +10,8 @@ extern unsigned long g_lastTelemUpdateMs;
 extern bool g_showHorizFlash;
 extern bool g_horizonOK;
 extern bool g_calOK;
+extern bool g_calibrating;
+extern bool g_calFailed;
 extern bool g_forceDisarmActive;
 extern unsigned long g_forceDisarmTimestamp;
 
@@ -108,7 +110,7 @@ void updateOledNormalView(const ControlInputs& inputs, const EnhancedTelemData& 
         }
     }
 
-    // Priority: Force disarm warning overrides everything
+    // Priority 1: Force disarm warning overrides everything
     if (showForceDisarmWarning) {
         // Show prominent force disarm warning
         display.setCursor(0, 0);
@@ -117,6 +119,29 @@ void updateOledNormalView(const ControlInputs& inputs, const EnhancedTelemData& 
         display.print("Safety System");
         display.setCursor(0, 20);
         display.print("Triggered");
+        display.display();
+        return;
+    }
+
+    // Priority 2: Calibration status messages
+    if (g_calibrating) {
+        display.setCursor(0, 0);
+        display.print("Calibrating...");
+        display.setCursor(0, 10);
+        display.print("Hold drone level");
+        display.setCursor(0, 20);
+        display.print("Please wait");
+        display.display();
+        return;
+    }
+
+    if (g_calFailed) {
+        display.setCursor(0, 0);
+        display.print("Calibration Failed");
+        display.setCursor(0, 10);
+        display.print("Release ARM button");
+        display.setCursor(0, 20);
+        display.print("and try again");
         display.display();
         return;
     }
@@ -207,7 +232,7 @@ void updateOledDebugView(const ControlInputs& inputs, const EnhancedTelemData& t
         }
     }
 
-    // Priority: Force disarm warning overrides everything
+    // Priority 1: Force disarm warning overrides everything
     if (showForceDisarmWarning) {
         // Show prominent force disarm warning
         display.setCursor(0, 0);
@@ -216,6 +241,29 @@ void updateOledDebugView(const ControlInputs& inputs, const EnhancedTelemData& t
         display.print("Safety System");
         display.setCursor(0, 20);
         display.print("Triggered");
+        display.display();
+        return;
+    }
+
+    // Priority 2: Calibration status messages
+    if (g_calibrating) {
+        display.setCursor(0, 0);
+        display.print("Calibrating...");
+        display.setCursor(0, 10);
+        display.print("Hold drone level");
+        display.setCursor(0, 20);
+        display.print("Please wait");
+        display.display();
+        return;
+    }
+
+    if (g_calFailed) {
+        display.setCursor(0, 0);
+        display.print("Calibration Failed");
+        display.setCursor(0, 10);
+        display.print("Release ARM button");
+        display.setCursor(0, 20);
+        display.print("and try again");
         display.display();
         return;
     }

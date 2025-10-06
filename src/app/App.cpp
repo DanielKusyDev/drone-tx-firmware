@@ -20,6 +20,8 @@ extern float g_telemFrequency;
 extern bool g_telemArmed;
 extern bool g_horizonOK;
 extern bool g_calOK;
+extern bool g_calibrating;
+extern bool g_calFailed;
 extern unsigned long g_horizFlashStartMs;
 extern bool g_showHorizFlash;
 extern uint8_t g_armPulseCountdown;
@@ -181,17 +183,19 @@ void App::loop()
     const EnhancedTelemData &etelem = m_radio->getEnhancedTelemetry();
 
     // --- Horizon safety from STATUS packet ---
-    // In enhanced telemetry, safety_flags contains horizon bit (bit 0)
+    // In enhanced telemetry, safety_flags contains horizon bit (bit 0) and calibration bits (bits 3-5)
     g_horizonOK = (etelem.status.safety_flags & 0x01) != 0;
     g_telemArmed = (etelem.status.armed & TELEM_ARMED_BIT) != 0;
-    g_calOK = (etelem.status.armed & TELEM_FLAG_CAL_OK) != 0;
-
+    g_calOK = (etelem.status.safety_flags & TELEM_FLAG_CAL_OK) != 0;
+    g_calibrating = (etelem.status.safety_flags & TELEM_FLAG_CALIBRATING) != 0;
+    g_calFailed = (etelem.status.safety_flags & TELEM_FLAG_CAL_FAILED) != 0;
     // --- Force disarm detection ---
     bool isArmed = g_telemArmed;
-    bool forceDisarm = (etelem.status.armed & TELEM_FORCE_DISARM) != 0;
+    bool forceDisarm = (etelem.status.safety_flags & TELEM_FORCE_DISARM) != 0;
 
     // Detect disarm transition with force disarm flag
-    if (m_lastArmedState && !isArmed && forceDisarm) {
+    if (m_lastArmedState && !isArmed && forceDisarm)
+    {
         g_forceDisarmActive = true;
         g_forceDisarmTimestamp = millis();
         LOG_WARN(SYSTEM, "Force disarm event detected!");
@@ -329,13 +333,15 @@ void App::loop()
             {
                 bool armed = (etelem.status.armed & TELEM_ARMED_BIT) != 0;
                 bool horizOK = (etelem.status.safety_flags & 0x01) != 0;
-                bool calOK = (etelem.status.armed & TELEM_FLAG_CAL_OK) != 0;
-                bool forceDisarm = (etelem.status.armed & TELEM_FORCE_DISARM) != 0;
+                bool calOK = (etelem.status.safety_flags & TELEM_FLAG_CAL_OK) != 0;
+                bool calibrating = (etelem.status.safety_flags & TELEM_FLAG_CALIBRATING) != 0;
+                bool calFailed = (etelem.status.safety_flags & TELEM_FLAG_CAL_FAILED) != 0;
+                bool forceDisarm = (etelem.status.safety_flags & TELEM_FORCE_DISARM) != 0;
 
-                LOG_DEBUG(TELEM, "STA: armed=%d mode=%d link=%d%% uptime=%us seq=%u [ARM:%d HRZ:%d CAL:%d FD:%d]",
+                LOG_DEBUG(TELEM, "STA: armed=%d mode=%d link=%d%% uptime=%us seq=%u [ARM:%d HRZ:%d CAL:%d CALIB:%d FAIL:%d FD:%d]",
                           etelem.status.armed, etelem.status.flight_mode,
                           etelem.status.link_quality, etelem.status.uptime_s,
-                          etelem.status.header.seq, armed, horizOK, calOK, forceDisarm);
+                          etelem.status.header.seq, armed, horizOK, calOK, calibrating, calFailed, forceDisarm);
             }
         }
         else
@@ -496,14 +502,17 @@ void App::handleSerialCommands()
             Serial.printf("  PERFORMANCE: %s\n", m_radio->hasPerformance() ? "Fresh" : "Stale");
             Serial.println();
 
-            // Status flags (decoded from armed bitfield)
-            if (m_radio->hasStatus()) {
-                const EnhancedTelemData& etelem = m_radio->getEnhancedTelemetry();
+            // Status flags (decoded from armed and safety_flags bitfields)
+            if (m_radio->hasStatus())
+            {
+                const EnhancedTelemData &etelem = m_radio->getEnhancedTelemetry();
                 Serial.println("Status Flags:");
                 Serial.printf("  Armed: %s\n", (etelem.status.armed & TELEM_ARMED_BIT) ? "YES" : "NO");
                 Serial.printf("  Horizon OK: %s\n", (etelem.status.safety_flags & 0x01) ? "YES" : "NO");
-                Serial.printf("  Calibration OK: %s\n", (etelem.status.armed & TELEM_FLAG_CAL_OK) ? "YES" : "NO");
-                Serial.printf("  Force Disarm: %s\n", (etelem.status.armed & TELEM_FORCE_DISARM) ? "YES" : "NO");
+                Serial.printf("  Calibration OK: %s\n", (etelem.status.safety_flags & TELEM_FLAG_CAL_OK) ? "YES" : "NO");
+                Serial.printf("  Calibrating: %s\n", (etelem.status.safety_flags & TELEM_FLAG_CALIBRATING) ? "YES" : "NO");
+                Serial.printf("  Cal Failed: %s\n", (etelem.status.safety_flags & TELEM_FLAG_CAL_FAILED) ? "YES" : "NO");
+                Serial.printf("  Force Disarm: %s\n", (etelem.status.safety_flags & TELEM_FORCE_DISARM) ? "YES" : "NO");
             }
         }
         // Toggle enhanced telemetry mode
@@ -524,7 +533,7 @@ void OledDemo::toggle()
     {
         m_state = OledDemoState::NO_TELEM_NORMAL;
         m_stateStartMs = millis();
-        Serial.println("[OLED_DEMO] Started - cycling through 8 views (2s each)");
+        Serial.println("[OLED_DEMO] Started - cycling through 10 views (2s each)");
     }
     else
     {
@@ -578,6 +587,14 @@ void OledDemo::advance()
         Serial.println("[OLED_DEMO] -> Normal Status Indicator");
         break;
     case OledDemoState::NORMAL_STATUS:
+        m_state = OledDemoState::CALIBRATING;
+        Serial.println("[OLED_DEMO] -> Calibrating");
+        break;
+    case OledDemoState::CALIBRATING:
+        m_state = OledDemoState::CAL_FAILED;
+        Serial.println("[OLED_DEMO] -> Calibration Failed");
+        break;
+    case OledDemoState::CAL_FAILED:
         m_state = OledDemoState::DEBUG_VIEW;
         Serial.println("[OLED_DEMO] -> Debug View (PID tuning)");
         break;
@@ -606,6 +623,8 @@ void OledDemo::renderCurrentState(const ControlInputs &inputs, const EnhancedTel
     extern bool g_showHorizFlash;
     extern bool g_horizonOK;
     extern bool g_telemArmed;
+    extern bool g_calibrating;
+    extern bool g_calFailed;
     extern unsigned long g_lastTelemUpdateMs;
     extern float g_telemFrequency;
 
@@ -613,6 +632,8 @@ void OledDemo::renderCurrentState(const ControlInputs &inputs, const EnhancedTel
     bool origHorizFlash = g_showHorizFlash;
     bool origHorizonOK = g_horizonOK;
     bool origTelemArmed = g_telemArmed;
+    bool origCalibrating = g_calibrating;
+    bool origCalFailed = g_calFailed;
     unsigned long origLastTelem = g_lastTelemUpdateMs;
     float origTelemFreq = g_telemFrequency;
 
@@ -671,6 +692,30 @@ void OledDemo::renderCurrentState(const ControlInputs &inputs, const EnhancedTel
         updateOledNormalView(mockInputs, mockTelem, mockDropCount);
         break;
 
+    case OledDemoState::CALIBRATING:
+        createMockInputs(mockInputs, false);
+        createMockTelemetry(mockTelem);
+        g_showHorizFlash = false;
+        g_horizonOK = true;
+        g_telemArmed = false;
+        g_calibrating = true;
+        g_calFailed = false;
+        g_lastTelemUpdateMs = millis();
+        updateOledNormalView(mockInputs, mockTelem, mockDropCount);
+        break;
+
+    case OledDemoState::CAL_FAILED:
+        createMockInputs(mockInputs, false);
+        createMockTelemetry(mockTelem);
+        g_showHorizFlash = false;
+        g_horizonOK = true;
+        g_telemArmed = false;
+        g_calibrating = false;
+        g_calFailed = true;
+        g_lastTelemUpdateMs = millis();
+        updateOledNormalView(mockInputs, mockTelem, mockDropCount);
+        break;
+
     case OledDemoState::DEBUG_VIEW:
         createMockInputs(mockInputs, true);
         createMockTelemetry(mockTelem);
@@ -696,6 +741,8 @@ void OledDemo::renderCurrentState(const ControlInputs &inputs, const EnhancedTel
     g_showHorizFlash = origHorizFlash;
     g_horizonOK = origHorizonOK;
     g_telemArmed = origTelemArmed;
+    g_calibrating = origCalibrating;
+    g_calFailed = origCalFailed;
     g_lastTelemUpdateMs = origLastTelem;
     g_telemFrequency = origTelemFreq;
 }
@@ -725,25 +772,25 @@ void OledDemo::createMockTelemetry(EnhancedTelemData &mockTelem)
     memset(&mockTelem, 0, sizeof(mockTelem));
 
     // ATTITUDE packet
-    mockTelem.attitude.roll_deg_x100 = -520;      // -5.2 degrees
-    mockTelem.attitude.pitch_deg_x100 = 310;      // 3.1 degrees
-    mockTelem.attitude.yaw_deg_x100 = 4500;       // 45 degrees
-    mockTelem.attitude.roll_rate_dps_x10 = -480;  // -48 deg/s
-    mockTelem.attitude.pitch_rate_dps_x10 = 350;  // 35 deg/s
-    mockTelem.attitude.yaw_rate_dps_x10 = -450;   // -45 deg/s
+    mockTelem.attitude.roll_deg_x100 = -520;     // -5.2 degrees
+    mockTelem.attitude.pitch_deg_x100 = 310;     // 3.1 degrees
+    mockTelem.attitude.yaw_deg_x100 = 4500;      // 45 degrees
+    mockTelem.attitude.roll_rate_dps_x10 = -480; // -48 deg/s
+    mockTelem.attitude.pitch_rate_dps_x10 = 350; // 35 deg/s
+    mockTelem.attitude.yaw_rate_dps_x10 = -450;  // -45 deg/s
     mockTelem.attitude_rx_ms = millis();
 
     // CONTROL packet
-    mockTelem.control.set_roll_deg_x100 = -500;   // -5.0 degrees setpoint
-    mockTelem.control.set_pitch_deg_x100 = 300;   // 3.0 degrees setpoint
-    mockTelem.control.set_yaw_rate_dps_x10 = -400;// -40 deg/s setpoint
-    mockTelem.control.out_roll_x10 = 1850;        // PID output
-    mockTelem.control.out_pitch_x10 = 1920;       // PID output
-    mockTelem.control.out_yaw_x10 = 1480;         // PID output
+    mockTelem.control.set_roll_deg_x100 = -500;    // -5.0 degrees setpoint
+    mockTelem.control.set_pitch_deg_x100 = 300;    // 3.0 degrees setpoint
+    mockTelem.control.set_yaw_rate_dps_x10 = -400; // -40 deg/s setpoint
+    mockTelem.control.out_roll_x10 = 1850;         // PID output
+    mockTelem.control.out_pitch_x10 = 1920;        // PID output
+    mockTelem.control.out_yaw_x10 = 1480;          // PID output
     mockTelem.control_rx_ms = millis();
 
     // MOTORS packet
-    mockTelem.motors.throttle = 250;              // Base throttle
+    mockTelem.motors.throttle = 250; // Base throttle
     mockTelem.motors.motor_cmd[0] = 300;
     mockTelem.motors.motor_cmd[1] = 280;
     mockTelem.motors.motor_cmd[2] = 270;
@@ -751,9 +798,9 @@ void OledDemo::createMockTelemetry(EnhancedTelemData &mockTelem)
     mockTelem.motors_rx_ms = millis();
 
     // STATUS packet
-    mockTelem.status.armed = 0;                   // Not armed
-    mockTelem.status.flight_mode = 1;             // Stabilize mode
-    mockTelem.status.safety_flags = 0x01;         // Horizon OK (bit 0)
-    mockTelem.status.link_quality = 95;           // 95% link quality
+    mockTelem.status.armed = 0;           // Not armed
+    mockTelem.status.flight_mode = 1;     // Stabilize mode
+    mockTelem.status.safety_flags = 0x01; // Horizon OK (bit 0)
+    mockTelem.status.link_quality = 95;   // 95% link quality
     mockTelem.status_rx_ms = millis();
 }
