@@ -1,349 +1,818 @@
-TEL: ATT: R=0.13 P=0.02 Y=0.00 seq=57405
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=28515
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14250 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.12 P=0.04 Y=0.00 seq=57484
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=28715
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14361 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.14 P=0.01 Y=0.00 seq=57559
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=28715
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14361 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.14 P=0.01 Y=0.00 seq=57640
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=28715
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14361 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-RAD: RC: queued seq=3849, 50 ACK (last 1s)
-TEL: ATT: R=0.14 P=0.04 Y=0.00 seq=57716
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=28715
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14361 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.12 P=0.03 Y=0.00 seq=57795
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=28895
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14446 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.10 P=0.05 Y=0.00 seq=57876
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=28934
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14446 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.13 P=0.02 Y=0.00 seq=57954
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=28954
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14446 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.15 P=0.05 Y=0.00 seq=58032
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=28954
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14446 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.11 P=0.06 Y=0.00 seq=58110
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=28954
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14446 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.22 P=0.06 Y=0.00 seq=58188
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=28954
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14446 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.19 P=0.06 Y=0.00 seq=58266
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29129
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14446 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.00 P=-0.05 Y=0.00 seq=58344
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29129
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14446 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.23 P=0.00 Y=0.00 seq=58421
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29129
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14446 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.02 P=0.06 Y=0.00 seq=58501
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29246
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14446 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.18 P=0.00 Y=0.00 seq=58579
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29255
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14446 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-RAD: RC: queued seq=3899, 50 ACK (last 1s)
-TEL: ATT: R=0.07 P=-0.02 Y=0.00 seq=58658
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29255
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=14446 THR=0
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.15 P=0.03 Y=0.00 seq=58736
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29255
-TEL: MOT: cmd=[223 224 235 234] act=[223 224 235 234] seq=14677 THR=224
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.15 P=0.06 Y=0.00 seq=58815
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29255
-TEL: MOT: cmd=[224 223 235 235] act=[224 223 235 235] seq=14692 THR=224
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.06 P=0.07 Y=0.00 seq=58893
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29421
-TEL: MOT: cmd=[224 223 235 235] act=[224 223 235 235] seq=14692 THR=224
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.27 P=0.10 Y=0.00 seq=58969
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29464
-TEL: MOT: cmd=[224 222 234 236] act=[224 222 234 236] seq=14740 THR=224
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.05 P=0.05 Y=0.00 seq=59047
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29489
-TEL: MOT: cmd=[224 222 234 236] act=[224 222 234 236] seq=14740 THR=224
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.27 P=-0.04 Y=0.00 seq=59123
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29489
-TEL: MOT: cmd=[224 222 234 236] act=[224 222 234 236] seq=14740 THR=224
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.01 P=0.02 Y=0.00 seq=59203
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29489
-TEL: MOT: cmd=[224 222 234 236] act=[224 222 234 236] seq=14740 THR=224
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.24 P=0.04 Y=0.00 seq=59279
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29619
-TEL: MOT: cmd=[223 223 235 235] act=[223 223 235 235] seq=14808 THR=224
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.18 P=0.09 Y=0.00 seq=59360
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29658
-TEL: MOT: cmd=[263 264 277 276] act=[263 264 277 276] seq=14838 THR=264
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.12 P=0.04 Y=0.00 seq=59434
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29695
-TEL: MOT: cmd=[288 288 304 304] act=[288 288 304 304] seq=14846 THR=289
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.18 P=0.02 Y=0.00 seq=59516
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29733
-TEL: MOT: cmd=[303 304 319 319] act=[303 304 319 319] seq=14876 THR=304
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.00 P=0.08 Y=0.00 seq=59592
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29733
-TEL: MOT: cmd=[303 304 319 319] act=[303 304 319 319] seq=14876 THR=304
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-RAD: RC: queued seq=3949, 50 ACK (last 1s)
-TEL: ATT: R=0.23 P=0.15 Y=0.00 seq=59671
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29822
-TEL: MOT: cmd=[303 304 319 319] act=[303 304 319 319] seq=14876 THR=304
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.00 P=0.13 Y=0.00 seq=59747
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29850
-TEL: MOT: cmd=[303 304 319 318] act=[303 304 319 318] seq=14924 THR=304
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.22 P=0.10 Y=0.00 seq=59825
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29911
-TEL: MOT: cmd=[303 304 319 318] act=[303 304 319 318] seq=14924 THR=304
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.16 P=0.10 Y=0.00 seq=59901
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29911
-TEL: MOT: cmd=[303 304 319 318] act=[303 304 319 318] seq=14924 THR=304
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.23 P=0.09 Y=0.00 seq=59983
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=29962
-TEL: MOT: cmd=[321 321 339 339] act=[321 321 339 339] seq=14992 THR=322
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.15 P=0.11 Y=0.00 seq=60060
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30001
-TEL: MOT: cmd=[321 321 339 339] act=[321 321 339 339] seq=14992 THR=322
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.18 P=0.18 Y=0.00 seq=60137
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30001
-TEL: MOT: cmd=[321 321 339 339] act=[321 321 339 339] seq=14992 THR=322
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.29 P=0.24 Y=0.00 seq=60215
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30085
-TEL: MOT: cmd=[321 321 339 339] act=[321 321 339 339] seq=14992 THR=322
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.16 P=0.16 Y=0.00 seq=60290
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30085
-TEL: MOT: cmd=[321 321 339 339] act=[321 321 339 339] seq=14992 THR=322
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.22 P=0.15 Y=0.00 seq=60375
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30175
-TEL: MOT: cmd=[321 321 339 339] act=[321 321 339 339] seq=14992 THR=322
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.13 P=0.19 Y=0.00 seq=60451
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30175
-TEL: MOT: cmd=[365 365 384 384] act=[365 365 384 384] seq=15100 THR=366
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.24 P=0.19 Y=0.00 seq=60530
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30245
-TEL: MOT: cmd=[365 365 384 384] act=[365 365 384 384] seq=15100 THR=366
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.05 P=0.01 Y=0.00 seq=60608
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30245
-TEL: MOT: cmd=[365 365 384 384] act=[365 365 384 384] seq=15100 THR=366
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-RAD: RC: queued seq=3999, 50 ACK (last 1s)
-TEL: ATT: R=0.26 P=0.19 Y=0.00 seq=60685
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30245
-TEL: MOT: cmd=[365 365 384 384] act=[365 365 384 384] seq=15100 THR=366
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.31 P=0.32 Y=0.00 seq=60761
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30378
-TEL: MOT: cmd=[365 365 384 384] act=[365 365 384 384] seq=15100 THR=366
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=-0.01 P=-0.15 Y=0.00 seq=60838
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30415
-TEL: MOT: cmd=[419 419 441 441] act=[419 419 441 441] seq=15200 THR=420
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.29 P=0.28 Y=0.00 seq=60921
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30415
-TEL: MOT: cmd=[457 458 481 480] act=[457 458 481 480] seq=15229 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.02 P=0.01 Y=0.00 seq=60998
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30486
-TEL: MOT: cmd=[457 458 481 480] act=[457 458 481 480] seq=15229 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=-0.09 P=-0.26 Y=0.00 seq=61076
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30486
-TEL: MOT: cmd=[457 458 481 480] act=[457 458 481 480] seq=15229 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.11 P=0.29 Y=0.00 seq=61153
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30486
-TEL: MOT: cmd=[457 458 481 480] act=[457 458 481 480] seq=15229 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.44 P=0.45 Y=0.00 seq=61229
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30594
-TEL: MOT: cmd=[457 458 481 480] act=[457 458 481 480] seq=15229 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.01 P=-0.15 Y=0.00 seq=61310
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30652
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15314 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.10 P=-0.11 Y=0.00 seq=61387
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30652
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15334 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=-0.19 P=-0.32 Y=0.00 seq=61464
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30726
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15334 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=-0.13 P=-0.20 Y=0.00 seq=61541
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30726
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15334 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-RAD: RC: queued seq=4049, 50 ACK (last 1s)
-TEL: ATT: R=0.01 P=-0.09 Y=0.00 seq=61619
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30786
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15392 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.23 P=0.27 Y=0.00 seq=61698
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30835
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.09 P=-0.27 Y=0.00 seq=61776
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30835
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=-0.03 P=-0.20 Y=0.00 seq=61854
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30835
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.02 P=-0.22 Y=0.00 seq=61932
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30950
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=-0.03 P=-0.29 Y=0.00 seq=62008
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=30950
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.10 P=-0.43 Y=0.00 seq=62089
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31042
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=-0.18 P=-0.55 Y=0.00 seq=62168
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31060
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.18 P=-0.03 Y=0.00 seq=62242
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31109
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.00 P=-0.20 Y=0.00 seq=62324
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31109
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.16 P=-0.12 Y=0.00 seq=62403
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31179
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.14 P=-0.32 Y=0.00 seq=62482
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31225
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.01 P=-0.37 Y=0.00 seq=62561
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31267
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-RAD: RC: queued seq=4099, 50 ACK (last 1s)
-TEL: ATT: R=0.00 P=-0.43 Y=0.00 seq=62639
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31296
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=-0.03 P=-0.50 Y=0.00 seq=62713
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31354
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.00 P=-0.50 Y=0.00 seq=62793
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31354
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.10 P=-0.42 Y=0.00 seq=62872
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31354
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.00 P=-0.61 Y=0.00 seq=62950
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31354
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.11 P=-0.40 Y=0.00 seq=63027
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31354
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=0.21 P=0.52 Y=0.00 seq=63106
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31354
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=2.34 P=7.92 Y=0.00 seq=63184
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31354
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=71s seq=6579 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=-7.23 P=6.92 Y=0.00 seq=63257
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31624
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=85s seq=7905 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=-2.81 P=-15.21 Y=0.00 seq=63338
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31655
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=85s seq=7905 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=4.92 P=-57.82 Y=0.00 seq=63419
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31676
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=1 mode=0 link=100% uptime=85s seq=7905 [ARM:1 HRZ:1 CAL:0 FD:0]
-TEL: ATT: R=-3.46 P=-55.80 Y=0.00 seq=63497
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31676
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=0 mode=0 link=100% uptime=85s seq=7932 [ARM:0 HRZ:0 CAL:0 FD:0]
-TEL: ATT: R=-65.00 P=-60.64 Y=0.00 seq=63580
-TEL: CTL: setR=0.00 setP=0.00 setYR=-8.6 seq=31768
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=0 mode=0 link=100% uptime=85s seq=7932 [ARM:0 HRZ:0 CAL:0 FD:0]
-RAD: RC: queued seq=4149, 50 ACK (last 1s)
-TEL: ATT: R=-28.76 P=-80.00 Y=0.00 seq=63659
-TEL: CTL: setR=0.00 setP=0.00 setYR=-10.2 seq=31799
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=0 mode=0 link=100% uptime=85s seq=7932 [ARM:0 HRZ:0 CAL:0 FD:0]
-[BTN] Press duration: 202ms
+TEL: ATT: R=-1.57 P=-1.61 Y=0.00 seq=27
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=12
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=5 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=4s seq=2 [ARM:0 HRZ:1 CAL:0 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-1.72 P=-1.62 Y=0.00 seq=90
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=19
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=9 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=4s seq=8 [ARM:0 HRZ:1 CAL:0 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-1.75 P=-1.62 Y=0.00 seq=168
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=71
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=9 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=4s seq=8 [ARM:0 HRZ:1 CAL:0 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-1.76 P=-1.62 Y=0.00 seq=246
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=95
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=60 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=4s seq=8 [ARM:0 HRZ:1 CAL:0 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-1.78 P=-1.55 Y=0.00 seq=322
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=143
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=70 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=4s seq=8 [ARM:0 HRZ:1 CAL:0 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-1.81 P=-1.59 Y=0.00 seq=398
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=185
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=70 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=4s seq=8 [ARM:0 HRZ:1 CAL:0 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-1.80 P=-1.47 Y=0.00 seq=474
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=230
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=70 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=4s seq=8 [ARM:0 HRZ:1 CAL:0 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-1.91 P=-1.50 Y=0.00 seq=552
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=257
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=70 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=5s seq=62 [ARM:0 HRZ:1 CAL:0 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-1.73 P=-1.62 Y=0.00 seq=629
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=289
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=70 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=5s seq=70 [ARM:0 HRZ:1 CAL:0 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-1.79 P=-1.58 Y=0.00 seq=706
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=327
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=171 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=5s seq=87 [ARM:0 HRZ:1 CAL:0 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-1.79 P=-1.51 Y=0.00 seq=782
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=379
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=171 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=5s seq=87 [ARM:0 HRZ:1 CAL:0 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=899, 50 ACK (last 1s)
+TEL: ATT: R=-1.82 P=-1.48 Y=0.00 seq=858
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=423
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=208 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=5s seq=87 [ARM:0 HRZ:1 CAL:0 CALIB:0 FAIL:0 FD:0]
+[BTN] Press duration: 201ms
 [BTN] Short press - ARM toggle
-TEL: ATT: R=-1.29 P=-74.95 Y=0.00 seq=63735
-TEL: CTL: setR=0.00 setP=0.00 setYR=-10.2 seq=31799
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=0 mode=0 link=100% uptime=85s seq=7932 [ARM:0 HRZ:0 CAL:0 FD:0]
-TEL: ATT: R=2.69 P=-32.54 Y=0.00 seq=63819
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31901
-TEL: MOT: cmd=[458 457 480 481] act=[458 457 480 481] seq=15412 THR=458
-TEL: STA: armed=0 mode=0 link=100% uptime=86s seq=7974 [ARM:0 HRZ:0 CAL:0 FD:0]
-TEL: ATT: R=0.66 P=-23.00 Y=0.00 seq=63861
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31901
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=15954 THR=36
-TEL: STA: armed=0 mode=0 link=100% uptime=86s seq=7974 [ARM:0 HRZ:0 CAL:0 FD:0]
-TEL: ATT: R=-0.41 P=-15.94 Y=0.00 seq=63987
-TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=31901
-TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=15954 THR=36
-TEL: STA: armed=0 mode=0 link=100% uptime=86s seq=7974 [ARM:0 HRZ:0 CAL:0 FD:0]
+TEL: ATT: R=-1.80 P=-1.52 Y=0.00 seq=934
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=423
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=227 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=5s seq=87 [ARM:0 HRZ:1 CAL:0 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-1.77 P=-1.51 Y=0.00 seq=1008
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=423
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=227 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=5s seq=166 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.79 P=-1.50 Y=0.00 seq=1081
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=530
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=227 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=5s seq=230 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.78 P=-1.52 Y=0.00 seq=1155
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=576
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=227 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=5s seq=261 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.81 P=-1.55 Y=0.00 seq=1227
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=610
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=303 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=6s seq=362 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.93 P=-1.48 Y=0.00 seq=1304
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=650
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=303 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=6s seq=449 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.79 P=-1.52 Y=0.00 seq=1376
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=664
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=343 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=6s seq=517 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.78 P=-1.46 Y=0.00 seq=1450
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=664
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=343 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=6s seq=608 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.82 P=-1.39 Y=0.00 seq=1524
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=757
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=374 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=6s seq=668 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.76 P=-1.45 Y=0.00 seq=1597
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=784
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=394 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=6s seq=756 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.80 P=-1.44 Y=0.00 seq=1671
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=834
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=412 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=6s seq=793 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.80 P=-1.48 Y=0.00 seq=1744
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=861
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=412 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=6s seq=901 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+RAD: RC: queued seq=949, 50 ACK (last 1s)
+TEL: ATT: R=-1.75 P=-1.49 Y=0.00 seq=1817
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=893
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=412 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=6s seq=976 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.74 P=-1.48 Y=0.00 seq=1890
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=944
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=471 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=6s seq=1029 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.86 P=-1.46 Y=0.00 seq=1963
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=976
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=489 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=6s seq=1029 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.82 P=-1.47 Y=0.00 seq=2036
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1012
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=503 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1192 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.80 P=-1.47 Y=0.00 seq=2109
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1051
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=523 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1256 [ARM:0 HRZ:1 CAL:0 CALIB:1 FAIL:0 FD:0]
+TEL: ATT: R=-1.57 P=-1.34 Y=0.00 seq=2172
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1085
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=541 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1323 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.28 P=-0.28 Y=0.00 seq=2249
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1110
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=559 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1323 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.04 P=-0.08 Y=0.00 seq=2324
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1159
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=559 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1323 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.00 P=-0.02 Y=0.00 seq=2400
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1192
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=598 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1323 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.00 P=0.00 Y=0.00 seq=2476
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1229
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=607 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1323 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.01 P=0.00 Y=0.00 seq=2551
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1265
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=623 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1323 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.04 P=-0.01 Y=0.00 seq=2626
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1305
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=641 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1323 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=999, 50 ACK (last 1s)
+TEL: ATT: R=0.02 P=-0.04 Y=0.00 seq=2703
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1347
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=641 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1323 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.02 P=0.02 Y=0.00 seq=2778
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1381
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=676 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1323 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.02 P=-0.06 Y=0.00 seq=2853
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1425
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=709 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1323 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.00 P=-0.04 Y=0.00 seq=2929
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1456
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=730 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1323 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.05 P=-0.02 Y=0.00 seq=3004
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1501
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=747 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1323 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.03 P=-0.07 Y=0.00 seq=3079
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1534
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=766 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=7s seq=1323 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.03 P=0.00 Y=0.00 seq=3156
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1544
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=784 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=8s seq=1441 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.03 P=0.01 Y=0.00 seq=3232
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1609
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=790 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=8s seq=1441 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.00 P=0.02 Y=0.00 seq=3309
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1641
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=790 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=8s seq=1441 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.02 P=0.05 Y=0.00 seq=3384
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1685
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=790 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=8s seq=1468 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.07 P=0.00 Y=0.00 seq=3460
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1710
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=854 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=8s seq=1468 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.03 P=-0.02 Y=0.00 seq=3536
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1761
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=854 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1492 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.07 P=-0.03 Y=0.00 seq=3612
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1801
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=891 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1492 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=1049, 50 ACK (last 1s)
+TEL: ATT: R=0.00 P=0.04 Y=0.00 seq=3688
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1843
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=904 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1492 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.06 P=0.00 Y=0.00 seq=3763
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1877
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=940 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1492 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.06 P=-0.03 Y=0.00 seq=3840
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1913
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=940 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1492 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+[BTN] Press duration: 198ms
+[BTN] Short press - ARM toggle
+TEL: ATT: R=0.03 P=-0.04 Y=0.00 seq=3915
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1953
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=978 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1492 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.03 P=-0.06 Y=0.00 seq=3991
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=1993
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=989 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1548 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.03 P=0.00 Y=0.00 seq=4067
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2029
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1016 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1548 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.06 P=0.00 Y=0.00 seq=4144
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2067
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1023 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1548 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.09 P=-0.01 Y=0.00 seq=4219
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2101
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1036 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1548 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.08 P=-0.03 Y=0.00 seq=4293
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2141
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1066 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1548 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.05 P=0.01 Y=0.00 seq=4369
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2173
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1066 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1548 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.14 P=-0.01 Y=0.00 seq=4448
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2217
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1066 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1548 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.13 P=-0.05 Y=0.00 seq=4523
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2258
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1128 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1548 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.09 P=-0.07 Y=0.00 seq=4599
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2272
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1146 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=9s seq=1548 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=1099, 50 ACK (last 1s)
+TEL: ATT: R=0.06 P=-0.07 Y=0.00 seq=4675
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2337
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1158 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.06 P=-0.06 Y=0.00 seq=4752
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2357
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1181 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.01 P=0.00 Y=0.00 seq=4827
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2388
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1181 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.02 P=0.01 Y=0.00 seq=4903
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2445
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1213 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.02 P=0.00 Y=0.00 seq=4980
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2485
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1244 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.09 P=-0.09 Y=0.00 seq=5056
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2527
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1251 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.01 P=-0.05 Y=0.00 seq=5132
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2557
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1251 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.14 P=-0.08 Y=0.00 seq=5209
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2597
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1251 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.07 P=0.03 Y=0.00 seq=5285
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2642
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1318 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.06 P=0.09 Y=0.00 seq=5363
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2642
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1337 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.04 P=0.10 Y=0.00 seq=5437
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2713
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1337 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.06 P=0.08 Y=0.00 seq=5513
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2747
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1366 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=1149, 50 ACK (last 1s)
+TEL: ATT: R=-0.07 P=0.07 Y=0.00 seq=5588
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2781
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1394 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.13 P=0.03 Y=0.00 seq=5665
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2811
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1399 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.11 P=0.08 Y=0.00 seq=5742
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2863
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1422 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.06 P=0.04 Y=0.00 seq=5818
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2905
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1447 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.02 P=0.02 Y=0.00 seq=5894
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2945
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1447 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.07 P=0.07 Y=0.00 seq=5974
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=2980
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1492 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+[BTN] Press duration: 201ms
+[BTN] Short press - ARM toggle
+TEL: ATT: R=-0.12 P=0.12 Y=0.00 seq=6048
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3006
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1507 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.02 P=0.14 Y=0.00 seq=6124
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3055
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1526 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.07 P=0.12 Y=0.00 seq=6199
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3092
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1526 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.02 P=0.13 Y=0.00 seq=6274
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3128
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1526 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.11 P=0.18 Y=0.00 seq=6351
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3175
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1576 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.05 P=0.19 Y=0.00 seq=6427
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3189
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1603 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.02 P=0.19 Y=0.00 seq=6502
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3244
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1603 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=1199, 50 ACK (last 1s)
+TEL: ATT: R=0.03 P=0.14 Y=0.00 seq=6577
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3281
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1603 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.01 P=0.16 Y=0.00 seq=6652
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3320
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1603 THR=0
+TEL: STA: armed=0 mode=0 link=100% uptime=10s seq=1635 [ARM:0 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.03 P=0.16 Y=0.00 seq=6729
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3357
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1603 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.04 P=0.15 Y=0.00 seq=6805
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3388
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1696 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.04 P=0.16 Y=0.00 seq=6881
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3438
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1714 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.05 P=0.15 Y=0.00 seq=6957
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3452
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1737 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.06 P=0.17 Y=0.00 seq=7034
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3494
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1754 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.00 P=0.20 Y=0.00 seq=7109
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3547
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1763 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.00 P=0.19 Y=0.00 seq=7184
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3547
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1795 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.01 P=0.20 Y=0.00 seq=7260
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3624
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1795 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.01 P=0.20 Y=0.00 seq=7335
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3661
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1795 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.03 P=0.23 Y=0.00 seq=7412
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3686
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1849 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.07 P=0.19 Y=0.00 seq=7491
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3741
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1863 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=1249, 50 ACK (last 1s)
+TEL: ATT: R=-0.04 P=0.24 Y=0.00 seq=7563
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3769
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1887 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.04 P=0.23 Y=0.00 seq=7641
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3816
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1903 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.07 P=0.22 Y=0.00 seq=7717
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3849
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1903 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.00 P=0.21 Y=0.00 seq=7792
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3894
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1944 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.04 P=0.22 Y=0.00 seq=7868
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3925
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1953 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=13s seq=1893 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.04 P=0.26 Y=0.00 seq=7944
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3963
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1953 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=14s seq=2037 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.05 P=0.24 Y=0.00 seq=8019
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=3981
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=1999 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=14s seq=2037 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.11 P=0.25 Y=0.00 seq=8094
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4045
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2009 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=14s seq=2037 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.06 P=0.37 Y=0.00 seq=8169
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4059
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2037 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=14s seq=2037 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.02 P=0.38 Y=0.00 seq=8244
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4115
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2037 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=14s seq=2037 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.01 P=0.35 Y=0.00 seq=8320
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4145
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2074 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=14s seq=2037 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.13 P=0.39 Y=0.00 seq=8395
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4193
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2074 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=14s seq=2037 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=1299, 50 ACK (last 1s)
+TEL: ATT: R=-0.02 P=0.34 Y=0.00 seq=8470
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4231
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2101 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=14s seq=2037 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+[BTN] Press duration: 251ms
+[BTN] Short press - ARM toggle
+TEL: ATT: R=-0.12 P=0.36 Y=0.00 seq=8544
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4265
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2101 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=14s seq=2037 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.10 P=0.40 Y=0.00 seq=8618
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4293
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2148 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=14s seq=2037 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.11 P=0.47 Y=0.00 seq=8694
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4332
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2155 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=15s seq=2137 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.06 P=0.35 Y=0.00 seq=8769
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4381
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2155 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=15s seq=2137 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.03 P=0.39 Y=0.00 seq=8842
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4416
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2196 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=15s seq=2137 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.01 P=0.37 Y=0.00 seq=8920
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4442
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2227 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=15s seq=2137 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.02 P=0.38 Y=0.00 seq=8997
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4493
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2238 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=15s seq=2137 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.05 P=0.35 Y=0.00 seq=9072
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4529
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2249 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=15s seq=2137 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.04 P=0.37 Y=0.00 seq=9147
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4565
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2249 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=15s seq=2137 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.05 P=0.37 Y=0.00 seq=9220
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4605
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2249 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=15s seq=2137 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.01 P=0.33 Y=0.00 seq=9298
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4634
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2319 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=15s seq=2137 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.00 P=0.33 Y=0.00 seq=9373
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4677
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2319 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=15s seq=2137 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=1349, 50 ACK (last 1s)
+TEL: ATT: R=0.04 P=0.31 Y=0.00 seq=9448
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4715
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2319 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=15s seq=2137 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.02 P=0.30 Y=0.00 seq=9523
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4761
+TEL: MOT: cmd=[176 176 185 185] act=[176 176 185 185] seq=2366 THR=177
+TEL: STA: armed=1 mode=0 link=100% uptime=15s seq=2137 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.12 P=0.31 Y=0.00 seq=9600
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4784
+TEL: MOT: cmd=[176 176 185 185] act=[176 176 185 185] seq=2366 THR=177
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2248 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.00 P=0.31 Y=0.00 seq=9674
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4828
+TEL: MOT: cmd=[256 257 269 269] act=[256 257 269 269] seq=2410 THR=257
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2248 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.02 P=0.34 Y=0.00 seq=9751
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4851
+TEL: MOT: cmd=[256 256 269 269] act=[256 256 269 269] seq=2434 THR=257
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2248 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.01 P=0.32 Y=0.00 seq=9826
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4908
+TEL: MOT: cmd=[256 256 269 269] act=[256 256 269 269] seq=2434 THR=257
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2248 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.03 P=0.37 Y=0.00 seq=9900
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4946
+TEL: MOT: cmd=[256 256 269 269] act=[256 256 269 269] seq=2434 THR=257
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2248 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.05 P=0.34 Y=0.00 seq=9976
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=4986
+TEL: MOT: cmd=[136 135 142 142] act=[136 135 142 142] seq=2492 THR=136
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2248 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.03 P=0.35 Y=0.00 seq=10052
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5018
+TEL: MOT: cmd=[78 78 78 78] act=[78 78 78 78] seq=2508 THR=10
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2248 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.01 P=0.41 Y=0.00 seq=10126
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5057
+TEL: MOT: cmd=[78 78 78 78] act=[78 78 78 78] seq=2508 THR=10
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2248 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.01 P=0.39 Y=0.00 seq=10199
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5075
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2548 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2319 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.03 P=0.40 Y=0.00 seq=10279
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5129
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2558 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2319 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.06 P=0.42 Y=0.00 seq=10355
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5177
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2558 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2319 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=1399, 50 ACK (last 1s)
+TEL: ATT: R=0.15 P=0.29 Y=0.00 seq=10431
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5211
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2607 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2319 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.04 P=0.40 Y=0.00 seq=10511
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5235
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2626 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2319 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.03 P=0.42 Y=0.00 seq=10586
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5288
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2626 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2319 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.00 P=0.37 Y=0.00 seq=10662
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5324
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2664 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2319 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.29 P=0.34 Y=0.00 seq=10737
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5361
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2664 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2319 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.03 P=0.45 Y=0.00 seq=10813
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5405
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2664 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=17s seq=2319 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.06 P=0.47 Y=0.00 seq=10889
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5437
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2664 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=18s seq=2407 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.13 P=0.41 Y=0.00 seq=10962
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5477
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2726 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=18s seq=2407 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.03 P=0.42 Y=0.00 seq=11039
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5509
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2751 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=18s seq=2407 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.07 P=0.45 Y=0.00 seq=11112
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5549
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2760 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=19s seq=2437 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.07 P=0.67 Y=0.00 seq=11190
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5593
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2760 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=19s seq=2437 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.00 P=0.53 Y=0.00 seq=11265
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5625
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2760 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=19s seq=2437 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=1449, 50 ACK (last 1s)
+TEL: ATT: R=0.00 P=0.52 Y=0.00 seq=11341
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5669
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2760 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=19s seq=2437 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.02 P=0.46 Y=0.00 seq=11416
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5701
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2760 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=19s seq=2437 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.00 P=0.55 Y=0.00 seq=11493
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5739
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2868 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=19s seq=2437 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.01 P=0.59 Y=0.00 seq=11568
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5777
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2868 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=19s seq=2437 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.04 P=0.52 Y=0.00 seq=11644
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5818
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2868 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=19s seq=2437 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.05 P=0.60 Y=0.00 seq=11720
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5853
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2912 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=19s seq=2437 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.18 P=0.46 Y=0.00 seq=11794
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5889
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2912 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=19s seq=2437 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.02 P=0.47 Y=0.00 seq=11869
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5929
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2912 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.14 P=0.35 Y=0.00 seq=11946
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=5963
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2912 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.11 P=0.40 Y=0.00 seq=12022
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6001
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=2991 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.01 P=0.55 Y=0.00 seq=12097
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6041
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3006 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.08 P=0.46 Y=0.00 seq=12173
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6077
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3006 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.05 P=0.41 Y=0.00 seq=12248
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6117
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3006 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=1499, 50 ACK (last 1s)
+TEL: ATT: R=0.12 P=0.48 Y=0.00 seq=12323
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6153
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3073 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.03 P=0.68 Y=0.00 seq=12399
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6194
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3073 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.03 P=0.70 Y=0.00 seq=12474
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6229
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3073 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.22 P=0.57 Y=0.00 seq=12550
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6248
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3131 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.29 P=0.53 Y=0.00 seq=12626
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6305
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3139 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.08 P=0.66 Y=0.00 seq=12700
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6335
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3171 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.25 P=0.35 Y=0.00 seq=12776
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6385
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3171 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.08 P=0.32 Y=0.00 seq=12853
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6411
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3195 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.08 P=0.27 Y=0.00 seq=12929
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6461
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3195 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.02 P=0.46 Y=0.00 seq=13005
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6497
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3237 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.02 P=0.45 Y=0.00 seq=13080
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6537
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3261 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.01 P=0.46 Y=0.00 seq=13156
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6575
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3261 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.05 P=0.48 Y=0.00 seq=13231
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6611
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3307 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=1549, 50 ACK (last 1s)
+TEL: ATT: R=0.01 P=0.49 Y=0.00 seq=13307
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6649
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3326 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=20s seq=2531 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.07 P=0.47 Y=0.00 seq=13384
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6673
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3326 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2724 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.03 P=0.52 Y=0.00 seq=13459
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6705
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3362 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2724 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.04 P=0.47 Y=0.00 seq=13539
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6761
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3376 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.05 P=0.45 Y=0.00 seq=13614
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6793
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3376 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.05 P=0.45 Y=0.00 seq=13689
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6835
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3376 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.02 P=0.46 Y=0.00 seq=13763
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6873
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3376 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.05 P=0.54 Y=0.00 seq=13840
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6914
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3459 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.09 P=0.46 Y=0.00 seq=13915
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6951
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3459 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.00 P=0.51 Y=0.00 seq=13982
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=6987
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3481 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.13 P=0.44 Y=0.00 seq=14071
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=7033
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3481 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.04 P=0.19 Y=0.00 seq=14147
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=7049
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3533 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=1599, 50 ACK (last 1s)
+TEL: ATT: R=0.07 P=0.31 Y=0.00 seq=14223
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=7105
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3543 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.12 P=0.53 Y=0.00 seq=14287
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=7131
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3543 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.29 P=0.63 Y=0.00 seq=14382
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=7185
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3577 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-1.38 P=0.53 Y=0.00 seq=14457
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=7213
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3608 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.28 P=0.00 Y=0.00 seq=14533
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=7258
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3608 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.06 P=-0.20 Y=0.00 seq=14608
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=7283
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3608 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-1.71 P=0.08 Y=0.00 seq=14682
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=7334
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3666 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.97 P=0.11 Y=0.00 seq=14761
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=7376
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3676 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=-0.30 P=-1.15 Y=0.00 seq=14834
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=7393
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3704 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=22s seq=2742 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+TEL: ATT: R=0.22 P=0.57 Y=0.00 seq=14905
+TEL: CTL: setR=0.00 setP=0.00 setYR=0.0 seq=7451
+TEL: MOT: cmd=[0 0 0 0] act=[0 0 0 0] seq=3720 THR=0
+TEL: STA: armed=1 mode=0 link=100% uptime=24s seq=2908 [ARM:1 HRZ:1 CAL:1 CALIB:0 FAIL:0 FD:0]
+RAD: RC: queued seq=1649, 36 ACK, 14 FAIL (last 1s)
+RAD: RC: queued seq=1699, 0 ACK, 50 FAIL (last 1s)
+RAD: RC: queued seq=1749, 0 ACK, 50 FAIL (last 1s)

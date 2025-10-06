@@ -16,42 +16,6 @@ struct RcPacket {
     uint16_t crc;       // CRC-16/X.25 of all fields except crc
 };
 
-// TELEM: Telemetry packet structure (must match drone exactly)
-struct TelemetryPacket {
-    uint8_t  magic;             // 0x5A - 1 bajt
-    uint8_t  version;           // 1 - 1 bajt
-    uint16_t seq;               // sequence counter - 2 bajty
-    uint32_t ms;                // timestamp - 4 bajty
-    
-    // Setpoints (scaled for precision)
-    int16_t  setAngleRoll_x10;  // setpoint roll * 10 - 2 bajty
-    int16_t  setAnglePitch_x10; // setpoint pitch * 10 - 2 bajty
-    int16_t  setYawRate_dps;    // setpoint yaw rate deg/s - 2 bajty
-    
-    // Estimated angles (scaled for precision)
-    int16_t  roll_deg_x10;      // actual roll * 10 - 2 bajty
-    int16_t  pitch_deg_x10;     // actual pitch * 10 - 2 bajty
-    
-    // Rates
-    int16_t  rollRate_dps;      // roll rate deg/s - 2 bajty
-    int16_t  pitchRate_dps;     // pitch rate deg/s - 2 bajty
-    int16_t  yawRate_dps;       // yaw rate deg/s - 2 bajty
-    
-    // RATE PID outputs
-    int16_t  outRoll;           // roll PID output - 2 bajty
-    int16_t  outPitch;          // pitch PID output - 2 bajty
-    int16_t  outYaw;            // yaw PID output - 2 bajty
-    
-    // Mixer values
-    uint16_t m1, m2, m3, m4;    // motor outputs - 4 × 2 = 8 bajtów
-    
-    // Status
-    uint16_t thr;               // throttle 0..1000 - 2 bajty
-    uint8_t  armed;             // armed state - 1 bajt
-    uint8_t  linkAlive;         // link status - 1 bajt
-    
-    uint16_t crc;               // CRC-16/X.25 - 2 bajty
-};
 #pragma pack(pop)
 
 // Packet constants
@@ -60,50 +24,19 @@ struct TelemetryPacket {
 #define RC_FLAG_ARMED     0x01
 #define RC_FLAG_DEBUG     0x02
 
-// TELEM: Telemetry packet constants
-#define TELEM_PACKET_MAGIC   0x5B
-#define TELEM_PACKET_VERSION 2
+// Telemetry safety_flags bitfield constants (used in TelemetryStatus packet)
+#define TELEM_HORIZON_BIT      0x01  // bit 0: horizon/level OK state
+#define TELEM_LINK_ALIVE       0x02  // bit 1: link alive
+#define TELEM_FORCE_DISARM     0x04  // bit 2: force disarm triggered
+#define TELEM_FLAG_CAL_OK      0x08  // bit 3: accelerometer calibration valid
+#define TELEM_FLAG_CALIBRATING 0x10  // bit 4: calibration in progress
+#define TELEM_FLAG_CAL_FAILED  0x20  // bit 5: calibration failed
 
-// Telemetry armed status bitfield constants
-#define TELEM_ARMED_BIT       0x01  // bit 0: drone armed state
-#define TELEM_HORIZON_BIT     0x02  // bit 1: horizon/level OK state
-#define TELEM_FORCE_DISARM    0x04  // bit 2: force disarm triggered
-#define TELEM_FLAG_CAL_OK     0x08  // bit 3: accelerometer calibration valid
-#define TELEM_FLAG_CALIBRATING 0x10 // bit 4: calibration in progress
-#define TELEM_FLAG_CAL_FAILED 0x20  // bit 5: calibration failed
+// Telemetry armed bitfield constants (used in TelemetryStatus packet)
+#define TELEM_ARMED_BIT        0x01  // bit 0: drone armed state
 
 // CRC-16/X.25 calculation
 uint16_t crc16_x25(const uint8_t* data, size_t len);
-
-// Telemetry status helpers
-inline bool isTelemArmed(const TelemetryPacket& packet) {
-    return (packet.armed & TELEM_ARMED_BIT) != 0;
-}
-
-inline bool isTelemHorizonOK(const TelemetryPacket& packet) {
-    return (packet.armed & TELEM_HORIZON_BIT) != 0;
-}
-
-inline bool isTelemForceDisarm(const TelemetryPacket& packet) {
-    return (packet.armed & TELEM_FORCE_DISARM) != 0;
-}
-
-inline bool isTelemCalOK(const TelemetryPacket& packet) {
-    return (packet.armed & TELEM_FLAG_CAL_OK) != 0;
-}
-
-inline bool isTelemCalibrating(const TelemetryPacket& packet) {
-    return (packet.armed & TELEM_FLAG_CALIBRATING) != 0;
-}
-
-inline bool isTelemCalFailed(const TelemetryPacket& packet) {
-    return (packet.armed & TELEM_FLAG_CAL_FAILED) != 0;
-}
-
-// Packet validation helpers
-inline bool isValidTelemPacket(const TelemetryPacket& packet) {
-    return packet.magic == TELEM_PACKET_MAGIC && packet.version == TELEM_PACKET_VERSION;
-}
 
 // ============================================================================
 // Enhanced Telemetry System (Version 2)

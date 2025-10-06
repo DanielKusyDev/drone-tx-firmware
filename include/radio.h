@@ -38,8 +38,7 @@ struct EnhancedTelemData {
 
 // Telemetry receiver configuration
 struct TelemReceiverConfig {
-    bool enable_enhanced;        // Enable enhanced telemetry (v2)
-    bool enable_legacy;          // Enable legacy telemetry (v1)
+    bool enable_enhanced;        // Enable enhanced telemetry reception
     uint8_t packet_type_mask;    // Bitmask of enabled packet types (bit 0 = ATTITUDE, etc.)
     uint16_t packet_timeout_ms;  // Packet timeout in ms
 };
@@ -50,12 +49,6 @@ public:
     bool setPeerMac(const uint8_t* mac);
     bool sendPacket(const void* data, size_t len);
     void setChannel(uint8_t channel);
-
-    // Legacy telemetry reception
-    bool hasNewTelemetry() const;
-    TelemetryPacket getLastTelemetry();
-    void clearNewTelemetryFlag();
-    uint32_t getDropCount() const;
 
     // Enhanced telemetry reception
     bool hasNewEnhancedTelemetry() const;
@@ -88,12 +81,6 @@ private:
     uint8_t m_peerMac[6] = {0};
     uint8_t m_channel = 1;
     bool m_initialized = false;
-
-    // Legacy telemetry state
-    static TelemetryPacket s_lastTelemetry;
-    static volatile bool s_newTelemetryAvailable;
-    static volatile uint32_t s_lastTelemSeq;
-    static volatile uint32_t s_dropCount;
 
     // Enhanced telemetry state
     static EnhancedTelemData s_enhancedTelem;

@@ -184,7 +184,7 @@ void App::loop()
 
     // --- Horizon safety from STATUS packet ---
     // In enhanced telemetry, safety_flags contains horizon bit (bit 0) and calibration bits (bits 3-5)
-    g_horizonOK = (etelem.status.safety_flags & 0x01) != 0;
+    g_horizonOK = (etelem.status.safety_flags & TELEM_HORIZON_BIT) != 0;
     g_telemArmed = (etelem.status.armed & TELEM_ARMED_BIT) != 0;
     g_calOK = (etelem.status.safety_flags & TELEM_FLAG_CAL_OK) != 0;
     g_calibrating = (etelem.status.safety_flags & TELEM_FLAG_CALIBRATING) != 0;
@@ -332,7 +332,7 @@ void App::loop()
             if (etelem.status_rx_ms > 0)
             {
                 bool armed = (etelem.status.armed & TELEM_ARMED_BIT) != 0;
-                bool horizOK = (etelem.status.safety_flags & 0x01) != 0;
+                bool horizOK = (etelem.status.safety_flags & TELEM_HORIZON_BIT) != 0;
                 bool calOK = (etelem.status.safety_flags & TELEM_FLAG_CAL_OK) != 0;
                 bool calibrating = (etelem.status.safety_flags & TELEM_FLAG_CALIBRATING) != 0;
                 bool calFailed = (etelem.status.safety_flags & TELEM_FLAG_CAL_FAILED) != 0;
@@ -432,17 +432,26 @@ void App::handleSerialCommands()
         {
             uint32_t successCount = m_radio->getSendSuccessCount();
             uint32_t failCount = m_radio->getSendFailCount();
-            uint32_t dropCount = m_radio->getDropCount();
+            uint32_t totalPackets = m_radio->getTotalEnhancedPackets();
+            uint32_t totalDrops = m_radio->getTotalEnhancedDrops();
 
             Serial.println("[RADIO_STATS]");
             Serial.printf("Send Success: %lu\n", successCount);
             Serial.printf("Send Fail: %lu\n", failCount);
-            Serial.printf("Telemetry Drops: %lu\n", dropCount);
 
             if (successCount + failCount > 0)
             {
                 float successRate = (float)successCount / (successCount + failCount) * 100.0f;
                 Serial.printf("Success Rate: %.1f%%\n", successRate);
+            }
+
+            Serial.printf("Telemetry Received: %lu packets\n", totalPackets);
+            Serial.printf("Telemetry Drops: %lu packets\n", totalDrops);
+
+            if (totalPackets + totalDrops > 0)
+            {
+                float dropRate = (float)totalDrops / (totalPackets + totalDrops) * 100.0f;
+                Serial.printf("Drop Rate: %.2f%%\n", dropRate);
             }
 
             unsigned long telemAge = Age::since(g_lastTelemUpdateMs);
@@ -453,9 +462,8 @@ void App::handleSerialCommands()
         {
             const TelemReceiverConfig &config = m_radio->getReceiverConfig();
 
-            Serial.println("[ENHANCED_TELEMETRY_STATS]");
+            Serial.println("[TELEMETRY_STATS]");
             Serial.printf("Enhanced Mode: %s\n", config.enable_enhanced ? "ON" : "OFF");
-            Serial.printf("Legacy Mode: %s\n", config.enable_legacy ? "ON" : "OFF");
             Serial.printf("Packet Type Mask: 0x%02X\n", config.packet_type_mask);
             Serial.printf("Timeout: %u ms\n", config.packet_timeout_ms);
             Serial.println();
@@ -508,7 +516,7 @@ void App::handleSerialCommands()
                 const EnhancedTelemData &etelem = m_radio->getEnhancedTelemetry();
                 Serial.println("Status Flags:");
                 Serial.printf("  Armed: %s\n", (etelem.status.armed & TELEM_ARMED_BIT) ? "YES" : "NO");
-                Serial.printf("  Horizon OK: %s\n", (etelem.status.safety_flags & 0x01) ? "YES" : "NO");
+                Serial.printf("  Horizon OK: %s\n", (etelem.status.safety_flags & TELEM_HORIZON_BIT) ? "YES" : "NO");
                 Serial.printf("  Calibration OK: %s\n", (etelem.status.safety_flags & TELEM_FLAG_CAL_OK) ? "YES" : "NO");
                 Serial.printf("  Calibrating: %s\n", (etelem.status.safety_flags & TELEM_FLAG_CALIBRATING) ? "YES" : "NO");
                 Serial.printf("  Cal Failed: %s\n", (etelem.status.safety_flags & TELEM_FLAG_CAL_FAILED) ? "YES" : "NO");
@@ -798,9 +806,9 @@ void OledDemo::createMockTelemetry(EnhancedTelemData &mockTelem)
     mockTelem.motors_rx_ms = millis();
 
     // STATUS packet
-    mockTelem.status.armed = 0;           // Not armed
-    mockTelem.status.flight_mode = 1;     // Stabilize mode
-    mockTelem.status.safety_flags = 0x01; // Horizon OK (bit 0)
-    mockTelem.status.link_quality = 95;   // 95% link quality
+    mockTelem.status.armed = 0;                             // Not armed
+    mockTelem.status.flight_mode = 1;                       // Stabilize mode
+    mockTelem.status.safety_flags = TELEM_HORIZON_BIT;      // Horizon OK
+    mockTelem.status.link_quality = 95;                     // 95% link quality
     mockTelem.status_rx_ms = millis();
 }

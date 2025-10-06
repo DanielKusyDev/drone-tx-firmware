@@ -11,22 +11,14 @@ void radioWrongMagicVersion(uint8_t magic, uint8_t version);
 void radioCrcError(uint16_t calculated, uint16_t received);
 
 
-// TELEM: Static telemetry variables (legacy)
-TelemetryPacket RadioManager::s_lastTelemetry = {};
-volatile bool RadioManager::s_newTelemetryAvailable = false;
-volatile uint32_t RadioManager::s_lastTelemSeq = 0;
-volatile uint32_t RadioManager::s_dropCount = 0;
-
 // Enhanced telemetry state
 EnhancedTelemData RadioManager::s_enhancedTelem = {};
 volatile bool RadioManager::s_newEnhancedAvailable = false;
 volatile uint8_t RadioManager::s_newPacketTypeFlags = 0;
 
 // Telemetry receiver configuration
-// Enhanced telemetry only - legacy (0x5A) packets are ignored
 TelemReceiverConfig RadioManager::s_config = {
-    .enable_enhanced = true,     // Enhanced telemetry (magic 0x5B, version 2)
-    .enable_legacy = false,      // Legacy telemetry disabled (magic 0x5A, version 1)
+    .enable_enhanced = true,     // Enhanced telemetry enabled
     .packet_type_mask = 0x7F,    // All 7 packet types enabled (ATTITUDE..PERFORMANCE)
     .packet_timeout_ms = 300     // Packet freshness timeout
 };
@@ -46,7 +38,7 @@ void RadioManager::onSendCallback(const uint8_t *mac_addr, esp_now_send_status_t
     }
 }
 
-// TELEM: Receive callback for telemetry
+// Enhanced telemetry receive callback
 void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *data, int len) {
     (void)mac_addr; // Unused
 
@@ -56,9 +48,8 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
     uint8_t magic = data[0];
     uint8_t version = data[1];
 
-    // Route to enhanced or legacy handler
+    // Only handle enhanced telemetry
     if (magic == TELEM_ENHANCED_MAGIC && version == TELEM_ENHANCED_VERSION) {
-        // Enhanced telemetry (v2)
         if (!s_config.enable_enhanced) return;
 
         if (len < sizeof(TelemetryHeader)) {
@@ -102,44 +93,6 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
                 // Unknown packet type
                 return;
         }
-
-    } else if (magic == TELEM_PACKET_MAGIC && version == TELEM_PACKET_VERSION) {
-        // Legacy telemetry (v1)
-        if (!s_config.enable_legacy) return;
-
-        if (len != sizeof(TelemetryPacket)) {
-            radioWrongPacketSize(len, sizeof(TelemetryPacket));
-            return;
-        }
-
-        const TelemetryPacket* packet = reinterpret_cast<const TelemetryPacket*>(data);
-
-        // Verify CRC (both sides use same CRC calc, no swap needed)
-        uint16_t calculatedCrc = crc16_x25(data, len - sizeof(packet->crc));
-        if (calculatedCrc != packet->crc) {
-            radioCrcError(calculatedCrc, packet->crc);
-            return;
-        }
-
-        // Check for dropped packets
-        uint32_t currentSeq = packet->seq;
-        if (s_lastTelemSeq != 0 && currentSeq != (s_lastTelemSeq + 1) % 65536) {
-            // Packets were dropped
-            uint32_t expectedSeq = (s_lastTelemSeq + 1) % 65536;
-            uint32_t droppedCount;
-            if (currentSeq > expectedSeq) {
-                droppedCount = currentSeq - expectedSeq;
-            } else {
-                droppedCount = (65536 - expectedSeq) + currentSeq;
-            }
-            s_dropCount += droppedCount;
-        }
-        s_lastTelemSeq = currentSeq;
-
-        // Copy packet and set flag
-        memcpy((void*)&s_lastTelemetry, packet, sizeof(TelemetryPacket));
-        s_newTelemetryAvailable = true;
-
     } else {
         // Unknown packet format
         radioWrongMagicVersion(magic, version);
@@ -207,23 +160,6 @@ void RadioManager::setChannel(uint8_t channel) {
         esp_wifi_set_channel(m_channel, WIFI_SECOND_CHAN_NONE);
         esp_wifi_set_promiscuous(false);
     }
-}
-
-// TELEM: Telemetry accessor methods
-bool RadioManager::hasNewTelemetry() const {
-    return s_newTelemetryAvailable;
-}
-
-TelemetryPacket RadioManager::getLastTelemetry() {
-    return s_lastTelemetry;
-}
-
-void RadioManager::clearNewTelemetryFlag() {
-    s_newTelemetryAvailable = false;
-}
-
-uint32_t RadioManager::getDropCount() const {
-    return s_dropCount;
 }
 
 uint32_t RadioManager::getSendSuccessCount() const {
