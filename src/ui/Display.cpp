@@ -1,5 +1,6 @@
 #include "Display.h"
 #include "config.h"
+#include "protocol.h"
 #include "../utils/Timing.h"
 #include <Adafruit_SSD1306.h>
 
@@ -8,6 +9,7 @@ extern Adafruit_SSD1306 display;
 extern unsigned long g_lastTelemUpdateMs;
 extern bool g_showHorizFlash;
 extern bool g_horizonOK;
+extern bool g_calOK;
 extern bool g_forceDisarmActive;
 extern unsigned long g_forceDisarmTimestamp;
 
@@ -135,7 +137,9 @@ void updateOledNormalView(const ControlInputs& inputs, const EnhancedTelemData& 
         }
     } else {
         display.print("ARM: ");
-        display.print(inputs.armed ? "ON" : "OFF");
+        // Show drone armed status from telemetry, not controller input
+        bool droneArmed = (telem.status.armed & TELEM_ARMED_BIT) != 0;
+        display.print(droneArmed ? "ON" : "OFF");
         display.print(" THR:");
     }
     // Show throttle from drone (MOTORS packet) instead of joystick input
@@ -153,6 +157,10 @@ void updateOledNormalView(const ControlInputs& inputs, const EnhancedTelemData& 
             // Horizon not OK - show on line 2 to avoid overlap
             display.setCursor(100, 10);
             display.print("HRZ?");
+        } else if (!g_calOK && !g_telemArmed) {
+            // Calibration not OK - show on line 2
+            display.setCursor(100, 10);
+            display.print("CAL?");
         }
     }
 

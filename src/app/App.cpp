@@ -19,6 +19,7 @@ extern unsigned long g_lastTelemUpdateMs;
 extern float g_telemFrequency;
 extern bool g_telemArmed;
 extern bool g_horizonOK;
+extern bool g_calOK;
 extern unsigned long g_horizFlashStartMs;
 extern bool g_showHorizFlash;
 extern uint8_t g_armPulseCountdown;
@@ -183,6 +184,7 @@ void App::loop()
     // In enhanced telemetry, safety_flags contains horizon bit (bit 0)
     g_horizonOK = (etelem.status.safety_flags & 0x01) != 0;
     g_telemArmed = (etelem.status.armed & TELEM_ARMED_BIT) != 0;
+    g_calOK = (etelem.status.armed & TELEM_FLAG_CAL_OK) != 0;
 
     // --- Force disarm detection ---
     bool isArmed = g_telemArmed;
@@ -325,10 +327,15 @@ void App::loop()
             // STATUS packet
             if (etelem.status_rx_ms > 0)
             {
-                LOG_DEBUG(TELEM, "STA: armed=%d mode=%d link=%d%% uptime=%us seq=%u",
+                bool armed = (etelem.status.armed & TELEM_ARMED_BIT) != 0;
+                bool horizOK = (etelem.status.safety_flags & 0x01) != 0;
+                bool calOK = (etelem.status.armed & TELEM_FLAG_CAL_OK) != 0;
+                bool forceDisarm = (etelem.status.armed & TELEM_FORCE_DISARM) != 0;
+
+                LOG_DEBUG(TELEM, "STA: armed=%d mode=%d link=%d%% uptime=%us seq=%u [ARM:%d HRZ:%d CAL:%d FD:%d]",
                           etelem.status.armed, etelem.status.flight_mode,
                           etelem.status.link_quality, etelem.status.uptime_s,
-                          etelem.status.header.seq);
+                          etelem.status.header.seq, armed, horizOK, calOK, forceDisarm);
             }
         }
         else
@@ -487,6 +494,17 @@ void App::handleSerialCommands()
             Serial.printf("  SENSORS: %s\n", m_radio->hasSensors() ? "Fresh" : "Stale");
             Serial.printf("  SAFETY: %s\n", m_radio->hasSafety() ? "Fresh" : "Stale");
             Serial.printf("  PERFORMANCE: %s\n", m_radio->hasPerformance() ? "Fresh" : "Stale");
+            Serial.println();
+
+            // Status flags (decoded from armed bitfield)
+            if (m_radio->hasStatus()) {
+                const EnhancedTelemData& etelem = m_radio->getEnhancedTelemetry();
+                Serial.println("Status Flags:");
+                Serial.printf("  Armed: %s\n", (etelem.status.armed & TELEM_ARMED_BIT) ? "YES" : "NO");
+                Serial.printf("  Horizon OK: %s\n", (etelem.status.safety_flags & 0x01) ? "YES" : "NO");
+                Serial.printf("  Calibration OK: %s\n", (etelem.status.armed & TELEM_FLAG_CAL_OK) ? "YES" : "NO");
+                Serial.printf("  Force Disarm: %s\n", (etelem.status.armed & TELEM_FORCE_DISARM) ? "YES" : "NO");
+            }
         }
         // Toggle enhanced telemetry mode
         else if (c == 'T' || c == 't')

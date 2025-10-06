@@ -33,6 +33,7 @@ float g_telemFrequency = 0.0f;
 // HORIZ: Horizon safety globals
 bool g_telemArmed = false;
 bool g_horizonOK = false;
+bool g_calOK = false;
 unsigned long g_horizFlashStartMs = 0;
 bool g_showHorizFlash = false;
 
