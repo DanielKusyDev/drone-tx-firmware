@@ -1,5 +1,6 @@
 #include "control.h"
 #include "config.h"
+#include "logger.h"
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_SSD1306.h>
@@ -35,7 +36,7 @@ void ControlManager::calibrate() {
 
 ControlInputs ControlManager::readInputs() {
     updateArmState();
-    
+
     ControlInputs inputs;
     inputs.throttle = updateThrottle();
     inputs.yaw = readAxisCentered(PIN_YAW, m_filterYaw, m_centerYaw);
@@ -43,7 +44,31 @@ ControlInputs ControlManager::readInputs() {
     inputs.roll = readAxisCentered(PIN_ROLL, m_filterRoll, m_centerRoll);
     inputs.armed = m_armed;
     inputs.debugView = m_debugView;  // TELEM: Add debug view state
-    
+
+    // Debug output for stick diagnostics (controlled via logger 'calib' category at TRACE level)
+    static unsigned long lastDbgMs = 0;
+    unsigned long now = millis();
+    if (now - lastDbgMs > 200) {
+        lastDbgMs = now;
+
+        // Read raw values directly for diagnosis
+        uint16_t rawR = readAdcAvg(PIN_ROLL, ADC_SAMPLES_AXIS);
+        uint16_t rawP = readAdcAvg(PIN_PITCH, ADC_SAMPLES_AXIS);
+        uint16_t rawY = readAdcAvg(PIN_YAW, ADC_SAMPLES_AXIS);
+        uint16_t rawT = readAdcAvg(PIN_THR, ADC_SAMPLES_AXIS);
+
+        LOG_TRACE(CALIB, "ADC raw R:%4u P:%4u Y:%4u T:%4u | norm R:%5d P:%5d Y:%5d T:%4u",
+                  rawR, rawP, rawY, rawT,
+                  inputs.roll, inputs.pitch, inputs.yaw, inputs.throttle);
+
+        LOG_TRACE(CALIB, "Centers  R:%4u P:%4u Y:%4u T:%4u | Diff R:%+5d P:%+5d Y:%+5d T:%+5d",
+                  m_centerRoll, m_centerPitch, m_centerYaw, m_centerThr,
+                  (int)rawR - (int)m_centerRoll,
+                  (int)rawP - (int)m_centerPitch,
+                  (int)rawY - (int)m_centerYaw,
+                  (int)rawT - (int)m_centerThr);
+    }
+
     return inputs;
 }
 
@@ -76,12 +101,12 @@ int16_t ControlManager::readAxisCentered(int pin, float& filter, uint16_t center
     float raw = (float)readAdcAvg(pin, ADC_SAMPLES_AXIS);
     filter = smoothFilter(filter, raw);
     int v = (int)lroundf((filter - center) / 2.0f); // ~-1000..1000
-    
+
     if (invert) v = -v;
     if (abs(v) < DEADZONE_THRESHOLD) v = 0;
     if (v < RC_AXIS_MIN) v = RC_AXIS_MIN;
     if (v > RC_AXIS_MAX) v = RC_AXIS_MAX;
-    
+
     return (int16_t)v;
 }
 

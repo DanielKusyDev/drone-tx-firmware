@@ -8,6 +8,8 @@ extern Adafruit_SSD1306 display;
 extern unsigned long g_lastTelemUpdateMs;
 extern bool g_showHorizFlash;
 extern bool g_horizonOK;
+extern bool g_forceDisarmActive;
+extern unsigned long g_forceDisarmTimestamp;
 
 void updateOledNoTelemNormalView(const ControlInputs& inputs) {
     display.clearDisplay();
@@ -93,6 +95,30 @@ void updateOledNormalView(const ControlInputs& inputs, const EnhancedTelemData& 
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
 
+    // Check if force disarm warning should be shown (5 seconds after event)
+    bool showForceDisarmWarning = false;
+    if (g_forceDisarmActive) {
+        unsigned long elapsed = millis() - g_forceDisarmTimestamp;
+        if (elapsed < 5000) {  // Show for 5 seconds
+            showForceDisarmWarning = true;
+        } else {
+            g_forceDisarmActive = false;  // Clear after timeout
+        }
+    }
+
+    // Priority: Force disarm warning overrides everything
+    if (showForceDisarmWarning) {
+        // Show prominent force disarm warning
+        display.setCursor(0, 0);
+        display.print("!! FORCE DISARM !!");
+        display.setCursor(0, 10);
+        display.print("Safety System");
+        display.setCursor(0, 20);
+        display.print("Triggered");
+        display.display();
+        return;
+    }
+
     // Line 1: ARM and THR with flash override
     display.setCursor(0, 0);
     if (g_showHorizFlash) {
@@ -161,6 +187,30 @@ void updateOledDebugView(const ControlInputs& inputs, const EnhancedTelemData& t
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
+
+    // Check if force disarm warning should be shown (5 seconds after event)
+    bool showForceDisarmWarning = false;
+    if (g_forceDisarmActive) {
+        unsigned long elapsed = millis() - g_forceDisarmTimestamp;
+        if (elapsed < 5000) {  // Show for 5 seconds
+            showForceDisarmWarning = true;
+        } else {
+            g_forceDisarmActive = false;  // Clear after timeout
+        }
+    }
+
+    // Priority: Force disarm warning overrides everything
+    if (showForceDisarmWarning) {
+        // Show prominent force disarm warning
+        display.setCursor(0, 0);
+        display.print("!! FORCE DISARM !!");
+        display.setCursor(0, 10);
+        display.print("Safety System");
+        display.setCursor(0, 20);
+        display.print("Triggered");
+        display.display();
+        return;
+    }
 
     // Line 1: Setpoints (from CONTROL packet)
     display.setCursor(0, 0);

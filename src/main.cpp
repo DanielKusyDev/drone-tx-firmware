@@ -41,6 +41,11 @@ bool g_showHorizFlash = false;
 uint8_t g_armPulseCountdown = 0;
 bool g_lastInputsArmed = false;
 
+// FORCE_DISARM: Force disarm warning state
+bool g_forceDisarmActive = false;
+unsigned long g_forceDisarmTimestamp = 0;
+#define FORCE_DISARM_WARNING_MS 5000  // Show warning for 5 seconds
+
 // LOG: Compatibility shim for radio.cpp error logging
 // These global functions forward to the new logger system
 void radioWrongPacketSize(int actualLen, int expectedLen) {

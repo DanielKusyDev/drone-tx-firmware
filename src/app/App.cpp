@@ -24,6 +24,8 @@ extern bool g_showHorizFlash;
 extern uint8_t g_armPulseCountdown;
 extern bool g_lastInputsArmed;
 extern uint8_t g_droneMac[6];
+extern bool g_forceDisarmActive;
+extern unsigned long g_forceDisarmTimestamp;
 
 // Constants from config.h or protocol.h
 #ifndef OLED_ADDR
@@ -96,6 +98,11 @@ bool App::init()
     m_radio = &radio;
     m_lastOledUpdateMs = 0;
 
+    // Initialize force disarm tracking
+    m_lastArmedState = false;
+    m_forceDisarmDetected = false;
+    m_forceDisarmTimestamp = 0;
+
     // Serial and I2C
     Serial.begin(115200);
     delay(100);
@@ -145,6 +152,11 @@ bool App::init()
     }
     LOG_INFO(INPUTS, "Control inputs initialized");
 
+    // Calibrate stick centers (ensure sticks are neutral!)
+    LOG_INFO(INPUTS, "Calibrating stick centers - hold sticks at neutral position...");
+    m_control->calibrate();
+    LOG_INFO(INPUTS, "Stick calibration complete");
+
     LOG_INFO(SYSTEM, "Transmitter initialization complete");
     return true;
 }
@@ -170,7 +182,20 @@ void App::loop()
     // --- Horizon safety from STATUS packet ---
     // In enhanced telemetry, safety_flags contains horizon bit (bit 0)
     g_horizonOK = (etelem.status.safety_flags & 0x01) != 0;
-    g_telemArmed = (etelem.status.armed != 0);
+    g_telemArmed = (etelem.status.armed & TELEM_ARMED_BIT) != 0;
+
+    // --- Force disarm detection ---
+    bool isArmed = g_telemArmed;
+    bool forceDisarm = (etelem.status.armed & TELEM_FORCE_DISARM) != 0;
+
+    // Detect disarm transition with force disarm flag
+    if (m_lastArmedState && !isArmed && forceDisarm) {
+        g_forceDisarmActive = true;
+        g_forceDisarmTimestamp = millis();
+        LOG_WARN(SYSTEM, "Force disarm event detected!");
+    }
+
+    m_lastArmedState = isArmed;
 
     // --- Horizon flash logic ---
     if (!g_horizonOK || !g_telemArmed || Age::since(g_lastTelemUpdateMs) > TELEM_TIMEOUT_MS)
@@ -381,6 +406,13 @@ void App::handleSerialCommands()
         else if (c == 'O' || c == 'o')
         {
             m_oledDemo.toggle();
+        }
+        // Calibrate stick centers
+        else if (c == 'C' || c == 'c')
+        {
+            LOG_INFO(INPUTS, "Manual calibration triggered - hold sticks neutral!");
+            m_control->calibrate();
+            LOG_INFO(INPUTS, "Calibration complete");
         }
         // Radio diagnostics
         else if (c == 'D' || c == 'd')
