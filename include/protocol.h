@@ -11,7 +11,7 @@ struct RcPacket {
     int16_t  yaw;       // -1000..1000
     int16_t  pitch;     // -1000..1000
     int16_t  roll;      // -1000..1000
-    uint8_t  flags;     // bit0 = ARM state, bit1 = debugView
+    uint8_t  flags;     // bit0 = ARM state, bit1 = CALIBRATE
     uint8_t  rssi_hint; // optional RSSI info
     uint16_t crc;       // CRC-16/X.25 of all fields except crc
 };
@@ -22,7 +22,8 @@ struct RcPacket {
 #define RC_PACKET_MAGIC   0xA5
 #define RC_PACKET_VERSION 1
 #define RC_FLAG_ARMED     0x01
-#define RC_FLAG_DEBUG     0x02
+#define RC_FLAG_CALIBRATE 0x02
+#define RC_FLAG_DEBUG     0x04
 
 // Telemetry safety_flags bitfield constants (used in TelemetryStatus packet)
 #define TELEM_HORIZON_BIT      0x01  // bit 0: horizon/level OK state

@@ -14,6 +14,7 @@
 #define PIN_PITCH 4   // Pitch stick (proportional, inverted)
 #define PIN_ROLL  2   // Roll stick (proportional)
 #define PIN_ARM   7   // ARM/DISARM button
+#define PIN_CALIB 10   // Calibration button
 
 // OLED Display (I2C)
 #define OLED_SDA  8   // I2C Data

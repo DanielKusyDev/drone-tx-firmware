@@ -78,6 +78,8 @@ void buildRcPacket(const ControlInputs &inputs, RcPacket &packet)
     packet.flags = 0;
     if (inputs.armed)
         packet.flags |= RC_FLAG_ARMED;
+    if (inputs.calibButtonPressed)
+        packet.flags |= RC_FLAG_CALIBRATE;
     if (inputs.debugView)
         packet.flags |= RC_FLAG_DEBUG;
     packet.rssi_hint = 0;

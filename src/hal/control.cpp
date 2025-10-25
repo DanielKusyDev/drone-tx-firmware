@@ -11,7 +11,8 @@ extern Adafruit_SSD1306 display;
 bool ControlManager::init() {
     // Configure GPIO pins
     pinMode(PIN_ARM, INPUT_PULLUP);
-    
+    pinMode(PIN_CALIB, INPUT_PULLUP);
+
     // Configure ADC
     analogReadResolution(ADC_RESOLUTION);
     analogSetAttenuation(ADC_ATTENUATION);
@@ -43,6 +44,7 @@ ControlInputs ControlManager::readInputs() {
     inputs.pitch = readAxisCentered(PIN_PITCH, m_filterPitch, m_centerPitch, true); // Inverted
     inputs.roll = readAxisCentered(PIN_ROLL, m_filterRoll, m_centerRoll);
     inputs.armed = m_armed;
+    inputs.calibButtonPressed = isCalibButtonPressed();
     inputs.debugView = m_debugView;  // TELEM: Add debug view state
 
     // Debug output for stick diagnostics (controlled via logger 'calib' category at TRACE level)
@@ -74,6 +76,10 @@ ControlInputs ControlManager::readInputs() {
 
 bool ControlManager::isArmButtonPressed() const {
     return digitalRead(PIN_ARM) == LOW;
+}
+
+bool ControlManager::isCalibButtonPressed() const {
+    return digitalRead(PIN_CALIB) == LOW;
 }
 
 void ControlManager::showMessage(const char* line1, const char* line2) {
@@ -153,23 +159,20 @@ void ControlManager::updateArmState() {
         unsigned long pressDuration = currentTime - m_buttonPressStart;
         
         // DEBUG: Print press duration
-        Serial.print("[BTN] Press duration: ");
-        Serial.print(pressDuration);
-        Serial.println("ms");
+        LOG_INFO(INPUTS, "Press duration: %d ms", pressDuration);
         
         if (currentTime - m_lastToggleMs > ARM_DEBOUNCE_MS) {
             if (pressDuration < SHORT_PRESS_MS) {
                 // Short press: toggle armed state (as before)
                 m_armed = !m_armed;
                 m_lastToggleMs = currentTime;
-                Serial.println("[BTN] Short press - ARM toggle");
+                LOG_INFO(INPUTS, "Short press - ARM toggle");
             }
             else if (pressDuration >= LONG_PRESS_MS) {
                 // Long press: toggle debug view without changing armed
                 m_debugView = !m_debugView;
                 m_lastToggleMs = currentTime;
-                Serial.print("[BTN] Long press - Debug view: ");
-                Serial.println(m_debugView ? "ON" : "OFF");
+                LOG_INFO(INPUTS, "Long press - Debug view %d", m_debugView ? "ON" : "OFF");
             }
             // Medium press (500ms-1500ms): do nothing
         }

@@ -8,6 +8,7 @@ struct ControlInputs {
     int16_t pitch;      // -1000..1000
     int16_t roll;       // -1000..1000
     bool armed;
+    bool calibButtonPressed;  // Calibration button state
     bool debugView;     // TELEM: Debug view state
 };
 
@@ -17,6 +18,7 @@ public:
     void calibrate();
     ControlInputs readInputs();
     bool isArmButtonPressed() const;
+    bool isCalibButtonPressed() const;
     void showMessage(const char* line1, const char* line2 = nullptr);
     
 private:
