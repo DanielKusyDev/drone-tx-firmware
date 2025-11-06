@@ -85,17 +85,20 @@ struct TelemetryAttitude {
     uint16_t crc;                // 12 bytes data + 2 CRC = 24 total
 };
 
-// 2. CONTROL (0x02) - PID Control Data (23 bytes total)
+// 2. CONTROL (0x02) - PID Control Data (30 bytes total)
 struct TelemetryControl {
-    TelemetryHeader header;      // 10 bytes
-    int16_t set_roll_deg_x100;   // Roll setpoint in 0.01° units
-    int16_t set_pitch_deg_x100;  // Pitch setpoint in 0.01° units
-    int16_t set_yaw_rate_dps_x10;// Yaw rate setpoint in 0.1°/s units
-    int16_t out_roll_x10;        // Roll PID output x10
-    int16_t out_pitch_x10;       // Pitch PID output x10
-    int16_t out_yaw_x10;         // Yaw PID output x10
-    uint8_t pid_gains_scale_x100;// PID gains scaling factor x100
-    uint16_t crc;                // 13 bytes data + 2 CRC = 23 total
+    TelemetryHeader header;              // 10 bytes
+    int16_t set_roll_deg_x100;           // Roll angle setpoint in 0.01° units (from RC)
+    int16_t set_pitch_deg_x100;          // Pitch angle setpoint in 0.01° units (from RC)
+    int16_t set_yaw_rate_dps_x10;        // Yaw rate setpoint in 0.1°/s units (from RC)
+    int16_t rate_set_roll_dps_x10;       // Roll rate setpoint from angle PID in 0.1°/s units
+    int16_t rate_set_pitch_dps_x10;      // Pitch rate setpoint from angle PID in 0.1°/s units
+    int16_t out_roll_x10;                // Roll rate PID output x10
+    int16_t out_pitch_x10;               // Pitch rate PID output x10
+    int16_t out_yaw_x10;                 // Yaw rate PID output x10
+    uint8_t pid_gains_scale_x100;        // Ground safety gain scaling factor x100
+    uint8_t throttle_gain_scale_x100;    // Throttle-dependent gain scaling factor x100
+    uint16_t crc;                        // 18 bytes data + 2 CRC = 30 total
 };
 
 // 3. MOTORS (0x03) - Motor and Mixer Data (31 bytes total)

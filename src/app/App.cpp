@@ -304,8 +304,8 @@ void App::loop()
             {
                 float roll = etelem.attitude.roll_deg_x100 / 100.0f;
                 float pitch = etelem.attitude.pitch_deg_x100 / 100.0f;
-                float yaw = etelem.attitude.yaw_deg_x100 / 100.0f;
-                LOG_DEBUG(TELEM, "ATT: R=%.2f P=%.2f Y=%.2f seq=%u",
+                float yaw = etelem.attitude.yaw_rate_dps_x10 / 10.0f;
+                LOG_DEBUG(TELEM, "ATT: R=%.2f P=%.2f Y Rate=%.2f seq=%u",
                           roll, pitch, yaw, etelem.attitude.header.seq);
             }
 
@@ -315,8 +315,14 @@ void App::loop()
                 float setRoll = etelem.control.set_roll_deg_x100 / 100.0f;
                 float setPitch = etelem.control.set_pitch_deg_x100 / 100.0f;
                 float setYawRate = etelem.control.set_yaw_rate_dps_x10 / 10.0f;
-                LOG_DEBUG(TELEM, "CTL: setR=%.2f setP=%.2f setYR=%.1f seq=%u",
-                          setRoll, setPitch, setYawRate, etelem.control.header.seq);
+                float rateSetRoll = etelem.control.rate_set_roll_dps_x10 / 10.0f;
+                float rateSetPitch = etelem.control.rate_set_pitch_dps_x10 / 10.0f;
+                float outRoll = etelem.control.out_roll_x10 / 10.0f;
+                float outPitch = etelem.control.out_pitch_x10 / 10.0f;
+                float outYaw = etelem.control.out_yaw_x10 / 10.0f;
+                float throttleScale = etelem.control.throttle_gain_scale_x100 / 100.0f;
+                LOG_DEBUG(TELEM, "CTL: setR=%.2f setP=%.2f setYR=%.1f rateSetR=%.1f rateSetP=%.1f outR=%.1f outP=%.1f outY=%.1f thrScale=%.2f seq=%u",
+                          setRoll, setPitch, setYawRate, rateSetRoll, rateSetPitch, outRoll, outPitch, outYaw, throttleScale, etelem.control.header.seq);
             }
 
             // MOTORS packet
@@ -791,12 +797,16 @@ void OledDemo::createMockTelemetry(EnhancedTelemData &mockTelem)
     mockTelem.attitude_rx_ms = millis();
 
     // CONTROL packet
-    mockTelem.control.set_roll_deg_x100 = -500;    // -5.0 degrees setpoint
-    mockTelem.control.set_pitch_deg_x100 = 300;    // 3.0 degrees setpoint
-    mockTelem.control.set_yaw_rate_dps_x10 = -400; // -40 deg/s setpoint
-    mockTelem.control.out_roll_x10 = 1850;         // PID output
-    mockTelem.control.out_pitch_x10 = 1920;        // PID output
-    mockTelem.control.out_yaw_x10 = 1480;          // PID output
+    mockTelem.control.set_roll_deg_x100 = -500;        // -5.0 degrees setpoint (from RC)
+    mockTelem.control.set_pitch_deg_x100 = 300;        // 3.0 degrees setpoint (from RC)
+    mockTelem.control.set_yaw_rate_dps_x10 = -400;     // -40 deg/s setpoint (from RC)
+    mockTelem.control.rate_set_roll_dps_x10 = -480;    // -48 deg/s from angle PID
+    mockTelem.control.rate_set_pitch_dps_x10 = 350;    // 35 deg/s from angle PID
+    mockTelem.control.out_roll_x10 = 1850;             // Rate PID output
+    mockTelem.control.out_pitch_x10 = 1920;            // Rate PID output
+    mockTelem.control.out_yaw_x10 = 1480;              // Rate PID output
+    mockTelem.control.pid_gains_scale_x100 = 100;      // 1.00 ground safety scale
+    mockTelem.control.throttle_gain_scale_x100 = 85;   // 0.85 throttle scale
     mockTelem.control_rx_ms = millis();
 
     // MOTORS packet

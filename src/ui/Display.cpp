@@ -198,8 +198,8 @@ void updateOledNormalView(const ControlInputs& inputs, const EnhancedTelemData& 
 
     // Line 3: Yaw angle and telemetry frequency
     display.setCursor(0, 20);
-    display.print("Y: ");
-    display.print(telem.attitude.yaw_deg_x100 / 100.0f, 1);
+    display.print("YR: ");
+    display.print(telem.attitude.yaw_rate_dps_x10 / 10.0f, 1);
     display.print(" FPS: ");
     display.print((int)g_telemFrequency);
 

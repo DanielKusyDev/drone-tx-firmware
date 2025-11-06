@@ -12,5 +12,5 @@ uint16_t crc16_x25(const uint8_t* data, size_t len) {
             }
         }
     }
-    return ~crc;
+    return crc ^ 0xFFFF;
 }
