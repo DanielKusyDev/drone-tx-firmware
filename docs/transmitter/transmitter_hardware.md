@@ -1,16 +1,16 @@
-# Kontroler do mikrodrona — dokumentacja hardware (TX)
+# Micro-Drone Controller – Hardware Documentation (TX)
 
-## 1) Przegląd
-- **MCU:** ESP32-C3 Super Mini (antenna on-board)
-- **Łączność:** ESP-NOW (bez Wi-Fi/BLE/parowania)
-- **Zasilanie:** 3×AA NiMH → LDO 3.3 V → szyna 3V3 (z diodą Schottky)
-- **Wejścia:** 2× joystick PS2 (4 osie łącznie) + 1× przycisk ARM/MODE
-- **Wyświetlacz:** OLED SSD1306 128×32, I²C
-- **LED:** (opcjonalnie) zielona LED zasilania 3.3 V
+## 1) Overview
+- **MCU:** ESP32-C3 Super Mini (on-board antenna)
+- **Communication:** ESP-NOW (no Wi-Fi/BLE/pairing)
+- **Power:** 3×AA NiMH → LDO 3.3 V → 3V3 rail (with Schottky diode)
+- **Inputs:** 2× PS2 joystick (4 axes total) + 1× ARM/MODE button
+- **Display:** OLED SSD1306 128×32, I²C
+- **LED:** (optional) green power LED 3.3 V
 
 ---
 
-## 2) Schemat blokowy (logiczny)
+## 2) Block Diagram (Logical)
 
 ```
 [3×AA NiMH] --(SW)--> [LDO 3.3V SPX5205] -->|1N5819|--> [3V3]
@@ -18,140 +18,140 @@
 
 [3V3] --> ESP32-C3 Super Mini <-- I²C --> SSD1306 128x32 (SDA=GPIO8, SCL=GPIO9)
    |            | \
-   |            |  \__ ADC: THR(0), YAW(1), PITCH(4), ROLL(2)  [każda oś: R~1k szereg + C=100nF do GND]
+   |            |  \__ ADC: THR(0), YAW(1), PITCH(4), ROLL(2)  [each axis: R~1k series + C=100nF to GND]
    |            |
-   |            \__ GPIO7 (ARM/MODE) — przycisk do GND, INPUT_PULLUP
+   |            \__ GPIO7 (ARM/MODE) — button to GND, INPUT_PULLUP
    |
-   \-- (opcjonalnie) LED zielona + 220Ω do GND
+   \-- (optional) green LED + 220Ω to GND
 ```
 
 ---
 
-## 3) Zasilanie
+## 3) Power Supply
 
-**Ścieżka:** 3×AA NiMH → włącznik → **SPX5205-3.3** → **1N5819** → szyna **3V3**
+**Path:** 3×AA NiMH → switch → **SPX5205-3.3** → **1N5819** → **3V3** rail
 
-- **LDO:** SPX5205-3.3 (niski dropout).  
-  - **EN** do **VIN** (cały czas włączony po włączeniu zasilania).  
-  - **NC** niepodłączony.
-- **Dioda Schottky 1N5819** na wyjściu LDO (kierunek do szyny 3V3) – dodaje zabezpieczenie i delikatnie obniża 3V3 (typ. ~0.2–0.3 V), co nadal jest akceptowalne dla ESP32-C3 i OLED.
-- **Kondensatory (blisko pinów):**
-  - **VIN LDO:** 10–47 µF + 100 nF
-  - **VOUT LDO:** 22–100 µF + 100 nF
-  - **Przy ESP:** 10–47 µF + 100 nF (lokalny zbiornik na szpilki prądu)
-  - **Przy OLED VCC:** 100 nF (lokalny)
-- **Uwagi praktyczne:**
-  - Przewody baterii możliwie krótkie; pętla masy wąska.
-  - Dławik nie jest wymagany, ale dobre prowadzenie masy i kondensatory minimalizują tętnienia.
-  - Zakres 3×NiMH: ~3.0–4.2 V na wejściu LDO (zależnie od obciążenia i stanu ogniw).
+- **LDO:** SPX5205-3.3 (low dropout).
+  - **EN** to **VIN** (always on after power switch).
+  - **NC** not connected.
+- **Schottky diode 1N5819** on LDO output (towards 3V3 rail) – adds protection and slightly reduces 3V3 (typ. ~0.2-0.3 V), still acceptable for ESP32-C3 and OLED.
+- **Capacitors (close to pins):**
+  - **LDO VIN:** 10-47 µF + 100 nF
+  - **LDO VOUT:** 22-100 µF + 100 nF
+  - **At ESP:** 10-47 µF + 100 nF (local reservoir for current spikes)
+  - **At OLED VCC:** 100 nF (local)
+- **Practical notes:**
+  - Battery wires as short as possible; narrow ground loop.
+  - Choke not required, but good ground routing and capacitors minimize ripple.
+  - 3×NiMH range: ~3.0-4.2 V at LDO input (depending on load and cell condition).
 
 ---
 
-## 4) Połączenia MCU (ESP32-C3 Super Mini)
+## 4) MCU Connections (ESP32-C3 Super Mini)
 
 ### 4.1. I²C (OLED)
 - **SDA:** GPIO **8**
 - **SCL:** GPIO **9**
-- **Adres OLED:** 0x3C (typowo; zapasowo 0x3D)
-- **Zasilanie OLED:** VCC=3.3 V, GND wspólna
+- **OLED Address:** 0x3C (typical; fallback 0x3D)
+- **OLED Power:** VCC=3.3 V, common GND
 
-### 4.2. Joysticki (ADC + RC-filtr na **każdej osi**)
-- Każda oś: **R≈1 kΩ** *szeregowo* w linii sygnałowej + **C=100 nF** do GND **przy pinie ADC**  
-  → f_c ≈ 1/(2π·1k·100nF) ≈ **1.6 kHz** (tłumi szum i drgania styków, nie ogranicza odczytów ~kHz)
-- **Mapowanie osi (ostateczne):**
+### 4.2. Joysticks (ADC + RC-filter on **each axis**)
+- Each axis: **R≈1 kΩ** *in series* in signal line + **C=100 nF** to GND **at ADC pin**
+  → f_c ≈ 1/(2π·1k·100nF) ≈ **1.6 kHz** (suppresses noise and contact bounce, doesn't limit ~kHz readings)
+- **Axis mapping (final):**
   - **THR → GPIO 0** (ADC1_CH0)
   - **YAW → GPIO 1** (ADC1_CH1)
   - **PITCH → GPIO 4** (ADC1_CH4)
   - **ROLL → GPIO 2** (ADC1_CH2)
-- **Zasilanie joysticków:** 3.3 V, GND wspólna
+- **Joystick power:** 3.3 V, common GND
 
-### 4.3. Przycisk
-- **ARM/MODE:** **GPIO 7**, do GND, wejście z **INPUT_PULLUP**
-  - Kabel krótki; opcjonalnie 100 nF do GND przy pinie (anty-bounce sprzętowy – niekonieczny, bo jest debounce w FW).
+### 4.3. Button
+- **ARM/MODE:** **GPIO 7**, to GND, input with **INPUT_PULLUP**
+  - Short cable; optional 100 nF to GND at pin (hardware anti-bounce – unnecessary, debounce in FW).
 
-### 4.4. LED (opcjonalnie)
-- **LED zielona** od 3.3 V przez **220 Ω** do GND (tylko sygnalizacja zasilania).
-
----
-
-## 5) Złącza i okablowanie (propozycja)
-
-- **BATERIA:** 2-pin JST-VH/MX lub koszyk AA z włącznikiem w linii dodatniej.
-- **OLED:** 4-pin (VCC, GND, SDA, SCL) raster 2.54 mm; skrętka SDA/SCL nie jest potrzebna, ale prowadź równolegle i krótko.
-- **JOYSTICKI:** 3-pin na oś (3.3 V, GND, sygnał) lub 5/6-pin na moduł (wspólne zasilanie + dwie osie).
-- **PRZYCISK:** 2-pin (GND + sygnał).
+### 4.4. LED (optional)
+- **Green LED** from 3.3 V through **220 Ω** to GND (power indicator only).
 
 ---
 
-## 6) Lista materiałowa (BoM)
+## 5) Connectors and Wiring (Proposal)
 
-| Element | Model / Wartość | Uwagi |
+- **BATTERY:** 2-pin JST-VH/MX or AA holder with switch in positive line.
+- **OLED:** 4-pin (VCC, GND, SDA, SCL) 2.54 mm pitch; no need for twisted SDA/SCL, but route parallel and short.
+- **JOYSTICKS:** 3-pin per axis (3.3 V, GND, signal) or 5/6-pin per module (common power + two axes).
+- **BUTTON:** 2-pin (GND + signal).
+
+---
+
+## 6) Bill of Materials (BoM)
+
+| Component | Model / Value | Notes |
 |---|---|---|
-| MCU | **ESP32-C3 Super Mini** | USB-C/Micro, antena wbudowana |
-| LDO | **SPX5205-3.3** | SOT-23-5; I_out typ. do 150 mA |
-| Dioda | **1N5819** | Schottky, mały spadek |
-| Bateria | **AA NiMH ×3** | koszyk 3×AA, włącznik w szeregu |
-| Kondensatory | 10–47 µF (VIN), 22–100 µF (VOUT), **100 nF** (VIN/VOUT/ESP/OLED) | low-ESR wskazany dla większych |
+| MCU | **ESP32-C3 Super Mini** | USB-C/Micro, built-in antenna |
+| LDO | **SPX5205-3.3** | SOT-23-5; I_out typ. up to 150 mA |
+| Diode | **1N5819** | Schottky, low drop |
+| Battery | **AA NiMH ×3** | 3×AA holder, series switch |
+| Capacitors | 10-47 µF (VIN), 22-100 µF (VOUT), **100 nF** (VIN/VOUT/ESP/OLED) | low-ESR recommended for larger |
 | OLED | **SSD1306 128×32 I²C** | 0.91"/0.49" – 3.3 V |
-| Joysticki | **PS2 x2** | 4 osie łącznie |
-| RC-filtr | **R≈1 kΩ** szereg + **C=100 nF** do GND (na **każdą** oś) | C blisko pinu ADC |
-| Przycisk | Tact 6×6 mm | do GND, do GPIO7 |
-| LED | Zielona + **220 Ω** | opcjonalna |
+| Joysticks | **PS2 x2** | 4 axes total |
+| RC-filter | **R≈1 kΩ** series + **C=100 nF** to GND (per **each** axis) | C close to ADC pin |
+| Button | Tact 6×6 mm | to GND, to GPIO7 |
+| LED | Green + **220 Ω** | optional |
 
 ---
 
-## 7) Wskazówki montażowe
+## 7) Assembly Tips
 
-- **Masa:** jeden „gruby” powrót GND do baterii; rozgałęzienia jak najbliżej źródła (LDO).  
-- **Kondensatory:** MLCC 100 nF **jak najbliżej** pinów VCC/GND układów (ESP, OLED); elektrolity/MLCC µF przy LDO (VIN/VOUT).  
-- **ADC:** prowadź sygnały osi z dala od linii I²C/anteny; **C=100 nF** *przy pinie*, **R≈1 kΩ** w szeregu *blisko źródła*.  
-- **I²C:** linie krótko, równolegle; jeżeli przewody >15–20 cm, rozważ 4.7 kΩ pull-upy (często OLED już ma).  
-- **ESD:** przy joystickach i przycisku warto rozważyć ochronę (TVS) jeśli urządzenie będzie narażone na dotyk w suchym środowisku.  
-- **Mocowanie:** OLED i joysticki na dystansach; zadbaj o mechaniczną sztywność potencjometrów (osie joysticków nie mogą „chodzić” względem płytki).
-
----
-
-## 8) Parametry pracy i budżet prądowy (orientacyjnie)
-
-- **ESP32-C3:** ~40–120 mA (zależnie od taktowania i TX ESP-NOW)  
-- **OLED 128×32:** ~10–20 mA (treść zależna)  
-- **Joysticki + reszta:** ~<5 mA  
-**Razem:** typowo **<150 mA** z 3.3 V → zapas dla SPX5205.
+- **Ground:** one "thick" GND return to battery; branches as close to source (LDO) as possible.
+- **Capacitors:** MLCC 100 nF **as close as possible** to VCC/GND pins of ICs (ESP, OLED); electrolytic/MLCC µF at LDO (VIN/VOUT).
+- **ADC:** route axis signals away from I²C/antenna lines; **C=100 nF** *at pin*, **R≈1 kΩ** in series *close to source*.
+- **I²C:** short, parallel lines; if wires >15-20 cm, consider 4.7 kΩ pull-ups (often OLED has them).
+- **ESD:** for joysticks and button, consider protection (TVS) if device exposed to touch in dry environment.
+- **Mounting:** OLED and joysticks on standoffs; ensure mechanical rigidity of potentiometers (joystick axes shouldn't "move" relative to board).
 
 ---
 
-## 9) Testy uruchomieniowe (hardware)
+## 8) Operating Parameters and Power Budget (Approximate)
 
-1. **Zasilanie**: 3.3 V na szynie po LDO i diodzie (zwykle ~3.05–3.2 V).  
-2. **I²C**: skaner I²C wykrywa OLED na **0x3C** (ew. 0x3D).  
-3. **ADC**: na środku joysticków ~2048 (12-bit); skraje ~0 i ~4095 (po RC-filtrze wartości stabilne; fluktuacje ±5–20 OK).  
-4. **Przycisk**: GPIO7 „LOW” po wciśnięciu (INPUT_PULLUP).  
-5. **ESP-NOW**: `WiFi.mode(WIFI_STA)` → sprawdzenie MAC; transmisja na kanale **1**.
-
----
-
-## 10) Notatki projektowe
-
-- Dioda **Schottky 1N5819** po LDO daje dodatkowy margines przy zasilaniu z programatora/USB (gdyby ESP był kiedyś zasilany z USB i z baterii – zapobiega cofaniu prądu).  
-- **RC-filtry** na osiach znacząco poprawiają stabilność odczytu ADC (szczególnie w ESP32).  
-- **Brak osobnych LED statusowych** – statusy wyświetlane na OLED; LED zasilania (opcjonalna) daje szybkie potwierdzenie 3V3.  
-- **ESP-NOW** wymaga STA-MAC; pamiętaj, aby na RX/TX spiąć **ten sam kanał**.
+- **ESP32-C3:** ~40-120 mA (depending on clock and ESP-NOW TX)
+- **OLED 128×32:** ~10-20 mA (content dependent)
+- **Joysticks + rest:** ~<5 mA
+**Total:** typically **<150 mA** from 3.3 V → margin for SPX5205.
 
 ---
 
-## 11) Pinout — szybka tabela
+## 9) Hardware Startup Tests
 
-| Funkcja | Pin ESP32-C3 | Uwagi |
+1. **Power:** 3.3 V on rail after LDO and diode (usually ~3.05-3.2 V).
+2. **I²C:** I²C scanner detects OLED at **0x3C** (or 0x3D).
+3. **ADC:** joysticks centered ~2048 (12-bit); edges ~0 and ~4095 (after RC-filter values stable; fluctuations ±5-20 OK).
+4. **Button:** GPIO7 "LOW" when pressed (INPUT_PULLUP).
+5. **ESP-NOW:** `WiFi.mode(WIFI_STA)` → check MAC; transmission on channel **1**.
+
+---
+
+## 10) Design Notes
+
+- **Schottky diode 1N5819** after LDO gives extra margin when powered from programmer/USB (if ESP ever powered from USB and battery – prevents reverse current).
+- **RC-filters** on axes significantly improve ADC read stability (especially on ESP32).
+- **No separate status LEDs** – status shown on OLED; power LED (optional) gives quick 3V3 confirmation.
+- **ESP-NOW** requires STA-MAC; remember to pair RX/TX on **same channel**.
+
+---
+
+## 11) Pinout — Quick Table
+
+| Function | ESP32-C3 Pin | Notes |
 |---|---:|---|
 | I²C SDA | **GPIO8** | OLED SSD1306 |
 | I²C SCL | **GPIO9** | OLED SSD1306 |
-| THROTTLE (ADC) | **GPIO0** | R≈1 kΩ szereg, C=100 nF do GND |
-| YAW (ADC) | **GPIO1** | jw. |
-| PITCH (ADC) | **GPIO4** | jw. |
-| ROLL (ADC) | **GPIO2** | jw. |
-| ARM/MODE (BTN) | **GPIO7** | do GND, INPUT_PULLUP |
-| 3V3 | — | z LDO przez 1N5819 |
-| GND | — | wspólna masa |
+| THROTTLE (ADC) | **GPIO0** | R≈1 kΩ series, C=100 nF to GND |
+| YAW (ADC) | **GPIO1** | same |
+| PITCH (ADC) | **GPIO4** | same |
+| ROLL (ADC) | **GPIO2** | same |
+| ARM/MODE (BTN) | **GPIO7** | to GND, INPUT_PULLUP |
+| 3V3 | — | from LDO through 1N5819 |
+| GND | — | common ground |
 
-> Jeśli używasz innego rozkładu pinów na Twojej płytce ESP32-C3 Super Mini (różne „wersje” klonów), dopasuj tylko tabelkę i przewody – firmware już masz pod te numery GPIO.
+> If you use different pin layout on your ESP32-C3 Super Mini board (different "versions" of clones), just adjust the table and wires – firmware is already configured for these GPIO numbers.
 
