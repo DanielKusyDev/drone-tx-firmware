@@ -2,7 +2,18 @@
 #include <cstdint>
 #include <cstddef>
 #include <esp_now.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 #include "protocol.h"
+
+// Error callback interface for logging (optional, dependency injection)
+class IRadioErrorLogger {
+public:
+    virtual ~IRadioErrorLogger() = default;
+    virtual void logWrongPacketSize(int actualLen, int expectedLen) = 0;
+    virtual void logWrongMagicVersion(uint8_t magic, uint8_t version) = 0;
+    virtual void logCrcError(uint16_t calculated, uint16_t received) = 0;
+};
 
 // Enhanced telemetry statistics per packet type
 struct EnhancedTelemStats {
@@ -50,6 +61,9 @@ public:
     bool sendPacket(const void* data, size_t len);
     void setChannel(uint8_t channel);
 
+    // Set error logger (optional - nullptr = no logging)
+    static void setErrorLogger(IRadioErrorLogger* logger);
+
     // Enhanced telemetry reception
     bool hasNewEnhancedTelemetry() const;
     const EnhancedTelemData& getEnhancedTelemetry() const;
@@ -82,17 +96,23 @@ private:
     uint8_t m_channel = 1;
     bool m_initialized = false;
 
-    // Enhanced telemetry state
+    // Enhanced telemetry state (protected by mutex)
     static EnhancedTelemData s_enhancedTelem;
-    static volatile bool s_newEnhancedAvailable;
-    static volatile uint8_t s_newPacketTypeFlags; // Bitmask of received packet types
+    static bool s_newEnhancedAvailable;
+    static uint8_t s_newPacketTypeFlags; // Bitmask of received packet types
 
     // Configuration
     static TelemReceiverConfig s_config;
 
-    // Send status tracking
+    // Send status tracking (ISR-safe: modified only in ISR, read in main)
     static volatile uint32_t s_sendSuccessCount;
     static volatile uint32_t s_sendFailCount;
+
+    // Thread safety
+    static SemaphoreHandle_t s_telemMutex;  // Protects telemetry data and flags
+
+    // Error logging (optional dependency injection)
+    static IRadioErrorLogger* s_errorLogger;
 
     // Packet handlers
     static void handleEnhancedAttitude(const uint8_t* data, int len);

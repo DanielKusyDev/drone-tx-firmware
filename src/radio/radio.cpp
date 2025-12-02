@@ -5,16 +5,11 @@
 #include <esp_wifi.h>
 #include <cstring>
 
-// Forward declarations for compatibility logging functions (defined in main.cpp)
-void radioWrongPacketSize(int actualLen, int expectedLen);
-void radioWrongMagicVersion(uint8_t magic, uint8_t version);
-void radioCrcError(uint16_t calculated, uint16_t received);
-
 
 // Enhanced telemetry state
 EnhancedTelemData RadioManager::s_enhancedTelem = {};
-volatile bool RadioManager::s_newEnhancedAvailable = false;
-volatile uint8_t RadioManager::s_newPacketTypeFlags = 0;
+bool RadioManager::s_newEnhancedAvailable = false;
+uint8_t RadioManager::s_newPacketTypeFlags = 0;
 
 // Telemetry receiver configuration
 TelemReceiverConfig RadioManager::s_config = {
@@ -26,6 +21,46 @@ TelemReceiverConfig RadioManager::s_config = {
 // Send status tracking
 volatile uint32_t RadioManager::s_sendSuccessCount = 0;
 volatile uint32_t RadioManager::s_sendFailCount = 0;
+
+// Thread safety
+SemaphoreHandle_t RadioManager::s_telemMutex = NULL;
+
+// Error logging (optional)
+IRadioErrorLogger* RadioManager::s_errorLogger = nullptr;
+
+void RadioManager::setErrorLogger(IRadioErrorLogger* logger) {
+    s_errorLogger = logger;
+}
+
+// Helper macro for packet handlers to reduce code duplication
+// NOTE: LOWERCASE_TYPE must match struct member names (attitude, control, etc.)
+#define HANDLE_TELEMETRY_PACKET(TYPE, ENUM_TYPE, STRUCT_NAME, LOWERCASE_TYPE, INDEX) \
+void RadioManager::handleEnhanced##TYPE(const uint8_t* data, int len) { \
+    if (len != sizeof(Telemetry##STRUCT_NAME)) { \
+        if (s_errorLogger) s_errorLogger->logWrongPacketSize(len, sizeof(Telemetry##STRUCT_NAME)); \
+        return; \
+    } \
+    const Telemetry##STRUCT_NAME* packet = reinterpret_cast<const Telemetry##STRUCT_NAME*>(data); \
+    uint16_t calculatedCrc = crc16_x25(data, len - sizeof(packet->crc)); \
+    bool crcValid = (calculatedCrc == packet->crc); \
+    if (!crcValid) { \
+        if (s_errorLogger) s_errorLogger->logCrcError(calculatedCrc, packet->crc); \
+        if (xSemaphoreTakeFromISR(s_telemMutex, NULL) == pdTRUE) { \
+            updatePacketStats(TELEM_TYPE_##ENUM_TYPE, packet->header.seq, false); \
+            xSemaphoreGiveFromISR(s_telemMutex, NULL); \
+        } \
+        return; \
+    } \
+    if (xSemaphoreTakeFromISR(s_telemMutex, NULL) == pdTRUE) { \
+        updatePacketStats(TELEM_TYPE_##ENUM_TYPE, packet->header.seq, true); \
+        memcpy(&s_enhancedTelem.LOWERCASE_TYPE, packet, sizeof(Telemetry##STRUCT_NAME)); \
+        s_enhancedTelem.LOWERCASE_TYPE##_rx_ms = millis(); \
+        s_enhancedTelem.stats[INDEX].last_timestamp_us = packet->header.timestamp_us; \
+        s_newEnhancedAvailable = true; \
+        s_newPacketTypeFlags |= (1 << INDEX); \
+        xSemaphoreGiveFromISR(s_telemMutex, NULL); \
+    } \
+}
 
 // Static callback function
 void RadioManager::onSendCallback(const uint8_t *mac_addr, esp_now_send_status_t status) {
@@ -53,7 +88,9 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
         if (!s_config.enable_enhanced) return;
 
         if (len < sizeof(TelemetryHeader)) {
-            radioWrongPacketSize(len, sizeof(TelemetryHeader));
+            if (s_errorLogger) {
+                s_errorLogger->logWrongPacketSize(len, sizeof(TelemetryHeader));
+            }
             return;
         }
 
@@ -95,32 +132,42 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
         }
     } else {
         // Unknown packet format
-        radioWrongMagicVersion(magic, version);
+        if (s_errorLogger) {
+            s_errorLogger->logWrongMagicVersion(magic, version);
+        }
     }
 }
 
 bool RadioManager::init(uint8_t channel) {
     m_channel = channel;
-    
+
+    // Create mutex for telemetry data protection
+    if (s_telemMutex == NULL) {
+        s_telemMutex = xSemaphoreCreateMutex();
+        if (s_telemMutex == NULL) {
+            return false;  // Mutex creation failed
+        }
+    }
+
     // Initialize WiFi in station mode
     WiFi.mode(WIFI_STA);
-    
+
     // Set the channel
     esp_wifi_set_promiscuous(true);
     esp_wifi_set_channel(m_channel, WIFI_SECOND_CHAN_NONE);
     esp_wifi_set_promiscuous(false);
-    
+
     // Initialize ESP-NOW
     if (esp_now_init() != ESP_OK) {
         return false;
     }
-    
+
     // Register send callback
     esp_now_register_send_cb(onSendCallback);
-    
+
     // TELEM: Register receive callback
     esp_now_register_recv_cb(onReceiveCallback);
-    
+
     m_initialized = true;
     return true;
 }
@@ -204,250 +251,110 @@ void RadioManager::updatePacketStats(TelemetryPacketType type, uint16_t seq, boo
     stats.packets_received++;
 }
 
-void RadioManager::handleEnhancedAttitude(const uint8_t* data, int len) {
-    if (len != sizeof(TelemetryAttitude)) {
-        radioWrongPacketSize(len, sizeof(TelemetryAttitude));
-        return;
-    }
-
-    const TelemetryAttitude* packet = reinterpret_cast<const TelemetryAttitude*>(data);
-
-    // Verify CRC
-    uint16_t calculatedCrc = crc16_x25(data, len - sizeof(packet->crc));
-    bool crcValid = (calculatedCrc == packet->crc);
-
-    if (!crcValid) {
-        radioCrcError(calculatedCrc, packet->crc);
-        updatePacketStats(TELEM_TYPE_ATTITUDE, packet->header.seq, false);
-        return;
-    }
-
-    // Update stats
-    updatePacketStats(TELEM_TYPE_ATTITUDE, packet->header.seq, true);
-
-    // Store packet data
-    memcpy(&s_enhancedTelem.attitude, packet, sizeof(TelemetryAttitude));
-    s_enhancedTelem.attitude_rx_ms = millis();
-    s_enhancedTelem.stats[0].last_timestamp_us = packet->header.timestamp_us;
-
-    // Set flags
-    s_newEnhancedAvailable = true;
-    s_newPacketTypeFlags |= (1 << 0);
-}
-
-void RadioManager::handleEnhancedControl(const uint8_t* data, int len) {
-    if (len != sizeof(TelemetryControl)) {
-        radioWrongPacketSize(len, sizeof(TelemetryControl));
-        return;
-    }
-
-    const TelemetryControl* packet = reinterpret_cast<const TelemetryControl*>(data);
-
-    // Verify CRC
-    uint16_t calculatedCrc = crc16_x25(data, len - sizeof(packet->crc));
-    bool crcValid = (calculatedCrc == packet->crc);
-
-    if (!crcValid) {
-        radioCrcError(calculatedCrc, packet->crc);
-        updatePacketStats(TELEM_TYPE_CONTROL, packet->header.seq, false);
-        return;
-    }
-
-    updatePacketStats(TELEM_TYPE_CONTROL, packet->header.seq, true);
-
-    memcpy(&s_enhancedTelem.control, packet, sizeof(TelemetryControl));
-    s_enhancedTelem.control_rx_ms = millis();
-    s_enhancedTelem.stats[1].last_timestamp_us = packet->header.timestamp_us;
-
-    s_newEnhancedAvailable = true;
-    s_newPacketTypeFlags |= (1 << 1);
-}
-
-void RadioManager::handleEnhancedMotors(const uint8_t* data, int len) {
-    if (len != sizeof(TelemetryMotors)) {
-        radioWrongPacketSize(len, sizeof(TelemetryMotors));
-        return;
-    }
-
-    const TelemetryMotors* packet = reinterpret_cast<const TelemetryMotors*>(data);
-
-    uint16_t calculatedCrc = crc16_x25(data, len - sizeof(packet->crc));
-    bool crcValid = (calculatedCrc == packet->crc);
-
-    if (!crcValid) {
-        radioCrcError(calculatedCrc, packet->crc);
-        updatePacketStats(TELEM_TYPE_MOTORS, packet->header.seq, false);
-        return;
-    }
-
-    updatePacketStats(TELEM_TYPE_MOTORS, packet->header.seq, true);
-
-    memcpy(&s_enhancedTelem.motors, packet, sizeof(TelemetryMotors));
-    s_enhancedTelem.motors_rx_ms = millis();
-    s_enhancedTelem.stats[2].last_timestamp_us = packet->header.timestamp_us;
-
-    s_newEnhancedAvailable = true;
-    s_newPacketTypeFlags |= (1 << 2);
-}
-
-void RadioManager::handleEnhancedStatus(const uint8_t* data, int len) {
-    if (len != sizeof(TelemetryStatus)) {
-        radioWrongPacketSize(len, sizeof(TelemetryStatus));
-        return;
-    }
-
-    const TelemetryStatus* packet = reinterpret_cast<const TelemetryStatus*>(data);
-
-    uint16_t calculatedCrc = crc16_x25(data, len - sizeof(packet->crc));
-    bool crcValid = (calculatedCrc == packet->crc);
-
-    if (!crcValid) {
-        radioCrcError(calculatedCrc, packet->crc);
-        updatePacketStats(TELEM_TYPE_STATUS, packet->header.seq, false);
-        return;
-    }
-
-    updatePacketStats(TELEM_TYPE_STATUS, packet->header.seq, true);
-
-    memcpy(&s_enhancedTelem.status, packet, sizeof(TelemetryStatus));
-    s_enhancedTelem.status_rx_ms = millis();
-    s_enhancedTelem.stats[3].last_timestamp_us = packet->header.timestamp_us;
-
-    s_newEnhancedAvailable = true;
-    s_newPacketTypeFlags |= (1 << 3);
-}
-
-void RadioManager::handleEnhancedSensors(const uint8_t* data, int len) {
-    if (len != sizeof(TelemetrySensors)) {
-        radioWrongPacketSize(len, sizeof(TelemetrySensors));
-        return;
-    }
-
-    const TelemetrySensors* packet = reinterpret_cast<const TelemetrySensors*>(data);
-
-    uint16_t calculatedCrc = crc16_x25(data, len - sizeof(packet->crc));
-    bool crcValid = (calculatedCrc == packet->crc);
-
-    if (!crcValid) {
-        radioCrcError(calculatedCrc, packet->crc);
-        updatePacketStats(TELEM_TYPE_SENSORS, packet->header.seq, false);
-        return;
-    }
-
-    updatePacketStats(TELEM_TYPE_SENSORS, packet->header.seq, true);
-
-    memcpy(&s_enhancedTelem.sensors, packet, sizeof(TelemetrySensors));
-    s_enhancedTelem.sensors_rx_ms = millis();
-    s_enhancedTelem.stats[4].last_timestamp_us = packet->header.timestamp_us;
-
-    s_newEnhancedAvailable = true;
-    s_newPacketTypeFlags |= (1 << 4);
-}
-
-void RadioManager::handleEnhancedSafety(const uint8_t* data, int len) {
-    if (len != sizeof(TelemetrySafety)) {
-        radioWrongPacketSize(len, sizeof(TelemetrySafety));
-        return;
-    }
-
-    const TelemetrySafety* packet = reinterpret_cast<const TelemetrySafety*>(data);
-
-    uint16_t calculatedCrc = crc16_x25(data, len - sizeof(packet->crc));
-    bool crcValid = (calculatedCrc == packet->crc);
-
-    if (!crcValid) {
-        radioCrcError(calculatedCrc, packet->crc);
-        updatePacketStats(TELEM_TYPE_SAFETY, packet->header.seq, false);
-        return;
-    }
-
-    updatePacketStats(TELEM_TYPE_SAFETY, packet->header.seq, true);
-
-    memcpy(&s_enhancedTelem.safety, packet, sizeof(TelemetrySafety));
-    s_enhancedTelem.safety_rx_ms = millis();
-    s_enhancedTelem.stats[5].last_timestamp_us = packet->header.timestamp_us;
-
-    s_newEnhancedAvailable = true;
-    s_newPacketTypeFlags |= (1 << 5);
-}
-
-void RadioManager::handleEnhancedPerformance(const uint8_t* data, int len) {
-    if (len != sizeof(TelemetryPerformance)) {
-        radioWrongPacketSize(len, sizeof(TelemetryPerformance));
-        return;
-    }
-
-    const TelemetryPerformance* packet = reinterpret_cast<const TelemetryPerformance*>(data);
-
-    uint16_t calculatedCrc = crc16_x25(data, len - sizeof(packet->crc));
-    bool crcValid = (calculatedCrc == packet->crc);
-
-    if (!crcValid) {
-        radioCrcError(calculatedCrc, packet->crc);
-        updatePacketStats(TELEM_TYPE_PERFORMANCE, packet->header.seq, false);
-        return;
-    }
-
-    updatePacketStats(TELEM_TYPE_PERFORMANCE, packet->header.seq, true);
-
-    memcpy(&s_enhancedTelem.performance, packet, sizeof(TelemetryPerformance));
-    s_enhancedTelem.performance_rx_ms = millis();
-    s_enhancedTelem.stats[6].last_timestamp_us = packet->header.timestamp_us;
-
-    s_newEnhancedAvailable = true;
-    s_newPacketTypeFlags |= (1 << 6);
-}
+// Generate all packet handlers using macro (thread-safe with mutexes)
+HANDLE_TELEMETRY_PACKET(Attitude, ATTITUDE, Attitude, attitude, 0)
+HANDLE_TELEMETRY_PACKET(Control, CONTROL, Control, control, 1)
+HANDLE_TELEMETRY_PACKET(Motors, MOTORS, Motors, motors, 2)
+HANDLE_TELEMETRY_PACKET(Status, STATUS, Status, status, 3)
+HANDLE_TELEMETRY_PACKET(Sensors, SENSORS, Sensors, sensors, 4)
+HANDLE_TELEMETRY_PACKET(Safety, SAFETY, Safety, safety, 5)
+HANDLE_TELEMETRY_PACKET(Performance, PERFORMANCE, Performance, performance, 6)
 
 // ============================================================================
 // Enhanced Telemetry Public API
 // ============================================================================
 
 bool RadioManager::hasNewEnhancedTelemetry() const {
-    return s_newEnhancedAvailable;
+    bool result = false;
+    if (xSemaphoreTake(s_telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+        result = s_newEnhancedAvailable;
+        xSemaphoreGive(s_telemMutex);
+    }
+    return result;
 }
 
 const EnhancedTelemData& RadioManager::getEnhancedTelemetry() const {
+    // Note: Caller should hold mutex or accept potential race
+    // This is acceptable as telemetry is read-only after reception
     return s_enhancedTelem;
 }
 
 void RadioManager::clearNewEnhancedFlag() {
-    s_newEnhancedAvailable = false;
-    s_newPacketTypeFlags = 0;
+    if (xSemaphoreTake(s_telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+        s_newEnhancedAvailable = false;
+        s_newPacketTypeFlags = 0;
+        xSemaphoreGive(s_telemMutex);
+    }
 }
 
 bool RadioManager::hasAttitude() const {
-    uint32_t age = millis() - s_enhancedTelem.attitude_rx_ms;
-    return (s_enhancedTelem.stats[0].packets_received > 0) && (age < s_config.packet_timeout_ms);
+    bool result = false;
+    if (xSemaphoreTake(s_telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+        uint32_t age = millis() - s_enhancedTelem.attitude_rx_ms;
+        result = (s_enhancedTelem.stats[0].packets_received > 0) && (age < s_config.packet_timeout_ms);
+        xSemaphoreGive(s_telemMutex);
+    }
+    return result;
 }
 
 bool RadioManager::hasControl() const {
-    uint32_t age = millis() - s_enhancedTelem.control_rx_ms;
-    return (s_enhancedTelem.stats[1].packets_received > 0) && (age < s_config.packet_timeout_ms);
+    bool result = false;
+    if (xSemaphoreTake(s_telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+        uint32_t age = millis() - s_enhancedTelem.control_rx_ms;
+        result = (s_enhancedTelem.stats[1].packets_received > 0) && (age < s_config.packet_timeout_ms);
+        xSemaphoreGive(s_telemMutex);
+    }
+    return result;
 }
 
 bool RadioManager::hasMotors() const {
-    uint32_t age = millis() - s_enhancedTelem.motors_rx_ms;
-    return (s_enhancedTelem.stats[2].packets_received > 0) && (age < s_config.packet_timeout_ms);
+    bool result = false;
+    if (xSemaphoreTake(s_telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+        uint32_t age = millis() - s_enhancedTelem.motors_rx_ms;
+        result = (s_enhancedTelem.stats[2].packets_received > 0) && (age < s_config.packet_timeout_ms);
+        xSemaphoreGive(s_telemMutex);
+    }
+    return result;
 }
 
 bool RadioManager::hasStatus() const {
-    uint32_t age = millis() - s_enhancedTelem.status_rx_ms;
-    return (s_enhancedTelem.stats[3].packets_received > 0) && (age < s_config.packet_timeout_ms);
+    bool result = false;
+    if (xSemaphoreTake(s_telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+        uint32_t age = millis() - s_enhancedTelem.status_rx_ms;
+        result = (s_enhancedTelem.stats[3].packets_received > 0) && (age < s_config.packet_timeout_ms);
+        xSemaphoreGive(s_telemMutex);
+    }
+    return result;
 }
 
 bool RadioManager::hasSensors() const {
-    uint32_t age = millis() - s_enhancedTelem.sensors_rx_ms;
-    return (s_enhancedTelem.stats[4].packets_received > 0) && (age < s_config.packet_timeout_ms);
+    bool result = false;
+    if (xSemaphoreTake(s_telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+        uint32_t age = millis() - s_enhancedTelem.sensors_rx_ms;
+        result = (s_enhancedTelem.stats[4].packets_received > 0) && (age < s_config.packet_timeout_ms);
+        xSemaphoreGive(s_telemMutex);
+    }
+    return result;
 }
 
 bool RadioManager::hasSafety() const {
-    uint32_t age = millis() - s_enhancedTelem.safety_rx_ms;
-    return (s_enhancedTelem.stats[5].packets_received > 0) && (age < s_config.packet_timeout_ms);
+    bool result = false;
+    if (xSemaphoreTake(s_telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+        uint32_t age = millis() - s_enhancedTelem.safety_rx_ms;
+        result = (s_enhancedTelem.stats[5].packets_received > 0) && (age < s_config.packet_timeout_ms);
+        xSemaphoreGive(s_telemMutex);
+    }
+    return result;
 }
 
 bool RadioManager::hasPerformance() const {
-    uint32_t age = millis() - s_enhancedTelem.performance_rx_ms;
-    return (s_enhancedTelem.stats[6].packets_received > 0) && (age < s_config.packet_timeout_ms);
+    bool result = false;
+    if (xSemaphoreTake(s_telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+        uint32_t age = millis() - s_enhancedTelem.performance_rx_ms;
+        result = (s_enhancedTelem.stats[6].packets_received > 0) && (age < s_config.packet_timeout_ms);
+        xSemaphoreGive(s_telemMutex);
+    }
+    return result;
 }
 
 const EnhancedTelemStats& RadioManager::getEnhancedStats(TelemetryPacketType type) const {

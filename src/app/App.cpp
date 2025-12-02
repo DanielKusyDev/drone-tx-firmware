@@ -98,11 +98,6 @@ App g_app;
 
 bool App::init()
 {
-    // Initialize pointers to global managers
-    m_control = &control;
-    m_radio = &radio;
-    m_lastOledUpdateMs = 0;
-
     // Initialize force disarm tracking
     m_lastArmedState = false;
     m_forceDisarmDetected = false;
@@ -131,7 +126,7 @@ bool App::init()
 
     // Radio
     LOG_INFO(RADIO, "Initializing ESP-NOW radio (channel %d)...", ESPNOW_CHANNEL);
-    if (!m_radio->init(ESPNOW_CHANNEL))
+    if (!radio.init(ESPNOW_CHANNEL))
     {
         LOG_ERROR(RADIO, "RadioManager init failed");
         return false;
@@ -141,7 +136,7 @@ bool App::init()
     LOG_INFO(RADIO, "Setting drone peer MAC: %02X:%02X:%02X:%02X:%02X:%02X",
              g_droneMac[0], g_droneMac[1], g_droneMac[2],
              g_droneMac[3], g_droneMac[4], g_droneMac[5]);
-    if (!m_radio->setPeerMac(g_droneMac))
+    if (!radio.setPeerMac(g_droneMac))
     {
         LOG_ERROR(RADIO, "Failed to set drone peer MAC");
         return false;
@@ -150,7 +145,7 @@ bool App::init()
 
     // Control
     LOG_INFO(INPUTS, "Initializing control inputs...");
-    if (!m_control->init())
+    if (!control.init())
     {
         LOG_ERROR(INPUTS, "ControlManager init failed");
         return false;
@@ -159,7 +154,7 @@ bool App::init()
 
     // Calibrate stick centers (ensure sticks are neutral!)
     LOG_INFO(INPUTS, "Calibrating stick centers - hold sticks at neutral position...");
-    m_control->calibrate();
+    control.calibrate();
     LOG_INFO(INPUTS, "Stick calibration complete");
 
     LOG_INFO(SYSTEM, "Transmitter initialization complete");
@@ -178,11 +173,11 @@ void App::loop()
     handleSerialCommands();
 
     // 2. Process control inputs (joysticks, switches)
-    const ControlInputs &inputs = m_control->readInputs();
+    const ControlInputs &inputs = control.readInputs();
 
     // 3. Apply safety logic (arming, horizon, telemetry)
     // Get enhanced telemetry for safety checks
-    const EnhancedTelemData &etelem = m_radio->getEnhancedTelemetry();
+    const EnhancedTelemData &etelem = radio.getEnhancedTelemetry();
 
     // --- Horizon safety from STATUS packet ---
     // In enhanced telemetry, safety_flags contains horizon bit (bit 0) and calibration bits (bits 3-5)
@@ -242,7 +237,7 @@ void App::loop()
             packet.flags |= RC_FLAG_ARMED;
             g_armPulseCountdown--;
         }
-        bool sent = m_radio->sendPacket(&packet, sizeof(packet));
+        bool sent = radio.sendPacket(&packet, sizeof(packet));
 
         // Debug: Log occasional packet status (every 50 packets = 1 second)
         static uint8_t debugCounter = 0;
@@ -253,8 +248,8 @@ void App::loop()
         {
             debugCounter = 0;
 
-            uint32_t currentSuccess = m_radio->getSendSuccessCount();
-            uint32_t currentFail = m_radio->getSendFailCount();
+            uint32_t currentSuccess = radio.getSendSuccessCount();
+            uint32_t currentFail = radio.getSendFailCount();
             uint32_t newSuccess = currentSuccess - lastSuccessCount;
             uint32_t newFails = currentFail - lastFailCount;
 
@@ -289,15 +284,15 @@ void App::loop()
     if (telemEvery.check())
     {
         // Check for enhanced telemetry
-        if (m_radio->hasNewEnhancedTelemetry())
+        if (radio.hasNewEnhancedTelemetry())
         {
-            m_radio->clearNewEnhancedFlag();
+            radio.clearNewEnhancedFlag();
             g_lastTelemUpdateMs = millis();
             g_telemFrequency = 20.0f; // Enhanced ATTITUDE packets at 20Hz
             dropCount = 0;
 
             // Log enhanced telemetry data
-            const EnhancedTelemData &etelem = m_radio->getEnhancedTelemetry();
+            const EnhancedTelemData &etelem = radio.getEnhancedTelemetry();
 
             // ATTITUDE packet (20Hz from drone)
             if (etelem.attitude_rx_ms > 0)
@@ -432,16 +427,16 @@ void App::handleSerialCommands()
         else if (c == 'C' || c == 'c')
         {
             LOG_INFO(INPUTS, "Manual calibration triggered - hold sticks neutral!");
-            m_control->calibrate();
+            control.calibrate();
             LOG_INFO(INPUTS, "Calibration complete");
         }
         // Radio diagnostics
         else if (c == 'D' || c == 'd')
         {
-            uint32_t successCount = m_radio->getSendSuccessCount();
-            uint32_t failCount = m_radio->getSendFailCount();
-            uint32_t totalPackets = m_radio->getTotalEnhancedPackets();
-            uint32_t totalDrops = m_radio->getTotalEnhancedDrops();
+            uint32_t successCount = radio.getSendSuccessCount();
+            uint32_t failCount = radio.getSendFailCount();
+            uint32_t totalPackets = radio.getTotalEnhancedPackets();
+            uint32_t totalDrops = radio.getTotalEnhancedDrops();
 
             Serial.println("[RADIO_STATS]");
             Serial.printf("Send Success: %lu\n", successCount);
@@ -468,7 +463,7 @@ void App::handleSerialCommands()
         // Enhanced telemetry diagnostics
         else if (c == 'E' || c == 'e')
         {
-            const TelemReceiverConfig &config = m_radio->getReceiverConfig();
+            const TelemReceiverConfig &config = radio.getReceiverConfig();
 
             Serial.println("[TELEMETRY_STATS]");
             Serial.printf("Enhanced Mode: %s\n", config.enable_enhanced ? "ON" : "OFF");
@@ -476,8 +471,8 @@ void App::handleSerialCommands()
             Serial.printf("Timeout: %u ms\n", config.packet_timeout_ms);
             Serial.println();
 
-            uint32_t totalPkts = m_radio->getTotalEnhancedPackets();
-            uint32_t totalDrops = m_radio->getTotalEnhancedDrops();
+            uint32_t totalPkts = radio.getTotalEnhancedPackets();
+            uint32_t totalDrops = radio.getTotalEnhancedDrops();
             Serial.printf("Total Enhanced Packets: %lu\n", totalPkts);
             Serial.printf("Total Enhanced Drops: %lu\n", totalDrops);
             if (totalPkts > 0)
@@ -493,7 +488,7 @@ void App::handleSerialCommands()
             for (uint8_t i = 1; i <= 7; i++)
             {
                 TelemetryPacketType type = static_cast<TelemetryPacketType>(i);
-                const EnhancedTelemStats &stats = m_radio->getEnhancedStats(type);
+                const EnhancedTelemStats &stats = radio.getEnhancedStats(type);
 
                 if (stats.packets_received > 0)
                 {
@@ -509,19 +504,19 @@ void App::handleSerialCommands()
 
             // Data freshness
             Serial.println("Data Freshness:");
-            Serial.printf("  ATTITUDE: %s\n", m_radio->hasAttitude() ? "Fresh" : "Stale");
-            Serial.printf("  CONTROL: %s\n", m_radio->hasControl() ? "Fresh" : "Stale");
-            Serial.printf("  MOTORS: %s\n", m_radio->hasMotors() ? "Fresh" : "Stale");
-            Serial.printf("  STATUS: %s\n", m_radio->hasStatus() ? "Fresh" : "Stale");
-            Serial.printf("  SENSORS: %s\n", m_radio->hasSensors() ? "Fresh" : "Stale");
-            Serial.printf("  SAFETY: %s\n", m_radio->hasSafety() ? "Fresh" : "Stale");
-            Serial.printf("  PERFORMANCE: %s\n", m_radio->hasPerformance() ? "Fresh" : "Stale");
+            Serial.printf("  ATTITUDE: %s\n", radio.hasAttitude() ? "Fresh" : "Stale");
+            Serial.printf("  CONTROL: %s\n", radio.hasControl() ? "Fresh" : "Stale");
+            Serial.printf("  MOTORS: %s\n", radio.hasMotors() ? "Fresh" : "Stale");
+            Serial.printf("  STATUS: %s\n", radio.hasStatus() ? "Fresh" : "Stale");
+            Serial.printf("  SENSORS: %s\n", radio.hasSensors() ? "Fresh" : "Stale");
+            Serial.printf("  SAFETY: %s\n", radio.hasSafety() ? "Fresh" : "Stale");
+            Serial.printf("  PERFORMANCE: %s\n", radio.hasPerformance() ? "Fresh" : "Stale");
             Serial.println();
 
             // Status flags (decoded from armed and safety_flags bitfields)
-            if (m_radio->hasStatus())
+            if (radio.hasStatus())
             {
-                const EnhancedTelemData &etelem = m_radio->getEnhancedTelemetry();
+                const EnhancedTelemData &etelem = radio.getEnhancedTelemetry();
                 Serial.println("Status Flags:");
                 Serial.printf("  Armed: %s\n", (etelem.status.armed & TELEM_ARMED_BIT) ? "YES" : "NO");
                 Serial.printf("  Horizon OK: %s\n", (etelem.status.safety_flags & TELEM_HORIZON_BIT) ? "YES" : "NO");
@@ -534,9 +529,9 @@ void App::handleSerialCommands()
         // Toggle enhanced telemetry mode
         else if (c == 'T' || c == 't')
         {
-            TelemReceiverConfig config = m_radio->getReceiverConfig();
+            TelemReceiverConfig config = radio.getReceiverConfig();
             config.enable_enhanced = !config.enable_enhanced;
-            m_radio->setReceiverConfig(config);
+            radio.setReceiverConfig(config);
             Serial.printf("[CONFIG] Enhanced telemetry: %s\n", config.enable_enhanced ? "ENABLED" : "DISABLED");
         }
     }

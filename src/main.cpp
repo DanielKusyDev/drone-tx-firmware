@@ -12,9 +12,26 @@
 #include <WiFi.h>
 #include <cstdarg>  // For va_list in logging functions
 
+// Error logger implementation for RadioManager (dependency injection)
+class RadioErrorLogger : public IRadioErrorLogger {
+public:
+    void logWrongPacketSize(int actualLen, int expectedLen) override {
+        LOG_ERROR(RADIO, "Wrong packet size: %d (expected %d)", actualLen, expectedLen);
+    }
+
+    void logWrongMagicVersion(uint8_t magic, uint8_t version) override {
+        LOG_ERROR(RADIO, "Wrong magic/version: 0x%02X / %d", magic, version);
+    }
+
+    void logCrcError(uint16_t calculated, uint16_t received) override {
+        LOG_ERROR(RADIO, "CRC mismatch: calc=0x%04X rcv=0x%04X", calculated, received);
+    }
+};
+
 // Global instances
 RadioManager radio;
 ControlManager control;
+RadioErrorLogger radioErrorLogger;
 
 // Global OLED display (matching original code structure)
 Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &Wire, -1);
@@ -49,22 +66,11 @@ bool g_forceDisarmActive = false;
 unsigned long g_forceDisarmTimestamp = 0;
 #define FORCE_DISARM_WARNING_MS 5000  // Show warning for 5 seconds
 
-// LOG: Compatibility shim for radio.cpp error logging
-// These global functions forward to the new logger system
-void radioWrongPacketSize(int actualLen, int expectedLen) {
-    LOG_ERROR(RADIO, "Wrong packet size: %d (expected %d)", actualLen, expectedLen);
-}
-
-void radioWrongMagicVersion(uint8_t magic, uint8_t version) {
-    LOG_ERROR(RADIO, "Wrong magic/version: 0x%02X / %d", magic, version);
-}
-
-void radioCrcError(uint16_t calculated, uint16_t received) {
-    LOG_ERROR(RADIO, "CRC mismatch: calc=0x%04X rcv=0x%04X", calculated, received);
-}
-
-
 void setup() {
+    // Set error logger for radio (dependency injection - no more forward declarations!)
+    RadioManager::setErrorLogger(&radioErrorLogger);
+
+    // Initialize application
     g_app.init();
 }
 

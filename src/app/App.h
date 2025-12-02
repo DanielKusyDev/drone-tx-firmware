@@ -74,15 +74,8 @@ public:
     void handleSerialCommands();
 
 private:
-    // Subsystem instances (maintain global access pattern for now)
-    ControlManager* m_control;
-    RadioManager* m_radio;
-
     // OLED_DEMO: Demo state machine instance
     OledDemo m_oledDemo;
-
-    // Timing state (preserve existing timing behavior)
-    unsigned long m_lastOledUpdateMs;
 
     // Force disarm tracking
     bool m_lastArmedState;
