@@ -21,9 +21,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8e6be60b-65fc-40ce-bd04-1bea3b24bd12" name="Changes" comment="Calibration new buttn">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="8e6be60b-65fc-40ce-bd04-1bea3b24bd12" name="Changes" comment="Calibration new buttn" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -226,6 +224,7 @@
       <workItem from="1764514428884" duration="618000" />
       <workItem from="1764516740284" duration="278000" />
       <workItem from="1764527105053" duration="69000" />
+      <workItem from="1764700629557" duration="596000" />
     </task>
     <task id="LOCAL-00001" summary="- Better script for plots&#10;- Removed legacy">
       <option name="closed" value="true" />

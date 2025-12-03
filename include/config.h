@@ -31,9 +31,9 @@
 // Control Parameters
 #define DEADZONE_THRESHOLD 20
 #define ARM_DEBOUNCE_MS    100
-#define IIR_ALPHA          0.3f
+#define IIR_ALPHA          0.15f  // Smooth joystick: reduced from 0.3f for smoother response
 #define THR_DEADZONE       50
-#define THR_RATE_SCALE     1.2f
+#define THR_RATE_SCALE     0.6f   // Smooth joystick: reduced from 1.2f to prevent too fast climb
 
 // TELEM: Button press timing
 #define SHORT_PRESS_MS     500
@@ -45,7 +45,7 @@
 
 // ADC averaging
 #define ADC_SAMPLES_DEFAULT 16
-#define ADC_SAMPLES_AXIS    4
+#define ADC_SAMPLES_AXIS    8  // Smooth joystick: increased from 4 for better noise reduction
 #define ADC_SAMPLES_CAL     64
 
 // Display update rate
