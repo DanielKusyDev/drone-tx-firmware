@@ -13,6 +13,7 @@
 #include "control.h"
 #include "radio.h"
 #include "protocol.h"
+#include "telemetry/TelemetryForwarder.h"
 
 // OLED_DEMO: Demo state machine for cycling through all UI views
 enum class OledDemoState {
@@ -70,12 +71,23 @@ public:
      * - 'D': Display radio diagnostics (legacy telemetry)
      * - 'E': Display enhanced telemetry statistics and per-packet details
      * - 'T': Toggle enhanced telemetry mode on/off
+     * - 'U': Toggle UART mode (DEBUG_TEXT / TELEMETRY_BINARY)
+     * - 'F': Display telemetry forwarder statistics
      */
     void handleSerialCommands();
+
+    /**
+     * @brief Get telemetry forwarder instance
+     * @return Reference to TelemetryForwarder
+     */
+    TelemetryForwarder& getForwarder() { return m_telemForwarder; }
 
 private:
     // OLED_DEMO: Demo state machine instance
     OledDemo m_oledDemo;
+
+    // Telemetry forwarder
+    TelemetryForwarder m_telemForwarder;
 
     // Force disarm tracking
     bool m_lastArmedState;

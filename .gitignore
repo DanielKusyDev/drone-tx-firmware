@@ -42,3 +42,6 @@ Desktop.ini
 # Environment variables
 .env
 .env.local
+
+
+local
