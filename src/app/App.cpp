@@ -143,6 +143,19 @@ bool App::init()
     }
     LOG_INFO(RADIO, "Radio initialized successfully");
 
+    // Telemetry Forwarder
+    LOG_INFO(SYSTEM, "Initializing telemetry forwarder...");
+    m_telemForwarder.init(&radio);
+
+    // Set UART mode based on compile-time config
+    #ifdef UART_MODE_TELEMETRY_BINARY
+        m_telemForwarder.setUartMode(UartMode::TELEMETRY_BINARY);
+        LOG_INFO(SYSTEM, "UART mode: TELEMETRY_BINARY (binary packets for UI)");
+    #else
+        m_telemForwarder.setUartMode(UartMode::DEBUG_TEXT);
+        LOG_INFO(SYSTEM, "UART mode: DEBUG_TEXT (human-readable logs)");
+    #endif
+
     // Control
     LOG_INFO(INPUTS, "Initializing control inputs...");
     if (!control.init())
@@ -280,7 +293,10 @@ void App::loop()
         }
     }
 
-    // 5. Process telemetry (10Hz)
+    // 5. Forward telemetry to UART (if in TELEMETRY_BINARY mode)
+    m_telemForwarder.update();
+
+    // 6. Process telemetry (10Hz)
     if (telemEvery.check())
     {
         // Check for enhanced telemetry
@@ -533,6 +549,62 @@ void App::handleSerialCommands()
             config.enable_enhanced = !config.enable_enhanced;
             radio.setReceiverConfig(config);
             Serial.printf("[CONFIG] Enhanced telemetry: %s\n", config.enable_enhanced ? "ENABLED" : "DISABLED");
+        }
+        // Toggle UART mode (DEBUG_TEXT / TELEMETRY_BINARY)
+        else if (c == 'U' || c == 'u')
+        {
+            if (m_telemForwarder.getUartMode() == UartMode::DEBUG_TEXT)
+            {
+                m_telemForwarder.setUartMode(UartMode::TELEMETRY_BINARY);
+                Serial.println("[UART] Mode: TELEMETRY_BINARY (binary packets for UI)");
+                Serial.println("[UART] Text logs DISABLED - switch back with 'U' command");
+            }
+            else
+            {
+                m_telemForwarder.setUartMode(UartMode::DEBUG_TEXT);
+                Serial.println("[UART] Mode: DEBUG_TEXT (human-readable logs)");
+                Serial.println("[UART] Binary telemetry DISABLED");
+            }
+        }
+        // Telemetry forwarder statistics
+        else if (c == 'F' || c == 'f')
+        {
+            Serial.println("[FORWARDER_STATS]");
+            Serial.printf("UART Mode: %s\n",
+                          m_telemForwarder.getUartMode() == UartMode::TELEMETRY_BINARY
+                              ? "TELEMETRY_BINARY"
+                              : "DEBUG_TEXT");
+
+            const ForwarderConfig &cfg = m_telemForwarder.getConfig();
+            Serial.println("Forwarding Config:");
+            Serial.printf("  ATTITUDE: %s\n", cfg.forward_attitude ? "YES" : "NO");
+            Serial.printf("  MOTORS: %s\n", cfg.forward_motors ? "YES" : "NO");
+            Serial.printf("  STATUS: %s\n", cfg.forward_status ? "YES" : "NO");
+            Serial.printf("  CONTROL: %s\n", cfg.forward_control ? "YES" : "NO");
+            Serial.printf("  SENSORS: %s\n", cfg.forward_sensors ? "YES" : "NO");
+            Serial.printf("  SAFETY: %s\n", cfg.forward_safety ? "YES" : "NO");
+            Serial.printf("  PERFORMANCE: %s\n", cfg.forward_performance ? "YES" : "NO");
+
+            Serial.println();
+            Serial.printf("Total Forwarded: %lu packets\n", m_telemForwarder.getForwardedCount());
+            Serial.printf("Total Dropped: %lu packets\n", m_telemForwarder.getDroppedCount());
+
+            uint32_t total = m_telemForwarder.getForwardedCount();
+            if (total > 0)
+            {
+                Serial.println();
+                Serial.println("Per-Packet Forwarded:");
+                const char *typeNames[] = {"ATTITUDE", "CONTROL", "MOTORS", "STATUS", "SENSORS", "SAFETY", "PERFORMANCE"};
+                for (uint8_t i = 1; i <= 7; i++)
+                {
+                    TelemetryPacketType type = static_cast<TelemetryPacketType>(i);
+                    uint32_t count = m_telemForwarder.getForwardedCount(type);
+                    if (count > 0)
+                    {
+                        Serial.printf("  %s: %lu\n", typeNames[i - 1], count);
+                    }
+                }
+            }
         }
     }
 }

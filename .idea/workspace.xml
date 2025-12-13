@@ -21,7 +21,19 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8e6be60b-65fc-40ce-bd04-1bea3b24bd12" name="Changes" comment="Calibration new buttn" />
+    <list default="true" id="8e6be60b-65fc-40ce-bd04-1bea3b24bd12" name="Changes" comment="Calibration new buttn">
+      <change beforePath="$PROJECT_DIR$/docs/transmitter/BASELINE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/transmitter/OLED_VIEW_INVENTORY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/transmitter/STICK_CALIBRATION_DIAGNOSTIC.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/transmitter/VALIDATION_PROCEDURE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/config.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/flight_crash_visualizer_enhanced.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/flight_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/App.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/App.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/App.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/App.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tools/telemetry_logger.py" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -225,6 +237,7 @@
       <workItem from="1764516740284" duration="278000" />
       <workItem from="1764527105053" duration="69000" />
       <workItem from="1764700629557" duration="596000" />
+      <workItem from="1765286397411" duration="813000" />
     </task>
     <task id="LOCAL-00001" summary="- Better script for plots&#10;- Removed legacy">
       <option name="closed" value="true" />
@@ -247,6 +260,29 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="- Better script for plots&#10;- Removed legacy" />
