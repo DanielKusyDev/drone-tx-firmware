@@ -96,6 +96,12 @@ extern unsigned long g_lastOledUpdateMs;
 // Global app instance
 App g_app;
 
+// Static callback for Logger to check if text logging is allowed
+static bool isTextLoggingAllowed() {
+    // Suppress all text logs when in TELEMETRY_BINARY mode
+    return g_app.getForwarder().getUartMode() != UartMode::TELEMETRY_BINARY;
+}
+
 bool App::init()
 {
     // Initialize force disarm tracking
@@ -109,6 +115,10 @@ bool App::init()
 
     // Initialize logger first
     Logger::init();
+
+    // Register UART mode callback - suppresses text logs in TELEMETRY_BINARY mode
+    Logger::setTextLoggingAllowedCallback(isTextLoggingAllowed);
+
     LOG_INFO(SYSTEM, "Transmitter starting up...");
 
     Wire.begin();
@@ -555,12 +565,14 @@ void App::handleSerialCommands()
         {
             if (m_telemForwarder.getUartMode() == UartMode::DEBUG_TEXT)
             {
-                m_telemForwarder.setUartMode(UartMode::TELEMETRY_BINARY);
+                // Print message BEFORE switching to binary mode
                 Serial.println("[UART] Mode: TELEMETRY_BINARY (binary packets for UI)");
                 Serial.println("[UART] Text logs DISABLED - switch back with 'U' command");
+                m_telemForwarder.setUartMode(UartMode::TELEMETRY_BINARY);
             }
             else
             {
+                // Switch back to text mode first, then print message
                 m_telemForwarder.setUartMode(UartMode::DEBUG_TEXT);
                 Serial.println("[UART] Mode: DEBUG_TEXT (human-readable logs)");
                 Serial.println("[UART] Binary telemetry DISABLED");

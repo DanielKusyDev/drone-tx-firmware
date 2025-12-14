@@ -156,8 +156,19 @@ public:
      */
     static const LogConfig& getConfig() { return config; }
 
+    /**
+     * @brief Set callback to check if text logging is allowed
+     *
+     * Used to suppress all text logs when in TELEMETRY_BINARY mode
+     * to prevent corrupting the binary stream.
+     *
+     * @param callback Function that returns true if text logging is allowed
+     */
+    static void setTextLoggingAllowedCallback(bool (*callback)());
+
 private:
     static LogConfig config;
+    static bool (*textLoggingAllowedCallback)();
 
     /**
      * @brief Check if a message should be logged

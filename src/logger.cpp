@@ -3,6 +3,7 @@
 
 // Static member initialization
 LogConfig Logger::config = {};
+bool (*Logger::textLoggingAllowedCallback)() = nullptr;
 
 // ============================================================================
 // Public API
@@ -28,6 +29,10 @@ void Logger::disableCategory(LogCategory cat) {
 
 void Logger::enableAllCategories() {
     config.enabled_categories = LogCategory::ALL;
+}
+
+void Logger::setTextLoggingAllowedCallback(bool (*callback)()) {
+    textLoggingAllowedCallback = callback;
 }
 
 // ============================================================================
@@ -264,6 +269,11 @@ void Logger::printStatus() {
 // ============================================================================
 
 bool Logger::shouldLog(LogLevel level, LogCategory cat) {
+    // UART mode check: if callback is set and returns false, suppress all logging
+    if (textLoggingAllowedCallback != nullptr && !textLoggingAllowedCallback()) {
+        return false;
+    }
+
     // Level check: message must be at or below global level
     if (level > config.global_level) return false;
 
