@@ -54,7 +54,7 @@
 // UART Mode Configuration
 // Uncomment to enable binary telemetry forwarding to UART
 // Comment out for debug text mode (default)
-// #define UART_MODE_TELEMETRY_BINARY
+#define UART_MODE_TELEMETRY_BINARY
 
 // UART Configuration
 #define UART_BAUD_RATE 115200

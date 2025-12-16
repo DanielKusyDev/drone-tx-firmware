@@ -9,9 +9,7 @@ extern Adafruit_SSD1306 display;
 extern unsigned long g_lastTelemUpdateMs;
 extern bool g_showHorizFlash;
 extern bool g_horizonOK;
-extern bool g_calOK;
 extern bool g_calibrating;
-extern bool g_calFailed;
 extern bool g_forceDisarmActive;
 extern unsigned long g_forceDisarmTimestamp;
 
@@ -123,7 +121,7 @@ void updateOledNormalView(const ControlInputs& inputs, const EnhancedTelemData& 
         return;
     }
 
-    // Priority 2: Calibration status messages
+    // Priority 2: Calibration status message
     if (g_calibrating) {
         display.setCursor(0, 0);
         display.print("Calibrating...");
@@ -131,17 +129,6 @@ void updateOledNormalView(const ControlInputs& inputs, const EnhancedTelemData& 
         display.print("Hold drone level");
         display.setCursor(0, 20);
         display.print("Please wait");
-        display.display();
-        return;
-    }
-
-    if (g_calFailed) {
-        display.setCursor(0, 0);
-        display.print("Calibration Failed");
-        display.setCursor(0, 10);
-        display.print("Release ARM button");
-        display.setCursor(0, 20);
-        display.print("and try again");
         display.display();
         return;
     }
@@ -182,10 +169,6 @@ void updateOledNormalView(const ControlInputs& inputs, const EnhancedTelemData& 
             // Horizon not OK - show on line 2 to avoid overlap
             display.setCursor(100, 10);
             display.print("HRZ?");
-        } else if (!g_calOK && !g_telemArmed) {
-            // Calibration not OK - show on line 2
-            display.setCursor(100, 10);
-            display.print("CAL?");
         }
     }
 
@@ -245,7 +228,7 @@ void updateOledDebugView(const ControlInputs& inputs, const EnhancedTelemData& t
         return;
     }
 
-    // Priority 2: Calibration status messages
+    // Priority 2: Calibration status message
     if (g_calibrating) {
         display.setCursor(0, 0);
         display.print("Calibrating...");
@@ -253,17 +236,6 @@ void updateOledDebugView(const ControlInputs& inputs, const EnhancedTelemData& t
         display.print("Hold drone level");
         display.setCursor(0, 20);
         display.print("Please wait");
-        display.display();
-        return;
-    }
-
-    if (g_calFailed) {
-        display.setCursor(0, 0);
-        display.print("Calibration Failed");
-        display.setCursor(0, 10);
-        display.print("Release ARM button");
-        display.setCursor(0, 20);
-        display.print("and try again");
         display.display();
         return;
     }

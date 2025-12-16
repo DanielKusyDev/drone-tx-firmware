@@ -26,12 +26,14 @@ struct RcPacket {
 #define RC_FLAG_DEBUG     0x04
 
 // Telemetry safety_flags bitfield constants (used in TelemetryStatus packet)
-#define TELEM_HORIZON_BIT      0x01  // bit 0: horizon/level OK state
-#define TELEM_LINK_ALIVE       0x02  // bit 1: link alive
-#define TELEM_FORCE_DISARM     0x04  // bit 2: force disarm triggered
-#define TELEM_FLAG_CAL_OK      0x08  // bit 3: accelerometer calibration valid
-#define TELEM_FLAG_CALIBRATING 0x10  // bit 4: calibration in progress
-#define TELEM_FLAG_CAL_FAILED  0x20  // bit 5: calibration failed
+// Updated flag mapping - removed redundant flags (linkAlive, cal_ok, cal_failed)
+#define TELEM_HORIZON_BIT           0x01  // bit 0: horizon/level OK state
+#define TELEM_FORCE_DISARM          0x02  // bit 1: force disarm triggered
+#define TELEM_FLAG_CALIBRATING      0x04  // bit 2: calibration in progress
+#define TELEM_LOW_BATTERY           0x08  // bit 3: low battery detected
+#define TELEM_SENSOR_FAILURE        0x10  // bit 4: sensor failure (NaN/Inf/extreme values)
+#define TELEM_FAILSAFE_ACTIVE       0x20  // bit 5: failsafe active (RC loss or emergency)
+#define TELEM_ANGLE_LIMIT_EXCEEDED  0x40  // bit 6: angle limit exceeded (>22°)
 
 // Telemetry armed bitfield constants (used in TelemetryStatus packet)
 #define TELEM_ARMED_BIT        0x01  // bit 0: drone armed state

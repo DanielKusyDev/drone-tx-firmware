@@ -19,9 +19,7 @@ extern unsigned long g_lastTelemUpdateMs;
 extern float g_telemFrequency;
 extern bool g_telemArmed;
 extern bool g_horizonOK;
-extern bool g_calOK;
 extern bool g_calibrating;
-extern bool g_calFailed;
 extern unsigned long g_horizFlashStartMs;
 extern bool g_showHorizFlash;
 extern uint8_t g_armPulseCountdown;
@@ -203,12 +201,10 @@ void App::loop()
     const EnhancedTelemData &etelem = radio.getEnhancedTelemetry();
 
     // --- Horizon safety from STATUS packet ---
-    // In enhanced telemetry, safety_flags contains horizon bit (bit 0) and calibration bits (bits 3-5)
+    // In enhanced telemetry, safety_flags contains horizon bit (bit 0) and calibration bit (bit 2)
     g_horizonOK = (etelem.status.safety_flags & TELEM_HORIZON_BIT) != 0;
     g_telemArmed = (etelem.status.armed & TELEM_ARMED_BIT) != 0;
-    g_calOK = (etelem.status.safety_flags & TELEM_FLAG_CAL_OK) != 0;
     g_calibrating = (etelem.status.safety_flags & TELEM_FLAG_CALIBRATING) != 0;
-    g_calFailed = (etelem.status.safety_flags & TELEM_FLAG_CAL_FAILED) != 0;
     // --- Force disarm detection ---
     bool isArmed = g_telemArmed;
     bool forceDisarm = (etelem.status.safety_flags & TELEM_FORCE_DISARM) != 0;
@@ -362,15 +358,18 @@ void App::loop()
             {
                 bool armed = (etelem.status.armed & TELEM_ARMED_BIT) != 0;
                 bool horizOK = (etelem.status.safety_flags & TELEM_HORIZON_BIT) != 0;
-                bool calOK = (etelem.status.safety_flags & TELEM_FLAG_CAL_OK) != 0;
                 bool calibrating = (etelem.status.safety_flags & TELEM_FLAG_CALIBRATING) != 0;
-                bool calFailed = (etelem.status.safety_flags & TELEM_FLAG_CAL_FAILED) != 0;
                 bool forceDisarm = (etelem.status.safety_flags & TELEM_FORCE_DISARM) != 0;
+                bool lowBattery = (etelem.status.safety_flags & TELEM_LOW_BATTERY) != 0;
+                bool sensorFailure = (etelem.status.safety_flags & TELEM_SENSOR_FAILURE) != 0;
+                bool failsafeActive = (etelem.status.safety_flags & TELEM_FAILSAFE_ACTIVE) != 0;
+                bool angleLimitExceeded = (etelem.status.safety_flags & TELEM_ANGLE_LIMIT_EXCEEDED) != 0;
 
-                LOG_DEBUG(TELEM, "STA: armed=%d mode=%d link=%d%% uptime=%us seq=%u [ARM:%d HRZ:%d CAL:%d CALIB:%d FAIL:%d FD:%d]",
+                LOG_DEBUG(TELEM, "STA: armed=%d mode=%d link=%d%% uptime=%us seq=%u [ARM:%d HRZ:%d CALIB:%d FD:%d LOBAT:%d SENS:%d FS:%d ANG:%d]",
                           etelem.status.armed, etelem.status.flight_mode,
                           etelem.status.link_quality, etelem.status.uptime_s,
-                          etelem.status.header.seq, armed, horizOK, calOK, calibrating, calFailed, forceDisarm);
+                          etelem.status.header.seq, armed, horizOK, calibrating, forceDisarm,
+                          lowBattery, sensorFailure, failsafeActive, angleLimitExceeded);
             }
         }
         else
@@ -546,10 +545,12 @@ void App::handleSerialCommands()
                 Serial.println("Status Flags:");
                 Serial.printf("  Armed: %s\n", (etelem.status.armed & TELEM_ARMED_BIT) ? "YES" : "NO");
                 Serial.printf("  Horizon OK: %s\n", (etelem.status.safety_flags & TELEM_HORIZON_BIT) ? "YES" : "NO");
-                Serial.printf("  Calibration OK: %s\n", (etelem.status.safety_flags & TELEM_FLAG_CAL_OK) ? "YES" : "NO");
                 Serial.printf("  Calibrating: %s\n", (etelem.status.safety_flags & TELEM_FLAG_CALIBRATING) ? "YES" : "NO");
-                Serial.printf("  Cal Failed: %s\n", (etelem.status.safety_flags & TELEM_FLAG_CAL_FAILED) ? "YES" : "NO");
                 Serial.printf("  Force Disarm: %s\n", (etelem.status.safety_flags & TELEM_FORCE_DISARM) ? "YES" : "NO");
+                Serial.printf("  Low Battery: %s\n", (etelem.status.safety_flags & TELEM_LOW_BATTERY) ? "YES" : "NO");
+                Serial.printf("  Sensor Failure: %s\n", (etelem.status.safety_flags & TELEM_SENSOR_FAILURE) ? "YES" : "NO");
+                Serial.printf("  Failsafe Active: %s\n", (etelem.status.safety_flags & TELEM_FAILSAFE_ACTIVE) ? "YES" : "NO");
+                Serial.printf("  Angle Limit Exceeded: %s\n", (etelem.status.safety_flags & TELEM_ANGLE_LIMIT_EXCEEDED) ? "YES" : "NO");
             }
         }
         // Toggle enhanced telemetry mode
@@ -719,7 +720,6 @@ void OledDemo::renderCurrentState(const ControlInputs &inputs, const EnhancedTel
     extern bool g_horizonOK;
     extern bool g_telemArmed;
     extern bool g_calibrating;
-    extern bool g_calFailed;
     extern unsigned long g_lastTelemUpdateMs;
     extern float g_telemFrequency;
 
@@ -728,7 +728,6 @@ void OledDemo::renderCurrentState(const ControlInputs &inputs, const EnhancedTel
     bool origHorizonOK = g_horizonOK;
     bool origTelemArmed = g_telemArmed;
     bool origCalibrating = g_calibrating;
-    bool origCalFailed = g_calFailed;
     unsigned long origLastTelem = g_lastTelemUpdateMs;
     float origTelemFreq = g_telemFrequency;
 
@@ -794,19 +793,18 @@ void OledDemo::renderCurrentState(const ControlInputs &inputs, const EnhancedTel
         g_horizonOK = true;
         g_telemArmed = false;
         g_calibrating = true;
-        g_calFailed = false;
         g_lastTelemUpdateMs = millis();
         updateOledNormalView(mockInputs, mockTelem, mockDropCount);
         break;
 
     case OledDemoState::CAL_FAILED:
+        // CAL_FAILED state removed - skip to next state
         createMockInputs(mockInputs, false);
         createMockTelemetry(mockTelem);
         g_showHorizFlash = false;
         g_horizonOK = true;
         g_telemArmed = false;
         g_calibrating = false;
-        g_calFailed = true;
         g_lastTelemUpdateMs = millis();
         updateOledNormalView(mockInputs, mockTelem, mockDropCount);
         break;
@@ -837,7 +835,6 @@ void OledDemo::renderCurrentState(const ControlInputs &inputs, const EnhancedTel
     g_horizonOK = origHorizonOK;
     g_telemArmed = origTelemArmed;
     g_calibrating = origCalibrating;
-    g_calFailed = origCalFailed;
     g_lastTelemUpdateMs = origLastTelem;
     g_telemFrequency = origTelemFreq;
 }
