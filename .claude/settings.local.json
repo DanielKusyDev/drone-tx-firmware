@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(pio run:*)",
-      "Bash(cloc:*)"
+      "Bash(cloc:*)",
+      "Bash(python3:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
