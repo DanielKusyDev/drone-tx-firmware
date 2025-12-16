@@ -152,20 +152,36 @@ class TelemetryBridge:
 
     # === Latest Data API (for REST endpoints) ===
 
-    async def get_latest_packets(self) -> dict[str, dict[str, Any]]:
+    async def get_latest_packets(self) -> dict[str, dict[str, Any] | None]:
         """
         Get latest packet of each type.
 
+        Used by REST endpoint /telemetry/latest.
+        Returns all 7 packet types with None for ones not yet received.
+
         Returns:
-            Dictionary mapping packet type to latest packet:
+            Dictionary mapping packet type to latest packet (None if not received):
             {
-                'ATT': {...},
-                'MOT': {...},
-                'STA': {...},
+                'ATT': {...} or None,
+                'MOT': {...} or None,
+                'STA': {...} or None,
+                'CTL': {...} or None,
+                'SENS': {...} or None,
+                'SAFE': {...} or None,
+                'PERF': {...} or None,
             }
         """
         async with self._lock.reader_lock:
-            return self._latest_packets.copy()
+            # Return all packet types, with None for ones not yet received
+            return {
+                'ATT': self._latest_packets.get('ATT'),
+                'MOT': self._latest_packets.get('MOT'),
+                'STA': self._latest_packets.get('STA'),
+                'CTL': self._latest_packets.get('CTL'),
+                'SENS': self._latest_packets.get('SENS'),
+                'SAFE': self._latest_packets.get('SAFE'),
+                'PERF': self._latest_packets.get('PERF'),
+            }
 
     async def get_latest_packet(self, packet_type: str) -> dict[str, Any] | None:
         """

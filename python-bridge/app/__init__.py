@@ -41,7 +41,21 @@ async def _init_telemetry_bridge(
 
         # Set async callback for real-time WebSocket broadcast
         async def on_packet(packet: dict[str, Any]):
-            """Forward packet to all WebSocket clients."""
+            """
+            Broadcast individual telemetry packets to all WebSocket clients.
+
+            Each packet is sent immediately as it arrives from the serial port.
+            This provides lowest latency and preserves packet timing:
+            - ATTITUDE (ATT): 20 Hz
+            - CONTROL (CTL): 10 Hz
+            - MOTORS (MOT): 5 Hz
+            - STATUS (STA): 2.5 Hz
+            - SENSORS (SENS): 1.25 Hz
+            - SAFETY (SAFE): 1.25 Hz
+            - PERFORMANCE (PERF): 0.625 Hz
+
+            WebSocket message format: Individual packet (see WebSocketPacket in models.py)
+            """
             await ws_manager.broadcast(packet)
 
         bridge.set_packet_callback(on_packet)

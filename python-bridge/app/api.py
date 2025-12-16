@@ -1,19 +1,28 @@
 import logging
-from typing import Any
 
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.params import Query
 
 from app.services.telemetry_bridge import TelemetryBridge
 from app.dependencies import Bridge, WsConnection
+from app.models import (
+    HealthResponse,
+    StatsResponse,
+    LatestTelemetryResponse,
+    AttitudePacket,
+    MotorsPacket,
+    StatusPacket,
+    PacketHistoryResponse,
+    PortsResponse,
+)
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
-@router.get("/health")
-async def health_check(bridge: Bridge) -> dict[str, Any]:
+@router.get("/health", response_model=HealthResponse)
+async def health_check(bridge: Bridge) -> HealthResponse:
     """
     Health check endpoint.
 
@@ -26,16 +35,16 @@ async def health_check(bridge: Bridge) -> dict[str, Any]:
     if not await bridge.is_healthy():
         raise HTTPException(status_code=503, detail="No recent telemetry")
 
-    return {
-        "status": "healthy",
-        "last_packet_age_s": health.get("last_packet_age_s"),
-        "packets_received": health["packets_received"],
-        "is_alive": health["is_alive"],
-    }
+    return HealthResponse(
+        status="healthy",
+        last_packet_age_s=health.get("last_packet_age_s"),
+        packets_received=health["packets_received"],
+        is_alive=health["is_alive"],
+    )
 
 
-@router.get("/stats")
-async def get_stats(bridge: Bridge) -> dict[str, Any]:
+@router.get("/stats", response_model=StatsResponse)
+async def get_stats(bridge: Bridge) -> StatsResponse:
     """
     Get comprehensive statistics.
 
@@ -45,11 +54,12 @@ async def get_stats(bridge: Bridge) -> dict[str, Any]:
     - Parser (CRC errors, etc.)
     - Packet counts by type
     """
-    return await bridge.get_stats()
+    stats = await bridge.get_stats()
+    return StatsResponse(**stats)
 
 
-@router.get("/telemetry/latest")
-async def get_latest_telemetry(bridge: Bridge) -> dict[str, dict[str, Any]]:
+@router.get("/telemetry/latest", response_model=LatestTelemetryResponse)
+async def get_latest_telemetry(bridge: Bridge) -> LatestTelemetryResponse:
     """
     Get latest packet of each type.
 
@@ -61,54 +71,54 @@ async def get_latest_telemetry(bridge: Bridge) -> dict[str, dict[str, Any]]:
     if not latest:
         raise HTTPException(status_code=404, detail="No telemetry received yet")
 
-    return latest
+    return LatestTelemetryResponse(**latest)
 
 
-@router.get("/telemetry/attitude")
-async def get_latest_attitude(bridge: Bridge) -> dict[str, Any] | None:
+@router.get("/telemetry/attitude", response_model=AttitudePacket)
+async def get_latest_attitude(bridge: Bridge) -> AttitudePacket:
     """Get latest ATTITUDE packet (roll, pitch, yaw + rates)."""
     attitude = await bridge.get_latest_attitude()
 
     if not attitude:
         raise HTTPException(status_code=404, detail="No ATTITUDE packet received yet")
 
-    return attitude
+    return AttitudePacket(**attitude)
 
 
-@router.get("/telemetry/motors")
-async def get_latest_motors(bridge: Bridge) -> dict[str, Any] | None:
+@router.get("/telemetry/motors", response_model=MotorsPacket)
+async def get_latest_motors(bridge: Bridge) -> MotorsPacket:
     """Get latest MOTORS packet (motor commands, throttle)."""
     motors = await bridge.get_latest_motors()
 
     if not motors:
         raise HTTPException(status_code=404, detail="No MOTORS packet received yet")
 
-    return motors
+    return MotorsPacket(**motors)
 
 
-@router.get("/telemetry/status")
-async def get_latest_status(bridge: Bridge) -> dict[str, Any] | None:
+@router.get("/telemetry/status", response_model=StatusPacket)
+async def get_latest_status(bridge: Bridge) -> StatusPacket:
     """Get latest STATUS packet (armed, flags, link quality)."""
     status = await bridge.get_latest_status()
 
     if not status:
         raise HTTPException(status_code=404, detail="No STATUS packet received yet")
 
-    return status
+    return StatusPacket(**status)
 
 
-@router.get("/telemetry/history/{packet_type}")
+@router.get("/telemetry/history/{packet_type}", response_model=PacketHistoryResponse)
 async def get_packet_history(
     bridge: Bridge, packet_type: str, max_count: int = Query(default=100, ge=1, le=10000)
-) -> dict[str, Any]:
+) -> PacketHistoryResponse:
     """Get packet history for specific type."""
     history = await bridge.get_packet_history(packet_type.upper(), max_count=max_count)
 
-    return {
-        "packet_type": packet_type.upper(),
-        "count": len(history),
-        "packets": history,
-    }
+    return PacketHistoryResponse(
+        packet_type=packet_type.upper(),
+        count=len(history),
+        packets=history,
+    )
 
 
 # === WebSocket Endpoint ===
@@ -117,15 +127,41 @@ async def websocket_telemetry(manager: WsConnection, websocket: WebSocket) -> No
     """
     WebSocket endpoint for real-time telemetry streaming.
 
-    Clients will receive packets as they arrive in real-time.
-    Each message is a JSON packet (ATT, MOT, STA, etc.)
+    IMPORTANT: This endpoint sends INDIVIDUAL packets as they arrive from the drone,
+    NOT aggregated state like GET /telemetry/latest does.
 
-    Usage:
+    Message Format:
+        - Each WebSocket message is ONE packet (see WebSocketPacket in models.py)
+        - Packet type indicated by "type" field: "ATT", "MOT", "STA", "CTL", etc.
+        - Message rate varies by packet type:
+          * ATTITUDE (ATT): 20 Hz - roll/pitch/yaw angles and rates
+          * MOTORS (MOT): 5 Hz - motor commands and throttle
+          * STATUS (STA): 2.5 Hz - armed state, flags, battery
+          * CONTROL (CTL): 10 Hz - PID setpoints and outputs
+          * SENSORS (SENS): 1.25 Hz - raw IMU data
+          * SAFETY (SAFE): 1.25 Hz - ground confidence, error flags
+          * PERFORMANCE (PERF): 0.625 Hz - loop timing, CPU, heap
+
+    Client Implementation:
+        Frontend should accumulate packets into state by type:
+
         const ws = new WebSocket('ws://localhost:8000/ws/telemetry');
+        const latestData = { ATT: null, MOT: null, STA: null, ... };
+
         ws.onmessage = (event) => {
             const packet = JSON.parse(event.data);
-            console.log(packet.type, packet.seq);
+            latestData[packet.type] = packet;  // Update corresponding packet type
+
+            // Now use latestData.ATT, latestData.MOT, etc.
+            if (latestData.ATT) {
+                updateArtificialHorizon(latestData.ATT.roll_deg, latestData.ATT.pitch_deg);
+            }
         };
+
+    Why Individual Packets?
+        - Lowest latency: Attitude data reaches UI in <50ms
+        - Bandwidth efficient: Only send what changed
+        - Preserves packet timing: Critical data (attitude) arrives faster than diagnostics
     """
     await manager.connect(websocket)
 
@@ -149,7 +185,7 @@ async def websocket_telemetry(manager: WsConnection, websocket: WebSocket) -> No
 # === Utility Endpoints ===
 
 
-@router.get("/ports")
-async def list_serial_ports():
+@router.get("/ports", response_model=PortsResponse)
+async def list_serial_ports() -> PortsResponse:
     """List available serial ports (useful for debugging)."""
-    return {"ports": TelemetryBridge.list_ports()}
+    return PortsResponse(ports=TelemetryBridge.list_ports())

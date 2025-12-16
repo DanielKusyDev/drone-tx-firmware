@@ -218,10 +218,12 @@ class SerialReader:
             - parser_stats: Parser statistics (CRC errors, etc.)
             - uptime_s: Seconds since start
             - queue_size: Current queue size
+            - is_open: Serial port open status
         """
         stats = self.stats.copy()
         stats["parser_stats"] = self.parser.get_stats()
         stats["queue_size"] = self.packet_queue.qsize()
+        stats["is_open"] = self._reader is not None and self._running
 
         if stats["start_time"]:
             stats["uptime_s"] = time.time() - stats["start_time"]
@@ -237,14 +239,13 @@ class SerialReader:
         Continuously reads from serial port, feeds data to parser,
         and dispatches parsed packets via callback or queue.
         """
-        logger.info(f"Read loop started, running={self._running}")
+        logger.info(f"Read loop started")
 
         try:
             while self._running:
                 try:
                     # Read available data (async)
                     data = await self._reader.read(self.read_size)
-                    logger.info(f"data! {data}")
                     if not data:
                         # EOF or port closed
                         logger.warning("Serial port closed unexpectedly")
@@ -295,14 +296,16 @@ class SerialReader:
             except Exception as e:
                 logger.error(f"Error in packet callback: {e}", exc_info=True)
 
-        # Queue packet (pull model)
-        try:
-            self.packet_queue.put_nowait(packet)
-            self.stats["packets_queued"] += 1
-        except asyncio.QueueFull:
-            # Queue full, drop packet
-            self.stats["packets_dropped"] += 1
-            logger.warning(f"Packet queue full, dropped {packet['type']} packet")
+        # Queue packet only if no callback is set (pull model)
+        # This prevents queue buildup when using callback-based consumption
+        if not self.packet_callback:
+            try:
+                self.packet_queue.put_nowait(packet)
+                self.stats["packets_queued"] += 1
+            except asyncio.QueueFull:
+                # Queue full, drop packet
+                self.stats["packets_dropped"] += 1
+                logger.warning(f"Packet queue full, dropped {packet['type']} packet")
 
     def is_running(self) -> bool:
         """Check if reader is currently running."""

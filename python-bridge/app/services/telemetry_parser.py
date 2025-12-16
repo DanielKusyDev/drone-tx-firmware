@@ -401,12 +401,13 @@ class TelemetryParser:
             'loop_rate_hz': loop_rate_hz_x10 / 10.0,
             'flags': {
                 'ARM': bool(armed),
-                'HRZ': bool(safety_flags & 0x01),  # TELEM_HORIZON_BIT
-                'LINK': bool(safety_flags & 0x02),  # TELEM_LINK_ALIVE
-                'DISARM': bool(safety_flags & 0x04),  # TELEM_FORCE_DISARM
-                'CAL': bool(safety_flags & 0x08),  # TELEM_FLAG_CAL_OK
-                'CALIB': bool(safety_flags & 0x10),  # TELEM_FLAG_CALIBRATING
-                'FAIL': bool(safety_flags & 0x20),  # TELEM_FLAG_CAL_FAILED
+                'HRZ': bool(safety_flags & 0x01),   # bit 0: TELEM_HORIZON_BIT
+                'DISARM': bool(safety_flags & 0x02), # bit 1: TELEM_FORCE_DISARM
+                'CALIB': bool(safety_flags & 0x04),  # bit 2: TELEM_FLAG_CALIBRATING
+                'LOBAT': bool(safety_flags & 0x08),  # bit 3: TELEM_LOW_BATTERY
+                'SENS': bool(safety_flags & 0x10),   # bit 4: TELEM_SENSOR_FAILURE
+                'FS': bool(safety_flags & 0x20),     # bit 5: TELEM_FAILSAFE_ACTIVE
+                'ANG': bool(safety_flags & 0x40),    # bit 6: TELEM_ANGLE_LIMIT_EXCEEDED
             }
         }
 
