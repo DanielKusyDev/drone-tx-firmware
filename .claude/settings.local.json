@@ -4,7 +4,8 @@
       "Bash(pio run:*)",
       "Bash(cloc:*)",
       "Bash(python3:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
