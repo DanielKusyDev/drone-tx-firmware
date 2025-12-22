@@ -229,7 +229,7 @@ async def broadcast_param_message(message: dict[str, Any]) -> None:
 
 
 @router.websocket("/params/live")
-async def websocket_params(websocket: WebSocket, param_bridge: ParamBridge) -> None:
+async def websocket_params(websocket: WebSocket) -> None:
     """
     WebSocket endpoint for real-time parameter management.
 
@@ -247,6 +247,13 @@ async def websocket_params(websocket: WebSocket, param_bridge: ParamBridge) -> N
         {"type": "param_changed", "index": 0, "value": 300.5, "changed_by": "client_123"}
     """
     await websocket.accept()
+
+    # Get param bridge from app state
+    param_bridge = websocket.app.state.param_bridge
+    if not param_bridge:
+        await websocket.close(code=1011, reason="PARAM bridge not initialized")
+        return
+
     param_websocket_clients.add(websocket)
 
     # Get client ID for tracking who changed params
