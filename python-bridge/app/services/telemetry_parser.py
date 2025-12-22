@@ -16,13 +16,15 @@ logger = logging.getLogger(__name__)
 
 class TelemetryPacketType(IntEnum):
     """Telemetry packet types (must match firmware enum)."""
-    ATTITUDE = 0x01
-    CONTROL = 0x02
-    MOTORS = 0x03
-    STATUS = 0x04
-    SENSORS = 0x05
-    SAFETY = 0x06
-    PERFORMANCE = 0x07
+    ATTITUDE = 0x01          # Attitude and rates
+    CONTROL = 0x02           # PID outputs and setpoints
+    MOTORS = 0x03            # Motor outputs and mixer
+    STATUS = 0x04            # System status and diagnostics
+    SENSORS = 0x05           # Raw sensor data
+    SAFETY = 0x06            # Safety and ground detection
+    PERFORMANCE = 0x07       # Timing and performance metrics
+    PARAM_REQUEST = 0x10     # Parameter request (controller → drone)
+    PARAM_RESPONSE = 0x11    # Parameter response (drone → controller)
 
 
 # Protocol constants (must match firmware)
@@ -38,6 +40,8 @@ PACKET_SIZES = {
     TelemetryPacketType.SENSORS: 30,
     TelemetryPacketType.SAFETY: 20,
     TelemetryPacketType.PERFORMANCE: 22,
+    TelemetryPacketType.PARAM_REQUEST: 18,   # 10 header + 6 payload + 2 CRC (NO padding)
+    TelemetryPacketType.PARAM_RESPONSE: 54,  # 10 header + 42 payload + 2 CRC (NO padding)
 }
 
 
@@ -304,6 +308,10 @@ class TelemetryParser:
             return self._parse_safety(header, data)
         elif packet_type == TelemetryPacketType.PERFORMANCE:
             return self._parse_performance(header, data)
+        elif packet_type == TelemetryPacketType.PARAM_REQUEST:
+            return self._parse_param_request(header, data)
+        elif packet_type == TelemetryPacketType.PARAM_RESPONSE:
+            return self._parse_param_response(header, data)
         else:
             # Unknown type (shouldn't reach here due to earlier check)
             return {
@@ -515,6 +523,56 @@ class TelemetryParser:
             'cpu_usage_pct': payload[3],
             'free_heap_kb': payload[4],
             'stack_usage_pct': payload[5],
+        }
+
+    def _parse_param_request(self, header: TelemetryHeader, data: bytes) -> dict[str, Any]:
+        """
+        Parse PARAM_REQUEST packet (18 bytes total).
+
+        Header: 10 bytes (packed, NO padding)
+        Payload: 6 bytes
+            command: uint8 (PARAM_CMD_LIST/GET/SET)
+            param_index: uint8
+            value: float (for SET commands)
+        CRC: 2 bytes
+
+        Note: PARAM_REQUEST is typically sent FROM controller TO drone,
+        so receiving it here might indicate UART echo/loopback.
+        TX firmware does NOT currently support PARAM forwarding.
+        """
+        return {
+            'type': 'PARAM_REQ',
+            'ts_us': header.timestamp_us,
+            'seq': header.seq,
+            'raw_data': data,  # Include raw data for UnifiedBridge processing
+        }
+
+    def _parse_param_response(self, header: TelemetryHeader, data: bytes) -> dict[str, Any]:
+        """
+        Parse PARAM_RESPONSE packet (54 bytes total).
+
+        Header: 10 bytes (packed, NO padding)
+        Payload: 42 bytes
+            command: uint8 (response command code)
+            param_index: uint8
+            param_type: uint8
+            param_access: uint8
+            value: float
+            group: char[16]
+            name: char[16]
+            total_params: uint8
+            error_code: uint8
+        CRC: 2 bytes
+
+        Note: TX firmware does NOT currently support PARAM forwarding.
+        This packet type will only be received if drone firmware is connected
+        directly via UART (not through TX).
+        """
+        return {
+            'type': 'PARAM_RESP',
+            'ts_us': header.timestamp_us,
+            'seq': header.seq,
+            'raw_data': data,  # Include raw data for UnifiedBridge processing
         }
 
     def get_stats(self) -> dict[str, int]:

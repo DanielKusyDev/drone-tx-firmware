@@ -23,13 +23,13 @@ from app.models import (
     ParamConnectionStatusRest,
     ParamInfo,
 )
-from app.services.param_uart_bridge import (
+from app.services.unified_bridge import (
     ParamTimeoutError,
     ParamNotFoundError,
     ParamReadOnlyError,
     ParamConnectionError,
+    UnifiedBridge,
 )
-from app.services.telemetry_bridge import TelemetryBridge
 
 logger = logging.getLogger(__name__)
 
@@ -203,7 +203,7 @@ async def websocket_telemetry(manager: WsConnection, websocket: WebSocket) -> No
 @router.get("/ports", response_model=PortsResponse)
 async def list_serial_ports() -> PortsResponse:
     """List available serial ports (useful for debugging)."""
-    return PortsResponse(ports=TelemetryBridge.list_ports())
+    return PortsResponse(ports=UnifiedBridge.list_ports())
 
 
 # === PARAM Endpoints ===
@@ -510,7 +510,13 @@ async def get_param_connection_status(param_bridge: ParamBridge) -> ParamConnect
     Returns:
         Connection status and last update timestamp
     """
-    stats = param_bridge.get_stats()
+    # Get PARAM stats (for UnifiedBridge compatibility, use get_param_stats if available)
+    if hasattr(param_bridge, 'get_param_stats'):
+        stats = param_bridge.get_param_stats()
+    else:
+        # Fallback for old ParamUARTBridge
+        stats = param_bridge.get_stats()
+
     last_update = None
 
     if stats['last_response_time']:

@@ -23,25 +23,29 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import router
 from app.config import settings
-from app.services.telemetry_bridge import TelemetryBridge
-from app.services.param_uart_bridge import ParamUARTBridge
+from app.services.unified_bridge import UnifiedBridge
 from app.services.websocket_manager import WebSocketConnectionManager, websocket_manager
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
 
-async def _init_telemetry_bridge(
+async def _init_unified_bridge(
     ws_manager: WebSocketConnectionManager,
-) -> TelemetryBridge | None:
-    """Initialize telemetry bridge with WebSocket broadcast callback."""
-    logger.info(f"Starting telemetry bridge: {settings.telemetry_port} @ {settings.baudrate}")
+) -> UnifiedBridge | None:
+    """Initialize unified bridge for telemetry and PARAM communication."""
+    logger.info(f"Starting unified bridge: {settings.telemetry_port} @ {settings.baudrate}")
 
     try:
-        bridge = TelemetryBridge(settings.telemetry_port, settings.baudrate)
+        bridge = UnifiedBridge(
+            port=settings.telemetry_port,
+            baudrate=settings.baudrate,
+            history_size=1000,
+            param_timeout=settings.param_uart_timeout,
+        )
 
         # Set async callback for real-time WebSocket broadcast
-        async def on_packet(packet: dict[str, Any]):
+        async def on_telemetry(packet: dict[str, Any]):
             """
             Broadcast individual telemetry packets to all WebSocket clients.
 
@@ -59,39 +63,14 @@ async def _init_telemetry_bridge(
             """
             await ws_manager.broadcast(packet)
 
-        bridge.set_packet_callback(on_packet)
+        bridge.set_telemetry_callback(on_telemetry)
         await bridge.start()
 
-        logger.info("✅ Telemetry bridge started successfully")
+        logger.info("✅ Unified bridge started successfully")
         return bridge
 
     except Exception as e:
-        logger.error(f"❌ Failed to start telemetry bridge: {e}", exc_info=True)
-        # Continue running (API will return errors but won't crash)
-        return None
-
-
-async def _init_param_bridge() -> ParamUARTBridge | None:
-    """Initialize PARAM UART bridge."""
-    logger.info(f"Starting PARAM bridge: {settings.param_uart_port} @ {settings.param_uart_baudrate}")
-
-    try:
-        bridge = ParamUARTBridge(
-            timeout=settings.param_uart_timeout,
-            reconnect_interval=settings.param_uart_reconnect_interval,
-        )
-
-        # Connect to UART
-        await bridge.connect(settings.param_uart_port, settings.param_uart_baudrate)
-
-        # Start auto-reconnect task
-        bridge.start_auto_reconnect()
-
-        logger.info("✅ PARAM bridge started successfully")
-        return bridge
-
-    except Exception as e:
-        logger.error(f"❌ Failed to start PARAM bridge: {e}", exc_info=True)
+        logger.error(f"❌ Failed to start unified bridge: {e}", exc_info=True)
         # Continue running (API will return errors but won't crash)
         return None
 
@@ -99,29 +78,24 @@ async def _init_param_bridge() -> ParamUARTBridge | None:
 # === Lifecycle Events ===
 @asynccontextmanager
 async def lifespan(app_instance: FastAPI) -> AsyncIterator[None]:
-    """Initialize telemetry bridge and PARAM bridge on startup and stop on shutdown."""
+    """Initialize unified bridge on startup and stop on shutdown."""
 
     # Initialize WebSocket manager
     app_instance.state.websocket_manager = websocket_manager
 
-    # Initialize telemetry bridge
-    app_instance.state.bridge = await _init_telemetry_bridge(app_instance.state.websocket_manager)
+    # Initialize unified bridge (handles both telemetry and PARAM)
+    app_instance.state.bridge = await _init_unified_bridge(app_instance.state.websocket_manager)
 
-    # Initialize PARAM bridge
-    app_instance.state.param_bridge = await _init_param_bridge()
+    # Also set param_bridge to the same bridge for API compatibility
+    app_instance.state.param_bridge = app_instance.state.bridge
 
     yield
 
     # Cleanup on shutdown
     if app_instance.state.bridge:
-        logger.info("Stopping telemetry bridge...")
+        logger.info("Stopping unified bridge...")
         await app_instance.state.bridge.stop()
-        logger.info("✅ Telemetry bridge stopped")
-
-    if hasattr(app_instance.state, 'param_bridge') and app_instance.state.param_bridge:
-        logger.info("Stopping PARAM bridge...")
-        await app_instance.state.param_bridge.disconnect()
-        logger.info("✅ PARAM bridge stopped")
+        logger.info("✅ Unified bridge stopped")
 
 
 # FastAPI app

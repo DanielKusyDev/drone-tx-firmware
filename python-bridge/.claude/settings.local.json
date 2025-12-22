@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /B \"C:\\\\Users\\\\danie\\\\Desktop\\\\Roboty\\\\ESP Firmware\\\\drone-tx-firmware\\\\python-bridge\\\\app\\\\api\")",
+      "Bash(python -m py_compile:*)",
+      "Bash(python debug_uart.py:*)",
+      "Bash(timeout 5 python:*)",
+      "Bash(exit 0)",
+      "Bash(python test_crc.py:*)",
+      "Bash(python verify_packet_sizes.py:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(python -c:*)"
+    ]
+  }
+}

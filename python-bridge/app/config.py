@@ -20,8 +20,6 @@ class Settings(BaseSettings):
     baudrate: int = Field(default=115200, description="Serial baud rate (default: 115200)")
 
     # PARAM UART settings (uses same port as telemetry)
-    param_uart_port: str = Field(default="COM3", description="UART port for PARAM protocol (same as telemetry)")
-    param_uart_baudrate: int = Field(default=115200, description="UART baud rate for PARAM (default: 115200)")
     param_uart_timeout: float = Field(default=2.0, description="PARAM request timeout in seconds")
     param_uart_reconnect_interval: float = Field(default=5.0, description="Auto-reconnect interval in seconds")
 
