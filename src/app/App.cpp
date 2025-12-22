@@ -302,6 +302,9 @@ void App::loop()
     // 5. Forward telemetry to UART (if in TELEMETRY_BINARY mode)
     m_telemForwarder.update();
 
+    // 5b. Handle PARAM system (bidirectional UART <-> ESP-NOW)
+    handleParamSystem();
+
     // 6. Process telemetry (10Hz)
     if (telemEvery.check())
     {
@@ -619,6 +622,183 @@ void App::handleSerialCommands()
                 }
             }
         }
+        // PARAM test - send test request to drone
+        else if (c == 'P' || c == 'p')
+        {
+            Serial.println("[PARAM_TEST]");
+            Serial.println("Sending PARAM LIST request to drone...");
+
+            // Build PARAM_REQUEST packet
+            TelemetryParamRequest request = {};
+            request.magic = TELEM_ENHANCED_MAGIC;
+            request.version = TELEM_ENHANCED_VERSION;
+            request.type = TELEM_TYPE_PARAM_REQUEST;
+            request.flags = 0;
+            request.seq = 1;
+            request.timestamp_us = (uint32_t)(micros() & 0xFFFFFFFF);
+            request.command = PARAM_CMD_LIST;
+            request.param_index = 0;
+            request.value = 0.0f;
+
+            // Calculate CRC
+            request.crc = crc16_x25((uint8_t*)&request, sizeof(request) - sizeof(request.crc));
+
+            // Send to drone via ESP-NOW
+            bool sent = radio.sendPacket(&request, sizeof(request));
+            if (sent)
+            {
+                Serial.printf("✓ PARAM request sent (seq=%u, cmd=%u, idx=%u)\n",
+                    request.seq, request.command, request.param_index);
+                Serial.println("Waiting for response from drone...");
+                Serial.println("(Response will appear in PARAM RESP logs if drone responds)");
+            }
+            else
+            {
+                Serial.println("✗ Failed to send PARAM request");
+            }
+        }
+    }
+}
+
+// ============================================================================
+// PARAM System Handler
+// ============================================================================
+
+void App::handleParamSystem()
+{
+    UartMode uartMode = m_telemForwarder.getUartMode();
+
+    // Part 1: Receive PARAM_REQUEST from UART and forward to drone
+    // Only in TELEMETRY_BINARY mode (Python bridge sends binary packets)
+    if (uartMode == UartMode::TELEMETRY_BINARY)
+    {
+        while (Serial.available() > 0)
+    {
+        uint8_t byte = Serial.read();
+
+        // Look for magic byte to start packet
+        if (m_paramBufferIndex == 0)
+        {
+            if (byte == TELEM_ENHANCED_MAGIC)
+            {
+                m_paramRequestBuffer[m_paramBufferIndex++] = byte;
+            }
+            continue;
+        }
+
+        // Accumulate bytes
+        m_paramRequestBuffer[m_paramBufferIndex++] = byte;
+
+        // Check if we have complete packet
+        if (m_paramBufferIndex >= sizeof(TelemetryParamRequest))
+        {
+            const TelemetryParamRequest* request = reinterpret_cast<const TelemetryParamRequest*>(m_paramRequestBuffer);
+
+            // Validate packet
+            bool valid = true;
+            if (request->magic != TELEM_ENHANCED_MAGIC)
+            {
+                valid = false;
+                LOG_ERROR(SYSTEM, "PARAM REQ: Invalid magic 0x%02X", request->magic);
+            }
+            else if (request->version != TELEM_ENHANCED_VERSION)
+            {
+                valid = false;
+                LOG_ERROR(SYSTEM, "PARAM REQ: Invalid version %u", request->version);
+            }
+            else if (request->type != TELEM_TYPE_PARAM_REQUEST)
+            {
+                valid = false;
+                LOG_ERROR(SYSTEM, "PARAM REQ: Invalid type 0x%02X", request->type);
+            }
+            else
+            {
+                // Validate CRC
+                uint16_t calculatedCrc = crc16_x25(m_paramRequestBuffer, sizeof(TelemetryParamRequest) - sizeof(request->crc));
+                if (calculatedCrc != request->crc)
+                {
+                    valid = false;
+                    LOG_ERROR(SYSTEM, "PARAM REQ: CRC error calc=0x%04X rcv=0x%04X", calculatedCrc, request->crc);
+                }
+            }
+
+            if (valid)
+            {
+                // Forward PARAM_REQUEST to drone via ESP-NOW
+                bool sent = radio.sendPacket(m_paramRequestBuffer, sizeof(TelemetryParamRequest));
+                if (sent)
+                {
+                    LOG_DEBUG(SYSTEM, "PARAM REQ: Forwarded cmd=%u idx=%u to drone", request->command, request->param_index);
+                }
+                else
+                {
+                    LOG_ERROR(SYSTEM, "PARAM REQ: Failed to send to drone");
+                }
+            }
+
+            // Reset buffer for next packet
+            m_paramBufferIndex = 0;
+        }
+
+        // Safety: Prevent buffer overflow
+        if (m_paramBufferIndex >= sizeof(TelemetryParamRequest))
+        {
+            m_paramBufferIndex = 0;
+        }
+    }
+    }
+
+    // Part 2: Check for PARAM_RESPONSE from drone
+    if (radio.hasParamResponse())
+    {
+        const EnhancedTelemData& telem = radio.getEnhancedTelemetry();
+        const TelemetryParamResponse& response = telem.paramResponse;
+
+        if (uartMode == UartMode::TELEMETRY_BINARY)
+        {
+            // Forward raw binary response to UART (for Python bridge)
+            Serial.write((const uint8_t*)&response, sizeof(TelemetryParamResponse));
+            Serial.flush();
+            LOG_DEBUG(SYSTEM, "PARAM RESP: Forwarded cmd=%u idx=%u to UART", response.command, response.param_index);
+        }
+        else
+        {
+            // DEBUG_TEXT mode - print human-readable response
+            const char* cmdName = "UNKNOWN";
+            switch (response.command)
+            {
+                case PARAM_CMD_LIST_RESP: cmdName = "LIST_RESP"; break;
+                case PARAM_CMD_GET_RESP: cmdName = "GET_RESP"; break;
+                case PARAM_CMD_SET_RESP: cmdName = "SET_RESP"; break;
+                case PARAM_CMD_ERROR: cmdName = "ERROR"; break;
+            }
+
+            Serial.println("[PARAM_RESPONSE]");
+            Serial.printf("Command: %s (0x%02X)\n", cmdName, response.command);
+            Serial.printf("Index: %u\n", response.param_index);
+            Serial.printf("Seq: %u\n", response.seq);
+
+            if (response.error_code != 0)
+            {
+                Serial.printf("✗ Error Code: %u\n", response.error_code);
+            }
+            else
+            {
+                Serial.printf("Group: %s\n", response.group);
+                Serial.printf("Name: %s\n", response.name);
+                Serial.printf("Value: %.3f\n", response.value);
+                Serial.printf("Type: 0x%02X\n", response.param_type);
+                Serial.printf("Access: %s\n", response.param_access == PARAM_ACCESS_READWRITE ? "RW" : "RO");
+
+                if (response.command == PARAM_CMD_LIST_RESP)
+                {
+                    Serial.printf("Total Params: %u\n", response.total_params);
+                }
+            }
+        }
+
+        // Clear flag
+        radio.clearParamResponseFlag();
     }
 }
 

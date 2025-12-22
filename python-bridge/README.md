@@ -171,11 +171,6 @@ uvicorn app:app --host 0.0.0.0 --port 8000 --workers 4
 http://localhost:8000/docs
 ```
 
-**Get Latest Telemetry:**
-```bash
-curl http://localhost:8000/telemetry/latest
-```
-
 **Health Check:**
 ```bash
 curl http://localhost:8000/health
@@ -211,40 +206,6 @@ pytest --cov=app --cov-report=html
 pytest tests/test_parser.py -k "attitude" -v
 ```
 
-### Manual Testing
-
-**1. List Available Serial Ports:**
-```bash
-curl http://localhost:8000/ports
-```
-
-**2. Check Health:**
-```bash
-curl http://localhost:8000/health
-```
-
-Expected response (healthy):
-```json
-{
-  "status": "healthy",
-  "last_packet_age_s": 0.05,
-  "packets_received": 1234,
-  "is_alive": true
-}
-```
-
-**3. Get Statistics:**
-```bash
-curl http://localhost:8000/stats
-```
-
-**4. WebSocket Test (Browser Console):**
-```javascript
-const ws = new WebSocket('ws://localhost:8000/ws/telemetry');
-ws.onopen = () => console.log('✅ Connected');
-ws.onmessage = (e) => console.log(JSON.parse(e.data));
-```
-
 ## API Endpoints
 
 ### REST Endpoints
@@ -255,17 +216,9 @@ GET /health
 ```
 Returns 200 if receiving recent packets, 503 otherwise.
 
-**Latest Telemetry:**
-```
-GET /telemetry/latest
-```
-Returns dictionary with latest packet of each type (ATT, MOT, STA, etc.)
-
 **Specific Packet Types:**
 ```
-GET /telemetry/attitude   # Latest ATTITUDE packet
 GET /telemetry/motors     # Latest MOTORS packet
-GET /telemetry/status     # Latest STATUS packet
 ```
 
 **Packet History:**
@@ -273,18 +226,6 @@ GET /telemetry/status     # Latest STATUS packet
 GET /telemetry/history/{packet_type}?max_count=100
 ```
 Returns historical packets for specific type (e.g., `/telemetry/history/ATT?max_count=50`)
-
-**Statistics:**
-```
-GET /stats
-```
-Comprehensive statistics including CRC errors, packet counts, parser stats.
-
-**Utility:**
-```
-GET /ports
-```
-Lists available serial ports.
 
 ### WebSocket Endpoint
 

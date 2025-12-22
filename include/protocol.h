@@ -53,7 +53,9 @@ enum TelemetryPacketType : uint8_t {
     TELEM_TYPE_STATUS       = 0x04,  // System status (2.5Hz)
     TELEM_TYPE_SENSORS      = 0x05,  // Raw sensor data (1.25Hz)
     TELEM_TYPE_SAFETY       = 0x06,  // Safety and diagnostics (1.25Hz)
-    TELEM_TYPE_PERFORMANCE  = 0x07   // Performance metrics (0.625Hz)
+    TELEM_TYPE_PERFORMANCE  = 0x07,  // Performance metrics (0.625Hz)
+    TELEM_TYPE_PARAM_REQUEST  = 0x10,  // Parameter request (on-demand)
+    TELEM_TYPE_PARAM_RESPONSE = 0x11   // Parameter response (on-demand)
 };
 
 // Enhanced telemetry constants
@@ -159,6 +161,92 @@ struct TelemetryPerformance {
     uint8_t stack_usage_pct;     // Stack usage percentage
     uint16_t crc;                // 10 bytes data + 2 CRC = 22 total
 };
+
+// ============================================================================
+// PARAM System (Version 2) - Dynamic Parameter Management
+// ============================================================================
+
+// PARAM command types
+enum ParamCommand : uint8_t {
+    PARAM_CMD_LIST = 0x01,          // List parameters
+    PARAM_CMD_GET = 0x02,           // Get parameter value
+    PARAM_CMD_SET = 0x03,           // Set parameter value
+    PARAM_CMD_LIST_RESP = 0x81,     // List response
+    PARAM_CMD_GET_RESP = 0x82,      // Get response
+    PARAM_CMD_SET_RESP = 0x83,      // Set response
+    PARAM_CMD_ERROR = 0xFF          // Error response
+};
+
+// PARAM error codes
+enum ParamErrorCode : uint8_t {
+    PARAM_ERROR_NONE = 0,
+    PARAM_ERROR_INDEX_OUT_OF_RANGE = 1,
+    PARAM_ERROR_NOT_FOUND = 2,
+    PARAM_ERROR_READ_FAILED = 3,
+    PARAM_ERROR_WRITE_FAILED = 4,
+    PARAM_ERROR_UNKNOWN_COMMAND = 5
+};
+
+// PARAM type codes
+enum ParamType : uint8_t {
+    PARAM_TYPE_FLOAT = 0x06
+};
+
+// PARAM access modes
+enum ParamAccess : uint8_t {
+    PARAM_ACCESS_READONLY = 0x00,
+    PARAM_ACCESS_READWRITE = 0x01
+};
+
+// 8. PARAM_REQUEST (0x10) - Parameter Request Packet (20 bytes total)
+struct TelemetryParamRequest {
+    // Header (12 bytes with padding)
+    uint8_t magic;           // 0x5B (enhanced telemetry identifier)
+    uint8_t version;         // 2 (enhanced version)
+    uint8_t type;            // 0x10 (TELEM_TYPE_PARAM_REQUEST)
+    uint8_t flags;           // Packet flags (0 for PARAM)
+    uint16_t seq;            // Sequence number
+    uint8_t _padding[2];     // 2-byte padding for alignment
+    uint32_t timestamp_us;   // Microsecond timestamp
+
+    // Payload (6 bytes)
+    uint8_t command;         // ParamCommand (LIST/GET/SET)
+    uint8_t param_index;     // Parameter index (0-255)
+    float value;             // New value (for SET command only)
+
+    // Footer (2 bytes)
+    uint16_t crc;            // CRC-16/X.25 (all bytes except CRC)
+};
+// Total: 20 bytes
+
+// 9. PARAM_RESPONSE (0x11) - Parameter Response Packet (57 bytes total)
+struct TelemetryParamResponse {
+    // Header (12 bytes with padding)
+    uint8_t magic;           // 0x5B
+    uint8_t version;         // 2
+    uint8_t type;            // 0x11 (TELEM_TYPE_PARAM_RESPONSE)
+    uint8_t flags;           // Packet flags (0 for PARAM)
+    uint16_t seq;            // Sequence number (matches request)
+    uint8_t _padding[2];     // 2-byte padding
+    uint32_t timestamp_us;   // Timestamp
+
+    // Payload (43 bytes with padding)
+    uint8_t command;         // ParamCommand (LIST_RESP/GET_RESP/SET_RESP/ERROR)
+    uint8_t param_index;     // Parameter index
+    uint8_t param_type;      // ParamType (0x06 = float)
+    uint8_t param_access;    // ParamAccess (0x00 = readonly, 0x01 = readwrite)
+    float value;             // Current parameter value
+    uint8_t _padding2;       // 1-byte padding after float
+    char group[16];          // Parameter group name (null-terminated)
+    char name[16];           // Parameter name (null-terminated)
+    uint8_t total_params;    // Total number of parameters (for LIST)
+    uint8_t error_code;      // ParamErrorCode (0 = success, >0 = error)
+
+    // Footer (2 bytes)
+    uint16_t crc;            // CRC-16/X.25
+};
+// Total: 57 bytes
+
 #pragma pack(pop)
 
 // Enhanced telemetry validation helper

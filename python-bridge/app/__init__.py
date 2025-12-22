@@ -21,7 +21,7 @@ from typing import Any, AsyncIterator
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import router
+from app.api import info_routes, params_routes, telemetry_routes
 from app.config import settings
 from app.services.unified_bridge import UnifiedBridge
 from app.services.websocket_manager import WebSocketConnectionManager, websocket_manager
@@ -34,7 +34,9 @@ async def _init_unified_bridge(
     ws_manager: WebSocketConnectionManager,
 ) -> UnifiedBridge | None:
     """Initialize unified bridge for telemetry and PARAM communication."""
-    logger.info(f"Starting unified bridge: {settings.telemetry_port} @ {settings.baudrate}")
+    logger.info(
+        f"Starting unified bridge: {settings.telemetry_port} @ {settings.baudrate}"
+    )
 
     try:
         bridge = UnifiedBridge(
@@ -84,7 +86,9 @@ async def lifespan(app_instance: FastAPI) -> AsyncIterator[None]:
     app_instance.state.websocket_manager = websocket_manager
 
     # Initialize unified bridge (handles both telemetry and PARAM)
-    app_instance.state.bridge = await _init_unified_bridge(app_instance.state.websocket_manager)
+    app_instance.state.bridge = await _init_unified_bridge(
+        app_instance.state.websocket_manager
+    )
 
     # Also set param_bridge to the same bridge for API compatibility
     app_instance.state.param_bridge = app_instance.state.bridge
@@ -116,4 +120,5 @@ app.add_middleware(
 )
 
 # Include API router
-app.include_router(router)
+app.include_router(info_routes.router)
+app.include_router(info_routes.router)

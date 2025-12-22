@@ -11,6 +11,9 @@ EnhancedTelemData RadioManager::s_enhancedTelem = {};
 bool RadioManager::s_newEnhancedAvailable = false;
 uint8_t RadioManager::s_newPacketTypeFlags = 0;
 
+// PARAM response state
+bool RadioManager::s_newParamResponse = false;
+
 // Telemetry receiver configuration
 TelemReceiverConfig RadioManager::s_config = {
     .enable_enhanced = true,     // Enhanced telemetry enabled
@@ -125,6 +128,9 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
                 break;
             case TELEM_TYPE_PERFORMANCE:
                 handleEnhancedPerformance(data, len);
+                break;
+            case TELEM_TYPE_PARAM_RESPONSE:
+                handleParamResponse(data, len);
                 break;
             default:
                 // Unknown packet type
@@ -386,4 +392,52 @@ void RadioManager::setReceiverConfig(const TelemReceiverConfig& config) {
 
 const TelemReceiverConfig& RadioManager::getReceiverConfig() const {
     return s_config;
+}
+
+// ============================================================================
+// PARAM System Handlers
+// ============================================================================
+
+void RadioManager::handleParamResponse(const uint8_t* data, int len) {
+    if (len != sizeof(TelemetryParamResponse)) {
+        if (s_errorLogger) {
+            s_errorLogger->logWrongPacketSize(len, sizeof(TelemetryParamResponse));
+        }
+        return;
+    }
+
+    const TelemetryParamResponse* packet = reinterpret_cast<const TelemetryParamResponse*>(data);
+
+    // Validate CRC
+    uint16_t calculatedCrc = crc16_x25(data, len - sizeof(packet->crc));
+    if (calculatedCrc != packet->crc) {
+        if (s_errorLogger) {
+            s_errorLogger->logCrcError(calculatedCrc, packet->crc);
+        }
+        return;
+    }
+
+    // Store PARAM response (thread-safe)
+    if (xSemaphoreTakeFromISR(s_telemMutex, NULL) == pdTRUE) {
+        memcpy(&s_enhancedTelem.paramResponse, packet, sizeof(TelemetryParamResponse));
+        s_enhancedTelem.param_response_rx_ms = millis();
+        s_newParamResponse = true;
+        xSemaphoreGiveFromISR(s_telemMutex, NULL);
+    }
+}
+
+bool RadioManager::hasParamResponse() const {
+    bool result = false;
+    if (xSemaphoreTake(s_telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+        result = s_newParamResponse;
+        xSemaphoreGive(s_telemMutex);
+    }
+    return result;
+}
+
+void RadioManager::clearParamResponseFlag() {
+    if (xSemaphoreTake(s_telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+        s_newParamResponse = false;
+        xSemaphoreGive(s_telemMutex);
+    }
 }

@@ -55,32 +55,39 @@ RESPONSE_PACKET_SIZE = 54  # 10 header + 42 payload + 2 CRC (NO padding)
 
 # === Exceptions ===
 
+
 class ParamTimeoutError(Exception):
     """Request timeout - no response from drone."""
+
     pass
 
 
 class ParamCRCError(Exception):
     """CRC validation failed."""
+
     pass
 
 
 class ParamNotFoundError(Exception):
     """Parameter not found (invalid index)."""
+
     pass
 
 
 class ParamReadOnlyError(Exception):
     """Attempted to write read-only parameter."""
+
     pass
 
 
 class ParamConnectionError(Exception):
     """UART connection error."""
+
     pass
 
 
 # === CRC-16/X.25 ===
+
 
 def crc16_x25(data: bytes) -> int:
     """
@@ -99,6 +106,7 @@ def crc16_x25(data: bytes) -> int:
 
 
 # === Unified Bridge ===
+
 
 class UnifiedBridge:
     """
@@ -172,7 +180,9 @@ class UnifiedBridge:
         self._lock = aiorwlock.RWLock()
 
         # Telemetry callback
-        self._telemetry_callback: Optional[Callable[[dict[str, Any]], Awaitable[None]]] = None
+        self._telemetry_callback: Optional[
+            Callable[[dict[str, Any]], Awaitable[None]]
+        ] = None
 
         # PARAM response queue (for request/response matching)
         self._param_response_queue: asyncio.Queue[dict] = asyncio.Queue()
@@ -285,13 +295,13 @@ class UnifiedBridge:
         """
         async with self._lock.reader_lock:
             return {
-                'ATT': self._latest_packets.get('ATT'),
-                'MOT': self._latest_packets.get('MOT'),
-                'STA': self._latest_packets.get('STA'),
-                'CTL': self._latest_packets.get('CTL'),
-                'SENS': self._latest_packets.get('SENS'),
-                'SAFE': self._latest_packets.get('SAFE'),
-                'PERF': self._latest_packets.get('PERF'),
+                "ATT": self._latest_packets.get("ATT"),
+                "MOT": self._latest_packets.get("MOT"),
+                "STA": self._latest_packets.get("STA"),
+                "CTL": self._latest_packets.get("CTL"),
+                "SENS": self._latest_packets.get("SENS"),
+                "SAFE": self._latest_packets.get("SAFE"),
+                "PERF": self._latest_packets.get("PERF"),
             }
 
     async def get_latest_packet(self, packet_type: str) -> dict[str, Any] | None:
@@ -345,7 +355,9 @@ class UnifiedBridge:
             }
 
             if self._health["last_packet_time"]:
-                health["last_packet_age_s"] = time.time() - self._health["last_packet_time"]
+                health["last_packet_age_s"] = (
+                    time.time() - self._health["last_packet_time"]
+                )
             else:
                 health["last_packet_age_s"] = None
 
@@ -365,7 +377,9 @@ class UnifiedBridge:
 
     # === PARAM Features (from ParamUARTBridge) ===
 
-    def _build_param_request(self, command: int, param_index: int, value: float = 0.0) -> bytes:
+    def _build_param_request(
+        self, command: int, param_index: int, value: float = 0.0
+    ) -> bytes:
         """Build PARAM request packet (18 bytes)."""
         self._param_seq_counter = (self._param_seq_counter + 1) & 0xFFFF
         timestamp_us = int(time.time() * 1_000_000) & 0xFFFFFFFF
@@ -373,7 +387,7 @@ class UnifiedBridge:
         # Pack header + payload (without CRC)
         # IMPORTANT: No padding - matches firmware packed struct (10-byte header)
         packet_no_crc = struct.pack(
-            '<BBBBHIBBf',  # Little-endian, NO padding (10 header + 6 payload = 16 bytes)
+            "<BBBBHIBBf",  # Little-endian, NO padding (10 header + 6 payload = 16 bytes)
             MAGIC_BYTE,
             PROTOCOL_VERSION,
             TELEM_PARAM_REQUEST,
@@ -382,28 +396,34 @@ class UnifiedBridge:
             timestamp_us,
             command,
             param_index,
-            value
+            value,
         )
 
         # Calculate and append CRC
         crc = crc16_x25(packet_no_crc)
-        packet = packet_no_crc + struct.pack('<H', crc)
+        packet = packet_no_crc + struct.pack("<H", crc)
 
         return packet
 
     def _parse_param_response(self, data: bytes) -> dict:
         """Parse PARAM response packet (54 bytes)."""
         if len(data) != RESPONSE_PACKET_SIZE:
-            raise ValueError(f"Invalid packet size: {len(data)}, expected {RESPONSE_PACKET_SIZE}")
+            raise ValueError(
+                f"Invalid packet size: {len(data)}, expected {RESPONSE_PACKET_SIZE}"
+            )
 
         # Verify CRC
         crc_calc = crc16_x25(data[:-2])
-        crc_received = struct.unpack('<H', data[-2:])[0]
+        crc_received = struct.unpack("<H", data[-2:])[0]
         if crc_calc != crc_received:
-            raise ParamCRCError(f"CRC mismatch: calc={crc_calc:04x}, recv={crc_received:04x}")
+            raise ParamCRCError(
+                f"CRC mismatch: calc={crc_calc:04x}, recv={crc_received:04x}"
+            )
 
         # Parse header (NO padding - matches firmware packed struct)
-        magic, version, pkt_type, flags, seq, timestamp_us = struct.unpack('<BBBBHI', data[0:10])
+        magic, version, pkt_type, flags, seq, timestamp_us = struct.unpack(
+            "<BBBBHI", data[0:10]
+        )
 
         if magic != MAGIC_BYTE:
             raise ValueError(f"Invalid magic: 0x{magic:02x}")
@@ -412,24 +432,33 @@ class UnifiedBridge:
             raise ValueError(f"Invalid packet type: 0x{pkt_type:02x}")
 
         # Parse payload (NO padding - matches firmware packed struct)
-        command, param_index, param_type, param_access, value, group_bytes, name_bytes, total_params, error_code = \
-            struct.unpack('<BBBBf16s16sBB', data[10:52])
+        (
+            command,
+            param_index,
+            param_type,
+            param_access,
+            value,
+            group_bytes,
+            name_bytes,
+            total_params,
+            error_code,
+        ) = struct.unpack("<BBBBf16s16sBB", data[10:52])
 
-        group = group_bytes.decode('utf-8', errors='ignore').rstrip('\x00')
-        name = name_bytes.decode('utf-8', errors='ignore').rstrip('\x00')
+        group = group_bytes.decode("utf-8", errors="ignore").rstrip("\x00")
+        name = name_bytes.decode("utf-8", errors="ignore").rstrip("\x00")
 
         return {
-            'seq': seq,
-            'timestamp_us': timestamp_us,
-            'command': command,
-            'param_index': param_index,
-            'param_type': param_type,
-            'param_access': param_access,
-            'value': value,
-            'group': group,
-            'name': name,
-            'total_params': total_params,
-            'error_code': error_code,
+            "seq": seq,
+            "timestamp_us": timestamp_us,
+            "command": command,
+            "param_index": param_index,
+            "param_type": param_type,
+            "param_access": param_access,
+            "value": value,
+            "group": group,
+            "name": name,
+            "total_params": total_params,
+            "error_code": error_code,
         }
 
     async def _send_param_request_and_wait(self, packet: bytes) -> dict:
@@ -452,19 +481,18 @@ class UnifiedBridge:
         # Send request
         self._writer.write(packet)
         await self._writer.drain()
-        self.stats['param_requests'] += 1
-        self.stats['bytes_written'] += len(packet)
+        self.stats["param_requests"] += 1
+        self.stats["bytes_written"] += len(packet)
 
         # Wait for response with timeout
         try:
             response = await asyncio.wait_for(
-                self._param_response_queue.get(),
-                timeout=self.param_timeout
+                self._param_response_queue.get(), timeout=self.param_timeout
             )
-            self.stats['param_responses'] += 1
+            self.stats["param_responses"] += 1
             return response
         except asyncio.TimeoutError:
-            self.stats['param_timeouts'] += 1
+            self.stats["param_timeouts"] += 1
             raise ParamTimeoutError(f"No response within {self.param_timeout}s")
 
     async def list_params(self) -> list[dict]:
@@ -479,7 +507,7 @@ class UnifiedBridge:
             packet = self._build_param_request(PARAM_CMD_LIST, 0)
             response = await self._send_param_request_and_wait(packet)
 
-            total_params = response['total_params']
+            total_params = response["total_params"]
             params = []
 
             # Request each parameter
@@ -488,17 +516,21 @@ class UnifiedBridge:
                 try:
                     resp = await self._send_param_request_and_wait(packet)
 
-                    if resp['error_code'] == 0:
-                        params.append({
-                            'index': resp['param_index'],
-                            'group': resp['group'],
-                            'name': resp['name'],
-                            'param_type': resp['param_type'],
-                            'param_access': resp['param_access'],
-                            'value': resp['value'],
-                        })
+                    if resp["error_code"] == 0:
+                        params.append(
+                            {
+                                "index": resp["param_index"],
+                                "group": resp["group"],
+                                "name": resp["name"],
+                                "param_type": resp["param_type"],
+                                "param_access": resp["param_access"],
+                                "value": resp["value"],
+                            }
+                        )
                     else:
-                        logger.warning(f"Error listing param {idx}: error_code={resp['error_code']}")
+                        logger.warning(
+                            f"Error listing param {idx}: error_code={resp['error_code']}"
+                        )
 
                 except ParamTimeoutError:
                     logger.warning(f"Timeout listing param {idx}")
@@ -520,13 +552,15 @@ class UnifiedBridge:
             packet = self._build_param_request(PARAM_CMD_GET, param_index)
             response = await self._send_param_request_and_wait(packet)
 
-            if response['error_code'] != 0:
-                if response['error_code'] == ERROR_PARAM_NOT_FOUND:
+            if response["error_code"] != 0:
+                if response["error_code"] == ERROR_PARAM_NOT_FOUND:
                     raise ParamNotFoundError(f"Parameter {param_index} not found")
                 else:
-                    raise Exception(f"Error getting param {param_index}: error_code={response['error_code']}")
+                    raise Exception(
+                        f"Error getting param {param_index}: error_code={response['error_code']}"
+                    )
 
-            return response['value']
+            return response["value"]
 
     async def set_param(self, param_index: int, value: float) -> bool:
         """
@@ -543,17 +577,21 @@ class UnifiedBridge:
             packet = self._build_param_request(PARAM_CMD_SET, param_index, value)
             response = await self._send_param_request_and_wait(packet)
 
-            if response['error_code'] != 0:
-                if response['error_code'] == ERROR_PARAM_NOT_FOUND:
+            if response["error_code"] != 0:
+                if response["error_code"] == ERROR_PARAM_NOT_FOUND:
                     raise ParamNotFoundError(f"Parameter {param_index} not found")
-                elif response['error_code'] == ERROR_WRITE_FAILED:
+                elif response["error_code"] == ERROR_WRITE_FAILED:
                     raise ParamReadOnlyError(f"Parameter {param_index} is read-only")
                 else:
-                    raise Exception(f"Error setting param {param_index}: error_code={response['error_code']}")
+                    raise Exception(
+                        f"Error setting param {param_index}: error_code={response['error_code']}"
+                    )
 
             # Verify value was set correctly
-            if abs(response['value'] - value) > 0.001:
-                logger.warning(f"Set param {param_index}: requested {value}, got {response['value']}")
+            if abs(response["value"] - value) > 0.001:
+                logger.warning(
+                    f"Set param {param_index}: requested {value}, got {response['value']}"
+                )
 
             logger.info(f"Set param {param_index} = {response['value']}")
             return True
@@ -587,12 +625,12 @@ class UnifiedBridge:
         Used by PARAM endpoints.
         """
         return {
-            'requests_sent': self.stats['param_requests'],
-            'responses_received': self.stats['param_responses'],
-            'timeouts': self.stats['param_timeouts'],
-            'crc_errors': self.stats['param_crc_errors'],
-            'errors': 0,  # Generic errors not tracked separately
-            'last_response_time': None,  # Not tracked in current impl
+            "requests_sent": self.stats["param_requests"],
+            "responses_received": self.stats["param_responses"],
+            "timeouts": self.stats["param_timeouts"],
+            "crc_errors": self.stats["param_crc_errors"],
+            "errors": 0,  # Generic errors not tracked separately
+            "last_response_time": None,  # Not tracked in current impl
         }
 
     async def reset_stats(self) -> None:
@@ -689,7 +727,7 @@ class UnifiedBridge:
         if packet_type == "PARAM_RESP":
             try:
                 # Parse full PARAM response from raw_data
-                response = self._parse_param_response(packet['raw_data'])
+                response = self._parse_param_response(packet["raw_data"])
                 await self._handle_param_response(response)
             except Exception as e:
                 logger.error(f"Error handling PARAM response: {e}")

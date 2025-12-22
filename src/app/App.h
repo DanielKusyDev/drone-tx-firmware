@@ -73,6 +73,7 @@ public:
      * - 'T': Toggle enhanced telemetry mode on/off
      * - 'U': Toggle UART mode (DEBUG_TEXT / TELEMETRY_BINARY)
      * - 'F': Display telemetry forwarder statistics
+     * - 'P': Send test PARAM request to drone (LIST command)
      */
     void handleSerialCommands();
 
@@ -93,6 +94,11 @@ private:
     bool m_lastArmedState;
     bool m_forceDisarmDetected;
     unsigned long m_forceDisarmTimestamp;
+
+    // PARAM system
+    void handleParamSystem();
+    uint8_t m_paramRequestBuffer[sizeof(TelemetryParamRequest)];
+    size_t m_paramBufferIndex = 0;
 };
 
 // Global app instance (maintains Arduino-style global access)

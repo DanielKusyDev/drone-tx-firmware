@@ -1,6 +1,6 @@
-from typing import Annotated, Union
+from typing import Annotated
 
-from fastapi import HTTPException, Depends, WebSocket
+from fastapi import HTTPException, Depends
 from starlette.requests import Request
 
 from app.config import Settings, get_settings
@@ -15,7 +15,9 @@ async def get_websocket_connection_manager() -> WebSocketConnectionManager:
     Works with both HTTP requests and WebSocket connections.
     """
     if not websocket_manager:
-        raise HTTPException(status_code=503, detail="WebSocket Connection not initialized")
+        raise HTTPException(
+            status_code=503, detail="WebSocket Connection not initialized"
+        )
     return websocket_manager
 
 
@@ -41,7 +43,10 @@ async def get_param_bridge(request: Request) -> UnifiedBridge:
     instance, which handles both telemetry and PARAM communication over a single
     UART port.
     """
-    if not hasattr(request.app.state, 'param_bridge') or not request.app.state.param_bridge:
+    if (
+        not hasattr(request.app.state, "param_bridge")
+        or not request.app.state.param_bridge
+    ):
         raise HTTPException(status_code=503, detail="PARAM bridge not initialized")
     return request.app.state.param_bridge
 
@@ -49,4 +54,6 @@ async def get_param_bridge(request: Request) -> UnifiedBridge:
 Bridge = Annotated[UnifiedBridge, Depends(get_telemetry_bridge)]
 ParamBridge = Annotated[UnifiedBridge, Depends(get_param_bridge)]
 AppSettings = Annotated[Settings, Depends(get_settings)]
-WsConnection = Annotated[WebSocketConnectionManager, Depends(get_websocket_connection_manager)]
+WsConnection = Annotated[
+    WebSocketConnectionManager, Depends(get_websocket_connection_manager)
+]

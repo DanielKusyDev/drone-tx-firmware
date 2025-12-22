@@ -45,6 +45,10 @@ struct EnhancedTelemData {
 
     // Statistics per packet type
     EnhancedTelemStats stats[7]; // Index = (type - 1)
+
+    // PARAM response (separate from periodic telemetry)
+    TelemetryParamResponse paramResponse;
+    uint32_t param_response_rx_ms;
 };
 
 // Telemetry receiver configuration
@@ -78,6 +82,10 @@ public:
     bool hasSafety() const;
     bool hasPerformance() const;
 
+    // PARAM system
+    bool hasParamResponse() const;
+    void clearParamResponseFlag();
+
     // Statistics
     const EnhancedTelemStats& getEnhancedStats(TelemetryPacketType type) const;
     uint32_t getTotalEnhancedPackets() const;
@@ -101,6 +109,9 @@ private:
     static bool s_newEnhancedAvailable;
     static uint8_t s_newPacketTypeFlags; // Bitmask of received packet types
 
+    // PARAM response flag (protected by mutex)
+    static bool s_newParamResponse;
+
     // Configuration
     static TelemReceiverConfig s_config;
 
@@ -122,6 +133,7 @@ private:
     static void handleEnhancedSensors(const uint8_t* data, int len);
     static void handleEnhancedSafety(const uint8_t* data, int len);
     static void handleEnhancedPerformance(const uint8_t* data, int len);
+    static void handleParamResponse(const uint8_t* data, int len);
 
     // Helper to update stats
     static void updatePacketStats(TelemetryPacketType type, uint16_t seq, bool crcValid);
