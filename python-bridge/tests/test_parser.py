@@ -167,7 +167,7 @@ def _create_status_packet(seq: int = 200) -> bytes:
     )
 
     # Payload (12 bytes)
-    safety_flags = 0x01 | 0x02 | 0x08  # HRZ | LINK | CAL
+    safety_flags = 0x01 | 0x04 | 0x10  # HRZ | CALIB | SENS
     buf.write(
         struct.pack(
             "<BBBBBBHI",
@@ -241,8 +241,8 @@ class TestBasicParsing:
         assert pkt["battery_pct"] == 85
         assert pkt["loop_rate_hz"] == 500.0
         assert pkt["flags"]["HRZ"] is True
-        assert pkt["flags"]["CAL"] is True
-        assert pkt["flags"]["LINK"] is True
+        assert pkt["flags"]["CALIB"] is True
+        assert pkt["flags"]["SENS"] is True
 
     def test_multiple_packets_in_stream(self, parser):
         """Test parsing multiple packets in one feed."""

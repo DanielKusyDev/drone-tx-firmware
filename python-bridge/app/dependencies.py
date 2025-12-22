@@ -5,6 +5,7 @@ from starlette.requests import Request
 
 from app.config import Settings, get_settings
 from app.services.telemetry_bridge import TelemetryBridge
+from app.services.param_uart_bridge import ParamUARTBridge
 from app.services.websocket_manager import WebSocketConnectionManager, websocket_manager
 
 
@@ -30,6 +31,18 @@ async def get_telemetry_bridge(request: Request) -> TelemetryBridge:
     return request.app.state.bridge
 
 
+async def get_param_bridge(request: Request) -> ParamUARTBridge:
+    """
+    Get PARAM UART bridge from app state.
+
+    Works with both HTTP requests and WebSocket connections.
+    """
+    if not hasattr(request.app.state, 'param_bridge') or not request.app.state.param_bridge:
+        raise HTTPException(status_code=503, detail="PARAM bridge not initialized")
+    return request.app.state.param_bridge
+
+
 Bridge = Annotated[TelemetryBridge, Depends(get_telemetry_bridge)]
+ParamBridge = Annotated[ParamUARTBridge, Depends(get_param_bridge)]
 AppSettings = Annotated[Settings, Depends(get_settings)]
 WsConnection = Annotated[WebSocketConnectionManager, Depends(get_websocket_connection_manager)]
