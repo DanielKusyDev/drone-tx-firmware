@@ -947,16 +947,12 @@ class TestAdditionalPacketTypes:
         assert pkt["stack_usage_pct"] == 40
 
     def test_param_request_packet(self, parser):
-        """Test parsing PARAM_REQUEST packet."""
+        """Test parsing PARAM_REQUEST packet - should be skipped (echo/loopback)."""
         packet = _create_param_request_packet(seq=700)
         packets = parser.feed(packet)
 
-        assert len(packets) == 1
-        pkt = packets[0]
-
-        assert pkt["type"] == "PARAM_REQ"
-        assert pkt["seq"] == 700
-        assert "raw_data" in pkt
+        # PARAM_REQUEST packets should be skipped (they are sent BY us, not FROM drone)
+        assert len(packets) == 0
 
     def test_param_response_packet(self, parser):
         """Test parsing PARAM_RESPONSE packet."""

@@ -204,6 +204,18 @@ class TelemetryParser:
             self.buffer.pop(0)
             return None
 
+        # Skip PARAM_REQUEST packets - these are sent BY us, not FROM drone
+        # (likely UART echo or firmware forwarding)
+        if packet_type == TelemetryPacketType.PARAM_REQUEST:
+            logger.debug(f"Skipping PARAM_REQUEST packet (echo/loopback)")
+            # Remove this packet from buffer
+            expected_size = PACKET_SIZES[packet_type]
+            if len(self.buffer) >= expected_size:
+                self.buffer = self.buffer[expected_size:]
+            else:
+                self.buffer.pop(0)
+            return None
+
         # Check if we have full packet
         expected_size = PACKET_SIZES[packet_type]
         if len(self.buffer) < expected_size:
@@ -264,8 +276,6 @@ class TelemetryParser:
             return self._parse_safety(header, data)
         elif packet_type == TelemetryPacketType.PERFORMANCE:
             return self._parse_performance(header, data)
-        elif packet_type == TelemetryPacketType.PARAM_REQUEST:
-            return self._parse_param_request(header, data)
         elif packet_type == TelemetryPacketType.PARAM_RESPONSE:
             return self._parse_param_response(header, data)
         else:
@@ -475,28 +485,6 @@ class TelemetryParser:
             "cpu_usage_pct": payload[3],
             "free_heap_kb": payload[4],
             "stack_usage_pct": payload[5],
-        }
-
-    def _parse_param_request(self, header: TelemetryHeader, data: bytes) -> dict[str, Any]:
-        """
-        Parse PARAM_REQUEST packet (18 bytes total).
-
-        Header: 10 bytes (packed, NO padding)
-        Payload: 6 bytes
-            command: uint8 (PARAM_CMD_LIST/GET/SET)
-            param_index: uint8
-            value: float (for SET commands)
-        CRC: 2 bytes
-
-        Note: PARAM_REQUEST is typically sent FROM controller TO drone,
-        so receiving it here might indicate UART echo/loopback.
-        TX firmware does NOT currently support PARAM forwarding.
-        """
-        return {
-            "type": "PARAM_REQ",
-            "ts_us": header.timestamp_us,
-            "seq": header.seq,
-            "raw_data": data,  # Include raw data for UnifiedBridge processing
         }
 
     def _parse_param_response(self, header: TelemetryHeader, data: bytes) -> dict[str, Any]:
