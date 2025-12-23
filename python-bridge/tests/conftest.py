@@ -12,6 +12,7 @@ import pytest
 def event_loop_policy():
     """Set event loop policy for asyncio tests."""
     import asyncio
+
     return asyncio.DefaultEventLoopPolicy()
 
 

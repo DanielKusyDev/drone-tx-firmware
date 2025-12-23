@@ -5,7 +5,11 @@
       "Bash(cloc:*)",
       "Bash(python3:*)",
       "Bash(npm run build:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(rm:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(uv run pytest:*)",
+      "Bash(uv sync:*)"
     ],
     "deny": [],
     "ask": []
