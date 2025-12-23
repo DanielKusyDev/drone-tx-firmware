@@ -84,7 +84,7 @@ async def _listen(port: str, baudrate: int):
             # Print other packet types
             click.echo(f"[{pkt_type} #{seq:04d}] {packet}")
 
-    bridge = UnifiedBridge(port, baudrate)
+    bridge = UnifiedBridge(port, baudrate, settings.history_size, settings.param_timeout)
     bridge.set_telemetry_callback(on_telemetry)
 
     try:
@@ -127,7 +127,7 @@ async def _params_list(port: str, baudrate: int):
     """List all parameters."""
     click.echo(f"Connecting to {port} @ {baudrate} baud...")
 
-    bridge = UnifiedBridge(port, baudrate)
+    bridge = UnifiedBridge(port, baudrate, settings.history_size, settings.param_timeout)
 
     try:
         await bridge.start()
@@ -173,7 +173,7 @@ async def _params_get(index: int, port: str, baudrate: int):
     """Get parameter value."""
     click.echo(f"Connecting to {port} @ {baudrate} baud...")
 
-    bridge = UnifiedBridge(port, baudrate)
+    bridge = UnifiedBridge(port, baudrate, settings.history_size, settings.param_timeout)
 
     try:
         await bridge.start()
@@ -202,7 +202,7 @@ async def _params_set(index: int, value: float, port: str, baudrate: int):
     """Set parameter value."""
     click.echo(f"Connecting to {port} @ {baudrate} baud...")
 
-    bridge = UnifiedBridge(port, baudrate)
+    bridge = UnifiedBridge(port, baudrate, settings.history_size, settings.param_timeout)
 
     try:
         await bridge.start()

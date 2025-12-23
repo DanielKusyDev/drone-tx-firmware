@@ -1,501 +1,379 @@
-# Python Telemetry Bridge
+# Python Bridge - ESP32 Telemetry & PARAM Communication
 
-**Production-ready FastAPI server** for ESP32 drone telemetry. Receives binary telemetry packets over UART and provides REST API + WebSocket streaming for real-time dashboards.
+**Clean, modular Python bridge** for ESP32 drone telemetry and parameter management. Receives binary telemetry packets over UART and provides bidirectional PARAM communication.
 
 ## Features
 
-- **FastAPI Integration** - Modern async Python web framework with automatic OpenAPI docs
-- **WebSocket Streaming** - Real-time telemetry broadcast to multiple clients
-- **REST API** - Query latest packets, packet history, health checks, and statistics
-- **Thread-Safe Architecture** - Background serial reader with async bridge
-- **Packet Caching** - Latest packet per type + rolling history buffer
-- **Health Monitoring** - Automatic link timeout detection and diagnostics
-- **Configuration Management** - Environment-based settings with pydantic-settings
-- **CORS Support** - Ready for React/Vue/Angular frontends
+- **Unified Bridge** - Single UART connection for bidirectional communication (telemetry + PARAM)
+- **Modular Architecture** - Composition pattern with single-responsibility components
+- **CLI Interface** - Simple command-line tools for testing and debugging
+- **Async I/O** - Full asyncio support for efficient serial communication
+- **Type Safety** - Pydantic models for all data structures
+- **Well Tested** - 60% test coverage with pytest
+- **Code Quality** - Ruff for linting and formatting (replaces black, flake8, isort)
 
 ## Architecture
 
 ```
 Serial Port (UART)
        ↓
-  SerialReader (background thread with asyncio integration)
+SerialConnection (async I/O)
        ↓
-  TelemetryParser (binary packet parsing + CRC-16/X.25)
+TelemetryParser (binary parsing + CRC-16/X.25)
        ↓
-  TelemetryBridge (async orchestration + cache)
-       ↓ callback
-  WebSocketConnectionManager (broadcast to all clients)
+PacketRouter (route by type)
        ↓
-  FastAPI (REST endpoints + WebSocket)
-       ↓
-  React UI / Dashboard
+    ┌──────────────┬──────────────┐
+    ↓              ↓              ↓
+TelemetryStore  ParamHandler  HealthMonitor
+  (cache)      (req/resp)     (statistics)
+    ↓
+Callback → Your application
 ```
 
-## Modules
+### Component Overview
 
-### 1. `telemetry_parser.py` - Packet Parser
+**Core Modules (`app/core/`):**
+- `serial_connection.py` - UART I/O management (~195 lines)
+- `packet_router.py` - Type-based packet routing (~90 lines)
+- `telemetry_store.py` - Thread-safe telemetry storage (~210 lines)
+- `param_handler.py` - PARAM request/response handling (~423 lines)
+- `health_monitor.py` - Statistics and health tracking (~106 lines)
 
-**Responsibilities:**
-- Parse binary Enhanced Telemetry packets
-- CRC-16/X.25 validation
-- Magic byte synchronization
-- Statistics (CRC errors, dropped packets, etc.)
+**Utilities (`app/utils/`):**
+- `crc.py` - CRC-16/X.25 implementation (~68 lines)
+- `protocol.py` - Protocol constants and helpers (~119 lines)
 
-**API:**
-```python
-from telemetry_parser import TelemetryParser
+**Services (`app/services/`):**
+- `telemetry_parser.py` - Binary packet parser (~646 lines)
+- `unified_bridge.py` - Main coordinator (~460 lines)
 
-parser = TelemetryParser()
-
-# Feed raw bytes
-packets = parser.feed(uart_data)
-
-# Process parsed packets
-for packet in packets:
-    print(f"{packet['type']} seq={packet['seq']}")
-
-# Get statistics
-stats = parser.get_stats()
-print(f"Parsed: {stats['packets_parsed']}, CRC errors: {stats['crc_errors']}")
-```
-
-**Supported packets:**
-- `ATT` - ATTITUDE (roll, pitch, yaw + rates)
-- `MOT` - MOTORS (motor commands, throttle)
-- `STA` - STATUS (armed, flags, link quality)
-- `CTL` - CONTROL (setpoints, PID outputs)
-- `SENS` - SENSORS (accel, gyro, mag)
-- `SAFE` - SAFETY (ground confidence, crash count)
-- `PERF` - PERFORMANCE (loop timing, CPU, heap)
-
-### 2. `serial_reader.py` - Background Serial I/O
-
-**Responsibilities:**
-- Background thread UART reading
-- Feed data to parser
-- Packet queue (pull model)
-- Packet callback (push model)
-
-**API:**
-```python
-from serial_reader import SerialReader
-
-reader = SerialReader('/dev/ttyUSB0', 115200)
-
-# Option 1: Callback (push model - for WebSocket)
-def on_packet(packet):
-    print(packet)
-
-reader.set_packet_callback(on_packet)
-reader.start()
-
-# Option 2: Queue (pull model - for REST API)
-reader.start()
-packet = reader.get_packet(timeout=1.0)  # Blocking
-packets = reader.get_packets(max_count=100)  # Non-blocking
-
-# Cleanup
-reader.stop()
-```
-
-### 3. `telemetry_bridge.py` - High-Level Orchestration
-
-**Responsibilities:**
-- Cache latest packets (one per type)
-- Packet history (rolling buffer)
-- Health monitoring
-- Aggregated statistics
-
-**API:**
-```python
-from telemetry_bridge import TelemetryBridge
-
-bridge = TelemetryBridge('COM3', 115200)
-bridge.start()
-
-# Get latest packets (for REST endpoints)
-latest = bridge.get_latest_packets()
-attitude = bridge.get_latest_attitude()
-
-# Get packet history
-history = bridge.get_packet_history('ATT', max_count=100)
-
-# Health check
-if bridge.is_healthy():
-    print("✅ Telemetry OK")
-
-# Statistics
-stats = bridge.get_stats()
-```
+**UnifiedBridge** orchestrates all components and provides a simple API.
 
 ## Quick Start
 
 ### Installation
 
+Using `uv` (recommended):
 ```bash
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate  # Windows
+cd python-bridge
+uv sync
+```
 
-# Install dependencies
+Or using pip:
+```bash
+cd python-bridge
 pip install -e .
 ```
 
 ### Configuration
 
-Create a `.env` file in the project root:
-
+Create `.env` file (optional, defaults work for most cases):
 ```bash
-TELEMETRY_PORT=/dev/ttyACM0  # or COM3 on Windows
+TELEMETRY_PORT=COM3  # or /dev/ttyUSB0 on Linux
 BAUDRATE=115200
+PARAM_TIMEOUT=2.0
+HISTORY_SIZE=1000
 ```
 
-### Run the Server
+### CLI Usage
 
+**List available serial ports:**
 ```bash
-# Option 1: Direct run (uses .env config)
-python main.py
-
-# Option 2: With uvicorn (development with auto-reload)
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
-
-# Option 3: Production
-uvicorn app:app --host 0.0.0.0 --port 8000 --workers 4
+uv run python cli.py ports
 ```
 
-### Access the API
-
-**Interactive API Documentation:**
-```
-http://localhost:8000/docs
-```
-
-**Health Check:**
+**Listen to telemetry stream:**
 ```bash
-curl http://localhost:8000/health
+uv run python cli.py listen --port COM3
+# Press Ctrl+C to stop
 ```
 
-**WebSocket (JavaScript):**
-```javascript
-const ws = new WebSocket('ws://localhost:8000/ws/telemetry');
-ws.onmessage = (event) => {
-    const packet = JSON.parse(event.data);
-    console.log(packet.type, packet.seq);
-};
+**PARAM commands:**
+```bash
+# List all parameters
+uv run python cli.py params list --port COM3
+
+# Get parameter value
+uv run python cli.py params get 0 --port COM3
+
+# Set parameter value
+uv run python cli.py params set 0 300.5 --port COM3
 ```
 
-## Testing
+## Python API
 
-### Run Tests
+### Basic Usage
+
+```python
+import asyncio
+from app.services.unified_bridge import UnifiedBridge
+
+async def main():
+    # Create bridge
+    bridge = UnifiedBridge('COM3', 115200)
+
+    # Set callback for telemetry packets
+    async def on_telemetry(packet):
+        print(f"{packet['type']} seq={packet['seq']}")
+
+    bridge.set_telemetry_callback(on_telemetry)
+
+    # Start bridge
+    await bridge.start()
+
+    # Query latest packets
+    attitude = await bridge.get_latest_attitude()
+    if attitude:
+        print(f"Roll: {attitude['roll_deg']:.2f}°")
+
+    # Get history
+    history = await bridge.get_packet_history('ATT', max_count=100)
+
+    # PARAM operations
+    params = await bridge.list_params()
+    value = await bridge.get_param(0)
+    await bridge.set_param(0, 300.5)
+
+    # Health check
+    if await bridge.is_healthy():
+        print("✅ Bridge is healthy")
+
+    # Stop bridge
+    await bridge.stop()
+
+asyncio.run(main())
+```
+
+### Context Manager
+
+```python
+async with UnifiedBridge('COM3', 115200) as bridge:
+    bridge.set_telemetry_callback(on_telemetry)
+
+    # Use bridge...
+    await asyncio.sleep(10)
+
+    # Automatically stops on exit
+```
+
+## Supported Telemetry Packets
+
+| Type | Rate | Description |
+|------|------|-------------|
+| `ATT` | 20 Hz | Roll, pitch, yaw angles + rates |
+| `CTL` | 10 Hz | PID setpoints and outputs |
+| `MOT` | 5 Hz | Motor commands and throttle |
+| `STA` | 2.5 Hz | Armed state, flags, link quality |
+| `SENS` | 1.25 Hz | Raw IMU data (accel, gyro, mag) |
+| `SAFE` | 1.25 Hz | Ground confidence, error flags |
+| `PERF` | 0.625 Hz | Loop timing, CPU, heap |
+
+### Example Packet (ATTITUDE)
+
+```python
+{
+    'type': 'ATT',
+    'ts_us': 123456789,
+    'seq': 42,
+    'roll_deg': -8.98,
+    'pitch_deg': 9.24,
+    'yaw_deg': 0.00,
+    'roll_rate_dps': -20.5,
+    'pitch_rate_dps': 11.5,
+    'yaw_rate_dps': 0.0
+}
+```
+
+## Development
+
+### Running Tests
 
 ```bash
 # Run all tests
-pytest
-
-# Run with verbose output
-pytest -v
-
-# Run specific test file
-pytest tests/test_parser.py -v
+uv run pytest
 
 # Run with coverage
-pytest --cov=app --cov-report=html
+uv run pytest --cov=app --cov-report=html
+
+# Run specific test file
+uv run pytest tests/test_parser.py -v
 
 # Run specific test
-pytest tests/test_parser.py -k "attitude" -v
+uv run pytest tests/test_parser.py -k "attitude" -v
 ```
 
-## API Endpoints
+### Code Quality (Ruff)
 
-### REST Endpoints
+```bash
+# Lint code
+uv run ruff check .
 
-**Health Check:**
-```
-GET /health
-```
-Returns 200 if receiving recent packets, 503 otherwise.
+# Lint + autofix
+uv run ruff check --fix .
 
-**Specific Packet Types:**
-```
-GET /telemetry/motors     # Latest MOTORS packet
-```
+# Format code
+uv run ruff format .
 
-**Packet History:**
-```
-GET /telemetry/history/{packet_type}?max_count=100
-```
-Returns historical packets for specific type (e.g., `/telemetry/history/ATT?max_count=50`)
-
-### WebSocket Endpoint
-
-**Real-time Streaming:**
-```
-WS /ws/telemetry
+# All at once
+uv run ruff check --fix . && uv run ruff format .
 ```
 
-Broadcasts all incoming packets to connected clients in real-time.
+**Configuration:** See `[tool.ruff]` in `pyproject.toml`
+- Line length: 120
+- Replaces: black, flake8, isort
+- Auto-fixes most issues
 
-**Example Client (JavaScript):**
-```javascript
-const ws = new WebSocket('ws://localhost:8000/ws/telemetry');
+### Project Structure
 
-ws.onopen = () => console.log('Connected');
-
-ws.onmessage = (event) => {
-    const packet = JSON.parse(event.data);
-
-    switch(packet.type) {
-        case 'ATT':
-            updateAttitude(packet);
-            break;
-        case 'MOT':
-            updateMotors(packet);
-            break;
-        case 'STA':
-            updateStatus(packet);
-            break;
-    }
-};
-
-// Send ping to keep connection alive
-setInterval(() => ws.send('ping'), 30000);
 ```
-
-### Interactive Documentation
-
-FastAPI provides automatic interactive API documentation:
-
-- **Swagger UI:** `http://localhost:8000/docs`
-- **ReDoc:** `http://localhost:8000/redoc`
-
-## Packet Format (JSON)
-
-### ATTITUDE (ATT)
-```json
-{
-  "type": "ATT",
-  "ts_us": 123456789,
-  "seq": 42,
-  "roll_deg": -8.98,
-  "pitch_deg": 9.24,
-  "yaw_deg": 0.00,
-  "roll_rate_dps": -20.5,
-  "pitch_rate_dps": 11.5,
-  "yaw_rate_dps": 0.0
-}
-```
-
-### MOTORS (MOT)
-```json
-{
-  "type": "MOT",
-  "ts_us": 123456800,
-  "seq": 43,
-  "motors": [0, 5120, 31488, 4864],
-  "motors_actual": [0, 5120, 31488, 4864],
-  "throttle": 2686,
-  "mixer_id": 0
-}
-```
-
-### STATUS (STA)
-```json
-{
-  "type": "STA",
-  "ts_us": 123456820,
-  "seq": 44,
-  "armed": true,
-  "mode": 0,
-  "ground_state": 0,
-  "link_quality": 100,
-  "battery_pct": 85,
-  "uptime_s": 45,
-  "loop_rate_hz": 500.0,
-  "flags": {
-    "ARM": true,
-    "HRZ": true,
-    "LINK": true,
-    "DISARM": false,
-    "CAL": true,
-    "CALIB": false,
-    "FAIL": false
-  }
-}
+python-bridge/
+├── app/
+│   ├── core/                    # Core components (NEW)
+│   │   ├── serial_connection.py     # UART I/O
+│   │   ├── packet_router.py         # Packet routing
+│   │   ├── telemetry_store.py       # Telemetry storage
+│   │   ├── param_handler.py         # PARAM handling
+│   │   └── health_monitor.py        # Statistics
+│   ├── utils/                   # Utilities (NEW)
+│   │   ├── crc.py                   # CRC-16/X.25
+│   │   └── protocol.py              # Protocol constants
+│   ├── services/
+│   │   ├── telemetry_parser.py      # Binary parser
+│   │   └── unified_bridge.py        # Main coordinator
+│   ├── config.py                # Pydantic settings
+│   └── models.py                # Pydantic models
+├── tests/                       # Test suite
+│   ├── test_parser.py               # Parser tests (645 lines)
+│   ├── test_crc.py                  # CRC tests (NEW)
+│   ├── test_packet_router.py        # Router tests (NEW)
+│   ├── test_telemetry_store.py      # Store tests (NEW)
+│   └── test_health_monitor.py       # Monitor tests (NEW)
+├── cli.py                       # CLI interface (NEW)
+├── pyproject.toml               # Dependencies + config
+└── README.md
 ```
 
 ## Troubleshooting
 
-### Problem: No packets
+### Problem: No packets received
 
 **Checklist:**
 1. Is the transmitter sending packets?
-   - Check `F` command in Serial Monitor
+   - Check serial monitor on TX (115200 baud)
+   - Send `F` command to see forwarder stats
+   - Send `U` command to toggle UART mode to TELEMETRY_BINARY
 2. Is the COM port correct?
-   ```python
-   from serial_reader import list_serial_ports
-   print(list_serial_ports())
+   ```bash
+   uv run python cli.py ports
    ```
 3. Is baud rate = 115200?
-4. Is UART mode = TELEMETRY_BINARY on transmitter?
-   - Send `U` command to toggle
+4. Check cable connection
 
-### Problem: Many CRC errors
+### Problem: CRC errors
 
 **Possible causes:**
-- Weak UART signal (check cable)
+- Weak UART signal (check cable quality)
 - Interference (keep away from motors/WiFi)
 - Baud rate mismatch
 
 **Debug:**
 ```python
-stats = bridge.get_stats()
-print(stats['reader']['parser_stats'])
-# Check crc_errors vs packets_parsed ratio
+stats = await bridge.get_stats()
+parser_stats = stats['parser']
+ratio = parser_stats['crc_errors'] / max(parser_stats['packets_parsed'], 1)
+print(f"CRC error rate: {ratio*100:.2f}%")
 ```
 
-### Problem: WebSocket delays
+Good: < 1% error rate
+Bad: > 5% error rate (check hardware)
 
-**Optimizations:**
-- Increase `history_size` in TelemetryBridge
-- Use asyncio for WebSocket callbacks
-- Limit number of WebSocket clients
+### Problem: PARAM timeout
+
+**Possible causes:**
+- Drone not responding (not running PARAM firmware)
+- UART not in correct mode (check with `U` command on TX)
+- Cable disconnected
+
+**Debug:**
+```bash
+# Try increasing timeout
+export PARAM_TIMEOUT=5.0
+uv run python cli.py params list
+```
 
 ## Performance
 
 **Bandwidth:**
-- Default config (ATT + MOT + STA): ~700 B/s
+- Default config (7 packet types): ~1 kB/s
 - UART 115200 baud = ~11 kB/s theoretical
 - Margin: >90% free bandwidth
 
 **Latency:**
-- Serial read: ~1-10 ms (depends on timeout)
+- Serial read: ~1-10 ms
 - Parse: <1 ms per packet
 - Total: <20 ms end-to-end
 
 **CPU:**
-- Serial reader thread: ~1-2% CPU
+- Read loop: ~1-2% CPU
 - Parser: <1% CPU
 - Total: <5% CPU on Raspberry Pi 4
 
-## Project Structure
+## Technical Details
 
+### Protocol
+
+**Magic Byte:** `0x5B`
+**Version:** `2`
+**CRC:** CRC-16/X.25 (polynomial 0x8408)
+
+**Packet Structure:**
 ```
-python-bridge/
-├── app/
-│   ├── __init__.py          # FastAPI app with lifespan management
-│   ├── api.py               # API routes (REST + WebSocket)
-│   ├── config.py            # Settings with pydantic-settings
-│   ├── dependencies.py      # Dependency injection
-│   └── services/
-│       ├── telemetry_parser.py      # Binary packet parser
-│       ├── serial_reader.py         # Async serial I/O
-│       ├── telemetry_bridge.py      # High-level orchestration
-│       └── websocket_manager.py     # WebSocket broadcast manager
-├── tests/
-│   ├── test_parser.py       # Parser unit tests
-│   └── conftest.py          # Pytest fixtures
-├── main.py                  # Entry point
-├── pyproject.toml           # Dependencies
-├── .env                     # Configuration
-└── README.md
+[Header: 10 bytes] [Payload: variable] [CRC: 2 bytes]
+
+Header:
+- magic: uint8 (0x5B)
+- version: uint8 (2)
+- type: uint8 (0x01-0x07, 0x10-0x11)
+- flags: uint8
+- seq: uint16
+- timestamp_us: uint32
 ```
 
-## Deployment
+See `docs/transmitter/telemetry.md` in parent directory for detailed packet specifications.
 
-### Development
+### Architecture Benefits
 
-```bash
-# Auto-reload on code changes
-uvicorn app:app --reload --host 0.0.0.0 --port 8000
-```
+**Before refactoring:**
+- 805 lines monolithic bridge
+- Duplicated CRC code (2x)
+- 18% test coverage
+- FastAPI overhead
 
-### Production (Systemd)
+**After refactoring:**
+- ~460 lines coordinator + modular components
+- Single CRC implementation
+- 60% test coverage
+- Lightweight CLI
 
-Create `/etc/systemd/system/drone-telemetry.service`:
-
-```ini
-[Unit]
-Description=Drone Telemetry API
-After=network.target
-
-[Service]
-Type=simple
-User=drone
-WorkingDirectory=/opt/drone-telemetry
-Environment="TELEMETRY_PORT=/dev/ttyACM0"
-Environment="BAUDRATE=115200"
-ExecStart=/opt/drone-telemetry/venv/bin/uvicorn app:app --host 0.0.0.0 --port 8000
-Restart=always
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Enable and start:
-```bash
-sudo systemctl enable drone-telemetry
-sudo systemctl start drone-telemetry
-sudo systemctl status drone-telemetry
-```
-
-### Production (Docker)
-
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-
-COPY pyproject.toml .
-RUN pip install -e .
-
-COPY app/ ./app/
-COPY main.py .
-
-EXPOSE 8000
-
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-Build and run:
-```bash
-docker build -t drone-telemetry .
-docker run -p 8000:8000 --device=/dev/ttyACM0 drone-telemetry
-```
-
-### Nginx Reverse Proxy
-
-```nginx
-server {
-    listen 80;
-    server_name telemetry.example.com;
-
-    location / {
-        proxy_pass http://localhost:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    location /ws/ {
-        proxy_pass http://localhost:8000/ws/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-    }
-}
-```
+**Key improvements:**
+- Single Responsibility Principle per module
+- Easy to test components independently
+- Clear dependency graph
+- Faster development iteration
 
 ## Future Enhancements
 
-- [ ] Authentication (JWT tokens, API keys)
-- [ ] Rate limiting (per IP, per endpoint)
-- [ ] Redis cache for horizontal scaling
-- [ ] Packet compression (gzip over WebSocket)
-- [ ] Metrics export (Prometheus)
-- [ ] Grafana dashboards
-- [ ] Historical data persistence (TimescaleDB)
+### Ready to add:
+- [ ] FastAPI integration (models already compatible)
+- [ ] WebSocket streaming
+- [ ] Data persistence (SQLite/TimescaleDB)
+- [ ] Prometheus metrics export
+
+### Needs design:
 - [ ] Command & control (send commands to drone)
+- [ ] Multi-drone support
+- [ ] Data compression (binary → JSON is verbose)
 
 ## License
 
@@ -503,13 +381,12 @@ MIT
 
 ## Authors
 
-- Claude (Anthropic) - FastAPI integration & architecture
+- Claude (Anthropic) - Refactoring & architecture
 - Daniel - System design & integration
 
 ---
 
-**Status:** ✅ Production Ready
-**Version:** 1.0.0
-**Last Updated:** 2025-12-14
+**Status:** ✅ Production Ready (refactored 2025-12-23)
+**Version:** 0.2.0
 **Python:** ≥3.11
-**Framework:** FastAPI + Uvicorn
+**Dependencies:** pyserial-asyncio, pydantic-settings, aiorwlock, click
