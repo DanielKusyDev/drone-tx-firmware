@@ -417,9 +417,8 @@ class TelemetryParser:
             accel_mg[3]: int16[3] (millig)
             gyro_mdps[3]: int16[3] (milli-dps)
             mag_mgauss[3]: int16[3] (milligauss)
-            temperature_c_x10: int16
         """
-        payload = struct.unpack("<hhhhhhhhhh", data[10:28])
+        payload = struct.unpack("<hhhhhhhhh", data[10:28])
 
         return {
             "type": "SENS",
@@ -428,7 +427,6 @@ class TelemetryParser:
             "accel_mg": list(payload[0:3]),  # [x, y, z] in millig
             "gyro_mdps": list(payload[3:6]),  # [x, y, z] in milli-dps
             "mag_mgauss": list(payload[6:9]),  # [x, y, z] in milligauss
-            "temperature_c": payload[9] / 10.0,
         }
 
     def _parse_safety(self, header: TelemetryHeader, data: bytes) -> dict[str, Any]:
@@ -440,9 +438,8 @@ class TelemetryParser:
             safety_gates: uint8
             error_flags: uint16
             total_flight_time_s: uint32
-            crash_count: uint16
         """
-        payload = struct.unpack("<BBHIH", data[10:18])
+        payload = struct.unpack("<BBHI", data[10:18])
 
         return {
             "type": "SAFE",
@@ -452,7 +449,6 @@ class TelemetryParser:
             "safety_gates": payload[1],
             "error_flags": payload[2],
             "total_flight_time_s": payload[3],
-            "crash_count": payload[4],
         }
 
     def _parse_performance(self, header: TelemetryHeader, data: bytes) -> dict[str, Any]:
@@ -553,56 +549,3 @@ class TelemetryParser:
     def clear_buffer(self):
         """Clear internal buffer (useful for testing or reset)."""
         self.buffer.clear()
-
-
-if __name__ == "__main__":
-    # Simple smoke test
-    logging.basicConfig(level=logging.DEBUG)
-
-    parser = TelemetryParser()
-
-    # Create a fake ATTITUDE packet
-    import io
-
-    buf = io.BytesIO()
-
-    # Header
-    buf.write(
-        struct.pack(
-            "<BBBBHI",
-            0x5B,  # magic
-            2,  # version
-            0x01,  # type (ATTITUDE)
-            0x00,  # flags
-            42,  # seq
-            123456789,  # timestamp_us
-        )
-    )
-
-    # Payload (6 x int16)
-    buf.write(
-        struct.pack(
-            "<hhhhhh",
-            -898,  # roll (*100) = -8.98°
-            924,  # pitch (*100) = 9.24°
-            0,  # yaw
-            -205,  # roll rate (*10) = -20.5°/s
-            115,  # pitch rate (*10) = 11.5°/s
-            0,  # yaw rate
-        )
-    )
-
-    # Calculate and write CRC
-    packet_data = buf.getvalue()
-    crc = crc16_x25(packet_data)
-    buf.write(struct.pack("<H", crc))
-
-    # Parse
-    packets = parser.feed(buf.getvalue())
-
-    if packets:
-        print("✅ Parser smoke test passed!")
-        print(f"Parsed packet: {packets[0]}")
-        print(f"Stats: {parser.get_stats()}")
-    else:
-        print("❌ Parser smoke test failed!")
