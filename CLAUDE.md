@@ -556,5 +556,18 @@ log enable TELEM
 
 ---
 
-*Last updated: 2025-12-13*  
-*Firmware version: Enhanced Telemetry v2 with UART Forwarding*
+## Code style guide
+**General**:
+- Max Line 120 characters 
+- snake_case for variables and functions
+- PascalCase for class names
+
+**C++/C files*
+- Use nullptr instead of NULL
+- Use override keyword for overridden virtual functions
+
+**Python files**
+- Follow PEP 8 style guide
+- Use type hints for function signatures
+- Always use 'None | Type' for optional parameters instead of 'Optional[Type]'
+

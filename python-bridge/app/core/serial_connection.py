@@ -6,7 +6,6 @@ Handles opening, closing, reading and writing to serial port using asyncio.
 
 import asyncio
 import logging
-from typing import Optional
 
 import serial_asyncio
 
@@ -50,8 +49,8 @@ class SerialConnection:
         self.port = port
         self.baudrate = baudrate
 
-        self._reader: Optional[asyncio.StreamReader] = None
-        self._writer: Optional[asyncio.StreamWriter] = None
+        self._reader: asyncio.StreamReader | None = None
+        self._writer: asyncio.StreamWriter | None = None
         self._is_open = False
 
     async def open(self) -> None:
@@ -96,7 +95,7 @@ class SerialConnection:
 
             try:
                 await asyncio.wait_for(self._writer.wait_closed(), timeout=timeout)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.warning(f"Timeout waiting for serial port {self.port} to close")
 
         self._reader = None

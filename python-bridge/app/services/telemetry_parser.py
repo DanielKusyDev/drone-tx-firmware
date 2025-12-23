@@ -10,10 +10,9 @@ from typing import Any
 from app.utils.crc import crc16_x25
 from app.utils.protocol import (
     MAGIC_BYTE,
-    PROTOCOL_VERSION,
     PACKET_SIZES,
+    PROTOCOL_VERSION,
     PacketType,
-    get_packet_type_name,
 )
 
 logger = logging.getLogger(__name__)
@@ -149,9 +148,7 @@ class TelemetryParser:
             self.buffer.clear()
             self.stats["bytes_discarded"] += discarded
             if discarded > 0:
-                logger.warning(
-                    f"Buffer cleared: no magic byte found, discarded {discarded} bytes"
-                )
+                logger.warning(f"Buffer cleared: no magic byte found, discarded {discarded} bytes")
 
     def _try_parse_packet(self) -> dict[str, Any] | None:
         """
@@ -220,10 +217,7 @@ class TelemetryParser:
         crc_received = struct.unpack("<H", packet_data[-2:])[0]
 
         if crc_calculated != crc_received:
-            logger.warning(
-                f"CRC error for {packet_type.name}: "
-                f"calc=0x{crc_calculated:04X} rcv=0x{crc_received:04X}"
-            )
+            logger.warning(f"CRC error for {packet_type.name}: calc=0x{crc_calculated:04X} rcv=0x{crc_received:04X}")
             self.stats["crc_errors"] += 1
             self.buffer.pop(0)  # Skip this byte
             return None
@@ -287,12 +281,12 @@ class TelemetryParser:
         Parse ATTITUDE packet (24 bytes total).
 
         Payload (12 bytes):
-            roll_deg_x100: int16 (roll angle × 100)
-            pitch_deg_x100: int16 (pitch angle × 100)
-            yaw_deg_x100: int16 (yaw angle × 100)
-            roll_rate_dps_x10: int16 (roll rate × 10)
-            pitch_rate_dps_x10: int16 (pitch rate × 10)
-            yaw_rate_dps_x10: int16 (yaw rate × 10)
+            roll_deg_x100: int16 (roll angle x 100)
+            pitch_deg_x100: int16 (pitch angle x 100)
+            yaw_deg_x100: int16 (yaw angle x 100)
+            roll_rate_dps_x10: int16 (roll rate x 10)
+            pitch_rate_dps_x10: int16 (pitch rate x 10)
+            yaw_rate_dps_x10: int16 (yaw rate x 10)
         """
         # Skip header (10 bytes), parse payload (12 bytes), skip CRC (2 bytes)
         payload = struct.unpack("<hhhhhh", data[10:22])
@@ -461,9 +455,7 @@ class TelemetryParser:
             "crash_count": payload[4],
         }
 
-    def _parse_performance(
-        self, header: TelemetryHeader, data: bytes
-    ) -> dict[str, Any]:
+    def _parse_performance(self, header: TelemetryHeader, data: bytes) -> dict[str, Any]:
         """
         Parse PERFORMANCE packet (22 bytes total).
 
@@ -489,9 +481,7 @@ class TelemetryParser:
             "stack_usage_pct": payload[5],
         }
 
-    def _parse_param_request(
-        self, header: TelemetryHeader, data: bytes
-    ) -> dict[str, Any]:
+    def _parse_param_request(self, header: TelemetryHeader, data: bytes) -> dict[str, Any]:
         """
         Parse PARAM_REQUEST packet (18 bytes total).
 
@@ -513,9 +503,7 @@ class TelemetryParser:
             "raw_data": data,  # Include raw data for UnifiedBridge processing
         }
 
-    def _parse_param_response(
-        self, header: TelemetryHeader, data: bytes
-    ) -> dict[str, Any]:
+    def _parse_param_response(self, header: TelemetryHeader, data: bytes) -> dict[str, Any]:
         """
         Parse PARAM_RESPONSE packet (54 bytes total).
 

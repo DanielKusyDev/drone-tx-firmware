@@ -12,7 +12,6 @@ import asyncio
 import logging
 import struct
 import time
-from typing import Optional
 
 from app.utils.crc import crc16_x25
 from app.utils.protocol import (
@@ -110,9 +109,7 @@ class ParamHandler:
             "last_response_time": None,
         }
 
-    def build_request(
-        self, command: ParamCommand, param_index: int, value: float = 0.0
-    ) -> bytes:
+    def build_request(self, command: ParamCommand, param_index: int, value: float = 0.0) -> bytes:
         """
         Build PARAM request packet.
 
@@ -194,14 +191,10 @@ class ParamHandler:
 
         if crc_calc != crc_received:
             self.stats["crc_errors"] += 1
-            raise ParamCRCError(
-                f"CRC mismatch: calc={crc_calc:04x}, recv={crc_received:04x}"
-            )
+            raise ParamCRCError(f"CRC mismatch: calc={crc_calc:04x}, recv={crc_received:04x}")
 
         # Parse header
-        magic, version, pkt_type, flags, seq, timestamp_us = struct.unpack(
-            "<BBBBHI", data[0:10]
-        )
+        magic, _version, pkt_type, _, seq, timestamp_us = struct.unpack("<BBBBHI", data[0:10])
 
         if magic != MAGIC_BYTE:
             raise ValueError(f"Invalid magic: 0x{magic:02x}")
@@ -268,13 +261,11 @@ class ParamHandler:
             ParamTimeoutError: No response within timeout
         """
         try:
-            response = await asyncio.wait_for(
-                self._response_queue.get(), timeout=self.timeout
-            )
+            response = await asyncio.wait_for(self._response_queue.get(), timeout=self.timeout)
             return response
-        except asyncio.TimeoutError:
+        except TimeoutError as exc:
             self.stats["timeouts"] += 1
-            raise ParamTimeoutError(f"No response within {self.timeout}s")
+            raise ParamTimeoutError(f"No response within {self.timeout}s") from exc
 
     async def list_params(self, send_func) -> list[dict]:
         """
@@ -318,9 +309,7 @@ class ParamHandler:
                             }
                         )
                     else:
-                        logger.warning(
-                            f"Error listing param {idx}: error_code={resp['error_code']}"
-                        )
+                        logger.warning(f"Error listing param {idx}: error_code={resp['error_code']}")
 
                 except ParamTimeoutError:
                     logger.warning(f"Timeout listing param {idx}")
@@ -352,9 +341,7 @@ class ParamHandler:
                 if response["error_code"] == ParamError.PARAM_NOT_FOUND:
                     raise ParamNotFoundError(f"Parameter {param_index} not found")
                 else:
-                    raise Exception(
-                        f"Error getting param {param_index}: error_code={response['error_code']}"
-                    )
+                    raise Exception(f"Error getting param {param_index}: error_code={response['error_code']}")
 
             return response["value"]
 
@@ -386,15 +373,11 @@ class ParamHandler:
                 elif response["error_code"] == ParamError.WRITE_FAILED:
                     raise ParamReadOnlyError(f"Parameter {param_index} is read-only")
                 else:
-                    raise Exception(
-                        f"Error setting param {param_index}: error_code={response['error_code']}"
-                    )
+                    raise Exception(f"Error setting param {param_index}: error_code={response['error_code']}")
 
             # Verify value
             if abs(response["value"] - value) > 0.001:
-                logger.warning(
-                    f"Set param {param_index}: requested {value}, got {response['value']}"
-                )
+                logger.warning(f"Set param {param_index}: requested {value}, got {response['value']}")
 
             logger.info(f"Set param {param_index} = {response['value']}")
             return True

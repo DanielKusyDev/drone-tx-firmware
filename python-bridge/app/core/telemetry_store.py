@@ -9,7 +9,7 @@ Manages storage of telemetry packets:
 
 import logging
 import time
-from typing import Any, Optional
+from typing import Any
 
 import aiorwlock
 
@@ -100,7 +100,7 @@ class TelemetryStore:
                 self._health["packets_by_type"][packet_type] = 0
             self._health["packets_by_type"][packet_type] += 1
 
-    async def get_latest(self, packet_type: str) -> Optional[dict[str, Any]]:
+    async def get_latest(self, packet_type: str) -> dict[str, Any] | None:
         """
         Get latest packet of specific type.
 
@@ -113,7 +113,7 @@ class TelemetryStore:
         async with self._lock.reader_lock:
             return self._latest.get(packet_type)
 
-    async def get_all_latest(self) -> dict[str, Optional[dict[str, Any]]]:
+    async def get_all_latest(self) -> dict[str, dict[str, Any] | None]:
         """
         Get latest packet of each telemetry type.
 
@@ -131,9 +131,7 @@ class TelemetryStore:
                 "PERF": self._latest.get("PERF"),
             }
 
-    async def get_history(
-        self, packet_type: Optional[str] = None, max_count: Optional[int] = None
-    ) -> list[dict[str, Any]]:
+    async def get_history(self, packet_type: str | None = None, max_count: int | None = None) -> list[dict[str, Any]]:
         """
         Get packet history.
 

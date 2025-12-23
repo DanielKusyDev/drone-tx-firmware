@@ -28,6 +28,62 @@ dev = [
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 
+# === Ruff Configuration ===
+# Replaces: black, flake8, isort
+# Docs: https://docs.astral.sh/ruff/
+
+[tool.ruff]
+# Line length (black default: 88, your preference: 120)
+line-length = 120
+
+# Target Python version
+target-version = "py311"
+
+# Exclude directories
+exclude = [
+    ".venv",
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".pytest_cache",
+]
+
+[tool.ruff.lint]
+# Enable rule groups:
+# - E/W: pycodestyle errors/warnings (flake8)
+# - F: pyflakes (flake8)
+# - I: isort (import sorting)
+# - N: pep8-naming
+# - UP: pyupgrade (modern Python syntax)
+# - B: flake8-bugbear (common bugs)
+# - C4: flake8-comprehensions
+# - SIM: flake8-simplify
+# - RUF: ruff-specific rules
+select = ["E", "W", "F", "I", "N", "UP", "B", "C4", "SIM", "RUF"]
+
+# Ignore specific rules if needed
+ignore = [
+    "E501",    # Line too long (handled by formatter)
+    "B008",    # Do not perform function calls in argument defaults (FastAPI uses this)
+]
+
+# Allow autofix for all enabled rules
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.isort]
+# isort configuration (replaces isort)
+known-first-party = ["app", "tests"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.format]
+# Formatter configuration (replaces black)
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
 [dependency-groups]
 dev = [
     "ruff>=0.14.10",

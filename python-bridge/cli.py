@@ -11,7 +11,6 @@ Usage:
 import asyncio
 import logging
 import sys
-from typing import Optional
 
 import click
 
@@ -101,10 +100,7 @@ async def _listen(port: str, baudrate: int):
                 health = await bridge.get_health()
                 age = health.get("last_packet_age_s")
                 if age is not None:
-                    click.echo(
-                        f"[HEALTH] Packets: {health['packets_received']} | "
-                        f"Last: {age:.1f}s ago"
-                    )
+                    click.echo(f"[HEALTH] Packets: {health['packets_received']} | Last: {age:.1f}s ago")
 
     except KeyboardInterrupt:
         click.echo("\n\nStopping...")
@@ -144,9 +140,7 @@ async def _params_list(port: str, baudrate: int):
             return
 
         # Print header
-        click.echo(
-            f"{'Index':>5} | {'Group':<16} | {'Name':<16} | {'Type':>4} | {'Access':>6} | {'Value':>10}"
-        )
+        click.echo(f"{'Index':>5} | {'Group':<16} | {'Name':<16} | {'Type':>4} | {'Access':>6} | {'Value':>10}")
         click.echo("-" * 80)
 
         # Print parameters

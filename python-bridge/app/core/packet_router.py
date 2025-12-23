@@ -10,8 +10,6 @@ import logging
 from enum import Enum
 from typing import Any
 
-from app.utils.protocol import PacketType, is_telemetry_packet, is_param_packet
-
 logger = logging.getLogger(__name__)
 
 

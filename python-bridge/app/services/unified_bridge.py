@@ -17,8 +17,10 @@ Architecture:
 """
 
 import asyncio
+import contextlib
 import logging
-from typing import Any, Callable, Awaitable, Optional
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from app.core.health_monitor import HealthMonitor
 from app.core.packet_router import PacketRouter, RouteDestination
@@ -98,12 +100,10 @@ class UnifiedBridge:
         self.health = HealthMonitor()
 
         # Telemetry callback (for real-time broadcast)
-        self._telemetry_callback: Optional[
-            Callable[[dict[str, Any]], Awaitable[None]]
-        ] = None
+        self._telemetry_callback: Callable[[dict[str, Any]], Awaitable[None]] | None = None
 
         # Read loop task
-        self._read_task: Optional[asyncio.Task] = None
+        self._read_task: asyncio.Task | None = None
         self._running = False
 
     # === Lifecycle ===
@@ -151,13 +151,12 @@ class UnifiedBridge:
         if self._read_task:
             try:
                 await asyncio.wait_for(self._read_task, timeout=timeout)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.warning("Read task did not stop cleanly, cancelling...")
                 self._read_task.cancel()
-                try:
+                with contextlib.suppress(asyncio.CancelledError):
                     await self._read_task
-                except asyncio.CancelledError:
-                    pass
+
             self._read_task = None
 
         # Close serial port
@@ -175,9 +174,7 @@ class UnifiedBridge:
 
     # === Telemetry Features ===
 
-    def set_telemetry_callback(
-        self, callback: Callable[[dict[str, Any]], Awaitable[None]]
-    ) -> None:
+    def set_telemetry_callback(self, callback: Callable[[dict[str, Any]], Awaitable[None]]) -> None:
         """
         Set async callback for telemetry packets.
 
@@ -189,7 +186,7 @@ class UnifiedBridge:
         """
         self._telemetry_callback = callback
 
-    async def get_latest_packets(self) -> dict[str, Optional[dict[str, Any]]]:
+    async def get_latest_packets(self) -> dict[str, dict[str, Any] | None]:
         """
         Get latest packet of each telemetry type.
 
@@ -198,24 +195,24 @@ class UnifiedBridge:
         """
         return await self.telemetry.get_all_latest()
 
-    async def get_latest_packet(self, packet_type: str) -> Optional[dict[str, Any]]:
+    async def get_latest_packet(self, packet_type: str) -> dict[str, Any] | None:
         """Get latest packet of specific type."""
         return await self.telemetry.get_latest(packet_type)
 
-    async def get_latest_attitude(self) -> Optional[dict[str, Any]]:
+    async def get_latest_attitude(self) -> dict[str, Any] | None:
         """Get latest ATTITUDE packet."""
         return await self.telemetry.get_latest("ATT")
 
-    async def get_latest_motors(self) -> Optional[dict[str, Any]]:
+    async def get_latest_motors(self) -> dict[str, Any] | None:
         """Get latest MOTORS packet."""
         return await self.telemetry.get_latest("MOT")
 
-    async def get_latest_status(self) -> Optional[dict[str, Any]]:
+    async def get_latest_status(self) -> dict[str, Any] | None:
         """Get latest STATUS packet."""
         return await self.telemetry.get_latest("STA")
 
     async def get_packet_history(
-        self, packet_type: Optional[str] = None, max_count: Optional[int] = None
+        self, packet_type: str | None = None, max_count: int | None = None
     ) -> list[dict[str, Any]]:
         """
         Get telemetry packet history.

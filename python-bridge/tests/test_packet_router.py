@@ -42,9 +42,7 @@ class TestPacketRouter:
         assert destination == RouteDestination.TELEMETRY
         assert router.stats["telemetry_routed"] == 1
 
-    @pytest.mark.parametrize(
-        "packet_type", ["ATT", "MOT", "STA", "CTL", "SENS", "SAFE", "PERF"]
-    )
+    @pytest.mark.parametrize("packet_type", ["ATT", "MOT", "STA", "CTL", "SENS", "SAFE", "PERF"])
     def test_route_all_telemetry_types(self, router, packet_type):
         """Test routing all telemetry packet types."""
         packet = {"type": packet_type, "seq": 1}

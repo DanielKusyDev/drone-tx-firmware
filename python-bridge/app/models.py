@@ -6,8 +6,8 @@ Date: 2025-12-20
 """
 
 from typing import Any
-from pydantic import BaseModel, Field
 
+from pydantic import BaseModel, Field
 
 # === Telemetry Models ===
 
@@ -16,9 +16,7 @@ class HealthResponse(BaseModel):
     """Health check response."""
 
     status: str = Field(..., description="Health status: 'healthy' or 'unhealthy'")
-    last_packet_age_s: float | None = Field(
-        None, description="Seconds since last packet"
-    )
+    last_packet_age_s: float | None = Field(None, description="Seconds since last packet")
     packets_received: int = Field(..., description="Total packets received")
     is_alive: bool = Field(..., description="Bridge is running")
 

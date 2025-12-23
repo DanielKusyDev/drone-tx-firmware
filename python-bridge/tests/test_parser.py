@@ -17,13 +17,12 @@ from io import BytesIO
 import pytest
 
 from app.services.telemetry_parser import (
-    TelemetryParser,
     TELEM_ENHANCED_MAGIC,
     TELEM_ENHANCED_VERSION,
     TelemetryPacketType,
+    TelemetryParser,
 )
 from app.utils.crc import crc16_x25
-
 
 # ============================================================================
 # Fixtures
@@ -59,9 +58,7 @@ def status_packet():
 # ============================================================================
 
 
-def _create_attitude_packet(
-    seq: int = 42, roll_deg: float = -8.98, pitch_deg: float = 9.24
-) -> bytes:
+def _create_attitude_packet(seq: int = 42, roll_deg: float = -8.98, pitch_deg: float = 9.24) -> bytes:
     """
     Create a test ATTITUDE packet.
 
