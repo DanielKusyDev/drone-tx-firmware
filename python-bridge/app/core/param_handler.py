@@ -298,13 +298,17 @@ class ParamHandler:
                     resp = await self.wait_for_response()
 
                     if resp["error_code"] == 0:
+                        # Map param_access to human-readable string
+                        access_map = {0: "readonly", 1: "readwrite"}
+                        access_str = access_map.get(resp["param_access"], "unknown")
+
                         params.append(
                             {
                                 "index": resp["param_index"],
                                 "group": resp["group"],
                                 "name": resp["name"],
-                                "param_type": resp["param_type"],
-                                "param_access": resp["param_access"],
+                                "type": resp["param_type"],
+                                "access": access_str,
                                 "value": resp["value"],
                             }
                         )
@@ -317,7 +321,7 @@ class ParamHandler:
             logger.info(f"Listed {len(params)} parameters")
             return params
 
-    async def get_param(self, param_index: int, send_func) -> float:
+    async def get_param(self, param_index: int, send_func) -> dict:
         """
         Get parameter value.
 
@@ -326,7 +330,7 @@ class ParamHandler:
             send_func: Async function to send request packet
 
         Returns:
-            Parameter value
+            Parameter info dictionary with group, name, value, etc.
 
         Raises:
             ParamNotFoundError: Parameter not found
@@ -343,9 +347,20 @@ class ParamHandler:
                 else:
                     raise Exception(f"Error getting param {param_index}: error_code={response['error_code']}")
 
-            return response["value"]
+            # Map param_access to human-readable string
+            access_map = {0: "readonly", 1: "readwrite"}
+            access_str = access_map.get(response["param_access"], "unknown")
 
-    async def set_param(self, param_index: int, value: float, send_func) -> bool:
+            return {
+                "index": response["param_index"],
+                "group": response["group"],
+                "name": response["name"],
+                "type": response["param_type"],
+                "access": access_str,
+                "value": response["value"],
+            }
+
+    async def set_param(self, param_index: int, value: float, send_func) -> dict:
         """
         Set parameter value.
 
@@ -355,7 +370,7 @@ class ParamHandler:
             send_func: Async function to send request packet
 
         Returns:
-            True if successful
+            Parameter info dictionary with updated value
 
         Raises:
             ParamNotFoundError: Parameter not found
@@ -380,7 +395,19 @@ class ParamHandler:
                 logger.warning(f"Set param {param_index}: requested {value}, got {response['value']}")
 
             logger.info(f"Set param {param_index} = {response['value']}")
-            return True
+
+            # Map param_access to human-readable string
+            access_map = {0: "readonly", 1: "readwrite"}
+            access_str = access_map.get(response["param_access"], "unknown")
+
+            return {
+                "index": response["param_index"],
+                "group": response["group"],
+                "name": response["name"],
+                "type": response["param_type"],
+                "access": access_str,
+                "value": response["value"],
+            }
 
     def get_stats(self) -> dict:
         """Get PARAM handler statistics."""

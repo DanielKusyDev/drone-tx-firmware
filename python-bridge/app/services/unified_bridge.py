@@ -78,6 +78,7 @@ class UnifiedBridge:
         baudrate: int = 115200,
         history_size: int = 1000,
         param_timeout: float = 2.0,
+        debug_raw_bytes: bool = False,
     ):
         """
         Initialize unified bridge.
@@ -87,9 +88,11 @@ class UnifiedBridge:
             baudrate: Baud rate (default: 115200)
             history_size: Max telemetry packets to keep in history
             param_timeout: PARAM request timeout in seconds
+            debug_raw_bytes: Enable raw byte debugging for PARAM troubleshooting
         """
         self.port = port
         self.baudrate = baudrate
+        self.debug_raw_bytes = debug_raw_bytes
 
         # Components (composition)
         self.serial = SerialConnection(port, baudrate)
@@ -351,6 +354,16 @@ class UnifiedBridge:
                     # Read from serial
                     data = await self.serial.read(1024)
                     self.health.record_bytes_read(len(data))
+
+                    # DEBUG: Raw byte logging for PARAM troubleshooting
+                    if self.debug_raw_bytes and len(data) > 0:
+                        hex_str = ' '.join(f'{b:02X}' for b in data)
+                        logger.info(f"[RAW] Received {len(data)} bytes: {hex_str[:100]}{'...' if len(hex_str) > 100 else ''}")
+
+                        # Check for PARAM_RESPONSE (0x5B 0x02 0x11)
+                        for i in range(len(data) - 2):
+                            if data[i] == 0x5B and data[i+1] == 0x02 and data[i+2] == 0x11:
+                                logger.info(f"[RAW] ✅ PARAM_RESPONSE found at offset {i}!")
 
                     # Parse packets
                     packets = self.parser.feed(data)

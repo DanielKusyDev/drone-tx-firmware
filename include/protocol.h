@@ -198,15 +198,14 @@ enum ParamAccess : uint8_t {
     PARAM_ACCESS_READWRITE = 0x01
 };
 
-// 8. PARAM_REQUEST (0x10) - Parameter Request Packet (20 bytes total)
+// 8. PARAM_REQUEST (0x10) - Parameter Request Packet (18 bytes total)
 struct TelemetryParamRequest {
-    // Header (12 bytes with padding)
+    // Header (10 bytes - standard TelemetryHeader layout)
     uint8_t magic;           // 0x5B (enhanced telemetry identifier)
     uint8_t version;         // 2 (enhanced version)
     uint8_t type;            // 0x10 (TELEM_TYPE_PARAM_REQUEST)
     uint8_t flags;           // Packet flags (0 for PARAM)
     uint16_t seq;            // Sequence number
-    uint8_t _padding[2];     // 2-byte padding for alignment
     uint32_t timestamp_us;   // Microsecond timestamp
 
     // Payload (6 bytes)
@@ -217,26 +216,24 @@ struct TelemetryParamRequest {
     // Footer (2 bytes)
     uint16_t crc;            // CRC-16/X.25 (all bytes except CRC)
 };
-// Total: 20 bytes
+// Total: 18 bytes (compatible with Python bridge)
 
-// 9. PARAM_RESPONSE (0x11) - Parameter Response Packet (57 bytes total)
+// 9. PARAM_RESPONSE (0x11) - Parameter Response Packet (54 bytes total)
 struct TelemetryParamResponse {
-    // Header (12 bytes with padding)
+    // Header (10 bytes - standard TelemetryHeader layout)
     uint8_t magic;           // 0x5B
     uint8_t version;         // 2
     uint8_t type;            // 0x11 (TELEM_TYPE_PARAM_RESPONSE)
     uint8_t flags;           // Packet flags (0 for PARAM)
     uint16_t seq;            // Sequence number (matches request)
-    uint8_t _padding[2];     // 2-byte padding
     uint32_t timestamp_us;   // Timestamp
 
-    // Payload (43 bytes with padding)
+    // Payload (42 bytes)
     uint8_t command;         // ParamCommand (LIST_RESP/GET_RESP/SET_RESP/ERROR)
     uint8_t param_index;     // Parameter index
     uint8_t param_type;      // ParamType (0x06 = float)
     uint8_t param_access;    // ParamAccess (0x00 = readonly, 0x01 = readwrite)
     float value;             // Current parameter value
-    uint8_t _padding2;       // 1-byte padding after float
     char group[16];          // Parameter group name (null-terminated)
     char name[16];           // Parameter name (null-terminated)
     uint8_t total_params;    // Total number of parameters (for LIST)
@@ -245,7 +242,7 @@ struct TelemetryParamResponse {
     // Footer (2 bytes)
     uint16_t crc;            // CRC-16/X.25
 };
-// Total: 57 bytes
+// Total: 54 bytes (compatible with Python bridge)
 
 #pragma pack(pop)
 

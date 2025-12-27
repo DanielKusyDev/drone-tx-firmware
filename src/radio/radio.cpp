@@ -100,10 +100,12 @@ void RadioManager::onReceiveCallback(const uint8_t *mac_addr, const uint8_t *dat
         const TelemetryHeader* header = reinterpret_cast<const TelemetryHeader*>(data);
         TelemetryPacketType type = static_cast<TelemetryPacketType>(header->type);
 
-        // Check if this packet type is enabled
-        uint8_t typeBit = 1 << (type - 1);
-        if (!(s_config.packet_type_mask & typeBit)) {
-            return; // Packet type filtered out
+        // Check if this packet type is enabled (skip check for PARAM packets 0x10, 0x11)
+        if (type < TELEM_TYPE_PARAM_REQUEST) {
+            uint8_t typeBit = 1 << (type - 1);
+            if (!(s_config.packet_type_mask & typeBit)) {
+                return; // Packet type filtered out
+            }
         }
 
         // Route to appropriate handler

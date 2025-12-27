@@ -191,7 +191,11 @@ void App::loop()
     static uint32_t dropCount = 0;
 
     // 1. Handle serial commands (e.g., MAC address)
-    handleSerialCommands();
+    // Skip serial commands in TELEMETRY_BINARY mode (binary data, not text commands)
+    if (m_telemForwarder.getUartMode() != UartMode::TELEMETRY_BINARY)
+    {
+        handleSerialCommands();
+    }
 
     // 2. Process control inputs (joysticks, switches)
     const ControlInputs &inputs = control.readInputs();

@@ -70,6 +70,8 @@ class SerialConnection:
             self._reader, self._writer = await serial_asyncio.open_serial_connection(
                 url=self.port,
                 baudrate=self.baudrate,
+                dsrdtr=False,  # Disable DTR/DSR to prevent ESP32 reset
+                rtscts=False,  # Disable RTS/CTS flow control
             )
             self._is_open = True
             logger.info(f"✅ Serial port opened: {self.port}")
